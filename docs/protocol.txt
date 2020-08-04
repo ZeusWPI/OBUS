@@ -1,0 +1,84 @@
+______________________________________
+
+Recap: message in CAN protocol
+  ↓ 11b     ↓ 64b (8 bytes)
++----+-----------------+ - - -
+| id |      body       | don’t care
++----+-----------------+ - - -
+
+______________________________________
+
+OBUS-messageformat
+
+ID:
+b bb bbbbbbbb
+|  |     ↓
+|  ↓     module-ID: 2⁸=256
+↓  type: 2²=4
+priority?
+
+    type:
+    - 0 controller
+        module-ID is type of message
+    - 1 puzzel
+    - 2 needy
+    - 3 reserved for future use
+
+Payload:
+[ B B B B  B B B B ]
+  -
+  ↓
+ type (per module type)
+
+- - - - - - - - - - - - - - - - - - -
+
+Types for controller:
+
+    - 0 acknowledge valid message
+      [ X B B B  B B B B ]
+          --------------
+             reserved
+
+    - 1 hello
+      [ X B B B  B B B B ]
+          --------------
+             reserved
+
+    - 2 game start
+      [ X B B B  B B B B ]
+          -------- - ---
+         time left ↓ reserved
+                #strikes
+
+    - 3 state (every x ms – e.g. in the middle of each second)
+      [ X B B B  B B B B ]
+          -------- - - -
+         time left ↓ ↓ reserved
+            #strikes #max strikes
+
+    - 4-6 solved, timeout, strikeout
+      [ X B B B  B B B B ]
+          -------- - - -
+          end time ↓ ↓ reserved
+            #strikes #max strikes
+
+    - 7-255 reserved
+
+- - - - - - - - - - - - - - - - - - -
+
+Types for modules:
+
+    - 0 hanlo
+      [ X B B B  B B B B ]
+          --------------
+             reserved
+
+    - 1 strike
+      [ X B B B  B B B B ]
+          --------------
+             reserved
+
+    - 2 solved (not for needy modules)
+      [ X B B B  B B B B ]
+          --------------
+             reserved
