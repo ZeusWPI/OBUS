@@ -29,6 +29,7 @@ Door een interface (GUI/CLI) kan het spel geconfigureerd worden en opgevolgd wor
 - simon says
 - don't push this button
 - morse
+- module waarbij je een aantal resistors hebt en die correct moet verbinden op de juiste plaatsen
 
 ### Essentie (voor POC):
 
