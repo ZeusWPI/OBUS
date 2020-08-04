@@ -26,4 +26,19 @@ Door een interface (GUI/CLI) kan het spel geconfigureerd worden en opgevolgd wor
 - boolean logic
 - last-minute modules
 - specifieke datum
+- simon says
+- don't push this button
+- morse
 
+### Essentie (voor POC):
+
+- Buttons
+- LCD + knoppen
+- 7-segment display
+- DPAD + enter
+- OLED scherm
+- Console (debug?)
+
+## Documentatie
+
+Documentatie in de stijl van een datasheet van het bedrijf "Zeus WPI". (oude stijl)
