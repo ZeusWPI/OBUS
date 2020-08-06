@@ -3,23 +3,25 @@ ______________________________________
 Recap: message in CAN protocol
   ↓ 11b     ↓ 64b (8 bytes)
 +----+-----------------+ - - -
-| id |      body       | don’t care
+| id |      body       | don’t care for now
 +----+-----------------+ - - -
+
+Priority is controlled by the ID: if a message with a higher ID is on the bus, lower messages will
+be silenced due to the design of CAN.
 
 ______________________________________
 
-OBUS-messageformat
+OBUS message specification
 
 ID:
 b bb bbbbbbbb
 |  |     ↓
 |  ↓     module-ID: 2⁸=256
 ↓  type: 2²=4
-priority?
+priority bit (so that each type can send priority messages if need be)
 
     type:
-    - 0 controller
-        module-ID is type of message
+    - 0 controller; module ID is ignored
     - 1 puzzel
     - 2 needy
     - 3 reserved for future use
@@ -46,9 +48,9 @@ Types for controller:
 
     - 2 game start
       [ X B B B  B B B B ]
-          -------- - ---
-         time left ↓ reserved
-                #strikes
+          -------- - - -
+         time left ↓ ↓ reserved
+            #strikes #max strikes
 
     - 3 state (every x ms – e.g. in the middle of each second)
       [ X B B B  B B B B ]
