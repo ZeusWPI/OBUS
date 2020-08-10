@@ -155,7 +155,8 @@ h5 {
   font-weight: bold;
 }
 
-p {
+p,
+a {
   margin: 0.75em 0.5em;
 }
 
@@ -236,6 +237,17 @@ ul li {
 
 .module-documents a {
   font-size: 1.2em;
+}
+
+.intro-subtitle {
+  font-size: 1.25em;
+  font-style: italic;
+}
+
+.section-subtitle {
+  font-size: 1.125em;
+  font-weight: bolder;
+  font-style: italic;
 }
 
 /*# sourceMappingURL=main.css.map */

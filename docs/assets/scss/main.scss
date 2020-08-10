@@ -111,8 +111,8 @@ h1 {
   font-size: 5em;
   font-weight: lighter;
   text-align: center;
-  margin-top: .5em;
-  margin-bottom: .5em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
 h2 {
   font-size: 3em;
@@ -135,7 +135,8 @@ h5 {
   font-weight: bold;
 }
 
-p {
+p,
+a {
   margin: 0.75em 0.5em;
 }
 
@@ -219,4 +220,15 @@ ul {
   a {
     font-size: 1.2em;
   }
+}
+
+.intro-subtitle {
+  font-size: 1.25em;
+  font-style: italic;
+}
+
+.section-subtitle {
+  font-size: 1.125em;
+  font-weight: bolder;
+  font-style: italic;
 }
