@@ -1,3 +1,37 @@
 {
-    
+    "flasher": {
+        "image": "https://dummyimage.com/400x400/777/fff.png&text=Product+image+coming+soon",
+        "features": [
+            "one bright white light"
+        ],
+        "description": "Just a single bright white light, intended to be flashing rapidly.",
+        "applications": [
+            "HID",
+            "Industrial control",
+            "Bomb-defusal devices"
+        ],
+        "el-specs" : {
+            "Supply voltage": {
+                "min": "4,5",
+                "typ": "5",
+                "max": "5,5",
+                "unit": "V"
+            },
+            "Supply current": {
+                "min": "50",
+                "typ": "350",
+                "max": "500",
+                "unit": "mA"
+            }
+        },
+        "app-note": "Quite a long text about an application not, perhaps shouldn't be placed in a json file...",
+        "documents": {
+            "datasheet" : "#datasheet",
+            "pinout diagram": "#pinout diagram",
+            "mechanical drawing": "#mechanical drawing"
+        },
+        "order-codes": {
+            "FLASH1BASE": "Base unit"
+        }
+    }
 }

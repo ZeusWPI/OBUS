@@ -32,7 +32,44 @@
             "mechanical drawing": "#mechanical drawing"
         },
         "order-codes": {
-            "LCDC1BASE": "Base unit"
+            "LCD1BASE": "Base unit"
+        }
+    },
+    "7-segment": {
+        "image": "https://dummyimage.com/400x400/777/fff.png&text=Product+image+coming+soon",
+        "features": [
+            "4 digits",
+            "1 led per digit",
+            "2 status LEDs"
+        ],
+        "description": "A 7-segment display capable of showing various information. Additionally each digit has its own indicator led.",
+        "applications": [
+            "HID",
+            "Industrial control",
+            "Bomb-defusal devices"
+        ],
+        "el-specs" : {
+            "Supply voltage": {
+                "min": "4,5",
+                "typ": "5",
+                "max": "5,5",
+                "unit": "V"
+            },
+            "Supply current": {
+                "min": "50",
+                "typ": "150",
+                "max": "500",
+                "unit": "mA"
+            }
+        },
+        "app-note": "Quite a long text about an application not, perhaps shouldn't be placed in a json file...",
+        "documents": {
+            "datasheet" : "#datasheet",
+            "pinout diagram": "#pinout diagram",
+            "mechanical drawing": "#mechanical drawing"
+        },
+        "order-codes": {
+            "7SEG1BASE": "Base unit"
         }
     }
 }
