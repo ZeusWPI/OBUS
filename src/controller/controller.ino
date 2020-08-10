@@ -14,7 +14,7 @@
 #define OBUS_MSG_LENGTH 8  // Max 8 to fit in a CAN message
 
 #define OBUS_MAX_MODULES     16
-#define OBUS_DISC_DURATION   1 // Duration of discovery round in seconds
+#define OBUS_DISC_DURATION   5 // Duration of discovery round in seconds
 #define OBUS_GAME_DURATION   60 // Duration of the game in seconds
 #define OBUS_MAX_STRIKEOUTS  3 // Number of strikeouts allowed until game over
 #define OBUS_UPDATE_INTERVAL 500 // Number of milliseconds between game updates
@@ -117,11 +117,11 @@ void solve_module_in_bit_vector(uint8_t module_id) {
 }
 
 
-void send_message(uint8_t* message) {
+void send_message(uint8_t* message, uint8_t length) {
   struct can_frame send_frame;
   
   send_frame.can_id = make_id(OBUS_CONTROLLER_ID, false, OBUS_TYPE_CONTROLLER);
-  send_frame.can_dlc = OBUS_MSG_LENGTH;
+  send_frame.can_dlc = length;
 
   memcpy(send_frame.data, message, OBUS_MSG_LENGTH);
  
@@ -142,7 +142,7 @@ void start_hello() {
   uint8_t message[OBUS_MSG_LENGTH];
   message[0] = OBUS_MSGTYPE_C_HELLO;
 
-  send_message(message);
+  send_message(message, 1);
   
 	Serial.println("Start of discovery round");
 }
@@ -152,7 +152,7 @@ void send_ack() {
   uint8_t message[OBUS_MSG_LENGTH];
   message[0] = OBUS_MSGTYPE_C_ACK;
 
-  send_message(message);
+  send_message(message, 1);
 }
 
 
@@ -173,6 +173,7 @@ void receive_hello() {
       }
       
       send_ack();
+      Serial.println("ACK");
     }
   } else if (current_time - hello_round_start > OBUS_DISC_DURATION * 1000) {
     state = STATE_GAME;
@@ -195,7 +196,7 @@ void initialize_game() {
   message[5] = strikeouts;
   message[6] = OBUS_MAX_STRIKEOUTS;
 
-  send_message(message);
+  send_message(message, 7);
 
   game_running = 1;
   game_start = millis();
@@ -228,6 +229,8 @@ void send_game_update(uint8_t status, uint16_t timestamp) {
   message[4] = (uint8_t) (timestamp & 0x000000FF);
   message[5] = strikeouts;
   message[6] = OBUS_MAX_STRIKEOUTS;
+
+  send_message(message, 7);
 }
 
 
@@ -238,14 +241,17 @@ void game_loop() {
   receive_module_update();
 
   if (check_solved()) {
+    Serial.println("Game solved");
     send_game_update(OBUS_MSGTYPE_C_SOLVED, game_duration);
     state = STATE_INACTIVE;
     return;
   } else if (game_duration >= (uint16_t) OBUS_GAME_DURATION * 1000) {
+    Serial.println("Times up");
     send_game_update(OBUS_MSGTYPE_C_TIMEOUT, game_duration);
     state = STATE_INACTIVE;
     return;
   } else if (strikeouts >= OBUS_MAX_STRIKEOUTS) {
+    Serial.println("Strikeout");
     send_game_update(OBUS_MSGTYPE_C_STRIKEOUT, game_duration);  
     state = STATE_INACTIVE;
     return;
@@ -253,6 +259,8 @@ void game_loop() {
   
   uint16_t elapsed_time = current_time - last_update;
   if (elapsed_time > OBUS_UPDATE_INTERVAL) {
+    Serial.print("Sending game update: ");
+    Serial.println(game_duration);
     send_game_update(OBUS_MSGTYPE_C_STATE, (uint16_t) OBUS_GAME_DURATION * 1000 - game_duration);
     last_update = current_time;
   }
