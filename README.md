@@ -55,3 +55,7 @@ Some things we'll need to consider:
 - payload is 8 bytes per packet
 - packets can be delayed or not received on every node, so detection of this and retransmission might be needed: if the bomb interactor solves a module and the packet that communicates this with the bomb does not get delivered to the controller, the bomb will still go off, even if all modules have been solved
 - we can't send an infinite amount of packets; the higher our bitrate is, the shorter our wires need to be
+
+## Development setup
+
+We use [this](https://github.com/autowp/arduino-mcp2515/) library for CAN communications. See [this](https://github.com/autowp/arduino-mcp2515/#software-usage) header for 3 simple steps on how to use it in the arduino IDE
