@@ -77,8 +77,8 @@ Types for modules:
 
     - 1 strike
       [ X B B B  B B B B ]
-          --------------
-             reserved
+          ↓ -----↓------
+    #strikes  reserved
 
     - 2 solved (not for needy modules)
       [ X B B B  B B B B ]
