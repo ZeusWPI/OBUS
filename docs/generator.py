@@ -73,7 +73,7 @@ if __name__ == "__main__":
     catalog += '<meta charset="UTF-8" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n<title>OBUS Catalog</title>\n'
     catalog += '<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />\n'
     catalog += '<link rel="stylesheet" href="https://meyerweb.com/eric/tools/css/reset/reset.css" />\n'
-    catalog += '<link rel="stylesheet" href="assets/css/main.css" />\n'
+    catalog += '<link rel="stylesheet" href="/assets/css/main.css" />\n'
     catalog += '</head>\n'
 
     # Add scroll to top button
@@ -111,6 +111,6 @@ if __name__ == "__main__":
 
     # print(catalog)
 
-    with open('catalog_test.html', 'w') as test_file:
+    with open('catalog_generated.html', 'w') as test_file:
         test_file.write(catalog)
     
