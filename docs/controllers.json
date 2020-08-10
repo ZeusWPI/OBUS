@@ -1,0 +1,34 @@
+{
+    "controller-name": {
+        "image": "https://dummyimage.com/400x400/777/fff.png&text=Product+image+coming+soon",
+        "features": [
+            "feature 1",
+            "feature 2",
+            "..."
+        ],
+        "description": "description...",
+        "applications": [
+            "application 1",
+            "application 2",
+            "..."
+        ],
+        "el-specs" : {
+            "Supply voltage": {
+                "min": "4,5",
+                "typ": "5",
+                "max": "5,5",
+                "unit": "V"
+            }
+        },
+        "app-note": "Quite a long text about an application not, perhaps shouldn't be placed in a json file...",
+        "documents": {
+            "datasheet" : "#datasheet",
+            "pinout diagram": "#pinout diagram",
+            "mechanical drawing": "#mechanical drawing"
+        },
+        "order-codes": {
+            "CONTROL1": "Base unit",
+            "CONTROL1DUMMY": "Dummy unit"
+        }
+    }
+}
