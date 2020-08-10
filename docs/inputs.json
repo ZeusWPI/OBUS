@@ -1,0 +1,78 @@
+{
+    "DPAD": {
+        "image": "/assets/img/DPAD_v1.png",
+        "features": [
+            "4 directional buttons",
+            "1 enter button",
+            "2 status LEDs"
+        ],
+        "description": "A box with 4 directional buttons and one enter/confirm button. Two status LED's give an easy overview of the module's state.",
+        "applications": [
+            "HID",
+            "Industrial control",
+            "Bomb-defusal devices"
+        ],
+        "el-specs" : {
+            "Supply voltage": {
+                "min": "4,5",
+                "typ": "5",
+                "max": "5,5",
+                "unit": "V"
+            },
+            "Supply current": {
+                "min": "50",
+                "typ": "150",
+                "max": "500",
+                "unit": "mA"
+            }
+        },
+        "app-note": "Quite a long text about an application not, perhaps shouldn't be placed in a json file...",
+        "documents": {
+            "datasheet" : "#datasheet",
+            "pinout diagram": "#pinout diagram",
+            "mechanical drawing": "#mechanical drawing"
+        },
+        "order-codes": {
+            "DPAD1": "Base unit",
+            "DPAD1GREEN": "Green buttons"
+        }
+    },
+    "Joysticks": {
+        "image": "/assets/img/joystick_v1.png",
+        "features": [
+            "2 analog joysticks",
+            "2 clicky joystick buttons",
+            "2 status LEDs"
+        ],
+        "description": "A box with 2 analog joysticks, the joysticks can be pushed down for an extra contact. Two status LED's give an easy overview of the module's state.",
+        "applications": [
+            "HID",
+            "Industrial control",
+            "Bomb-defusal devices"
+        ],
+        "el-specs" : {
+            "Supply voltage": {
+                "min": "4,5",
+                "typ": "5",
+                "max": "5,5",
+                "unit": "V"
+            },
+            "Supply current": {
+                "min": "50",
+                "typ": "150",
+                "max": "500",
+                "unit": "mA"
+            }
+        },
+        "app-note": "Quite a long text about an application not, perhaps shouldn't be placed in a json file...",
+        "documents": {
+            "datasheet" : "#datasheet",
+            "pinout diagram": "#pinout diagram",
+            "mechanical drawing": "#mechanical drawing"
+        },
+        "order-codes": {
+            "JOYC1": "Base unit",
+            "JOYC1GREEN": "Green buttons"
+        }
+    }
+}
