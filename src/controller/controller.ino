@@ -31,7 +31,6 @@ MCP2515 mcp2515(10);
 
 uint8_t state = STATE_INACTIVE;
 
-
 void setup() {
 	Serial.begin(9600);
 	mcp2515.reset();
@@ -65,4 +64,11 @@ void start_hello() {
 }
 
 void loop() {
+  if (state == STATE_INACTIVE) {
+    start_hello();  
+  } else if (state == STATE_HELLO) {
+    // Group hello messages from controllers and register them  
+  } else if (state == STATE_GAME) {
+    // Game loop  
+  }
 }
