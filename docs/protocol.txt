@@ -30,7 +30,7 @@ Payload:
 [ B B B B  B B B B ]
   -
   ↓
- type (per module type)
+ type of the message (per module type)
 
 - - - - - - - - - - - - - - - - - - -
 
