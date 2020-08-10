@@ -38,7 +38,7 @@ void hanlo() {
   CAN.endPacket();
 }
 
-/* Send Hanlo to controller */
+/* Send strike to controller */
 void strike() {
   Serial.println("-> STRIKE");
   CAN.beginPacket(id);
@@ -46,7 +46,7 @@ void strike() {
   CAN.endPacket();
 }
 
-/* Send Hanlo to controller */
+/* Send solve to controller */
 void solved() {
   Serial.println("-> SOLVED");
   CAN.beginPacket(id);
