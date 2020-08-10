@@ -15,6 +15,9 @@
 
 #define OBUS_MAX_MODULES 16
 #define OBUS_DISC_DURATION 1 // Duration of discovery round in seconds
+#define OBUS_GAME_DURATION 60 // Duration of the game in seconds
+#define OBUS_MAX_STRIKEOUTS 3 // Number of strikeouts allowed until game over
+#define OBUS_UPDATE_INTERVAL 500 // Number of milliseconds between game updates
 
 #define OBUS_MSGTYPE_C_ACK       0
 #define OBUS_MSGTYPE_C_HELLO     1
@@ -31,13 +34,23 @@
 #define CAN_DOMINANT  0
 #define CAN_RECESSIVE 1
 
+struct module {
+  uint8_t id;
+  uint8_t type;
+};
+
 MCP2515 mcp2515(10);
 
 uint8_t state = STATE_INACTIVE;
-uint8_t connected_modules_ids[OBUS_MAX_MODULES];
+struct module connected_modules_ids[OBUS_MAX_MODULES];
 uint8_t nr_connected_modules;
+uint8_t strikeouts;
+uint8_t game_running;
 
-unsigned long hello_round_start;
+// TIMERS
+uint16_t hello_round_start;
+uint16_t game_start;
+uint16_t last_update;
 
 void setup() {
 	Serial.begin(9600);
@@ -45,9 +58,7 @@ void setup() {
 	mcp2515.setBitrate(CAN_50KBPS);
 	mcp2515.setNormalMode();
 
-  nr_connected_modules = 0;
-  
-	Serial.println("begin");
+  game_running = 0;
 }
 
 uint16_t make_id(uint8_t id, bool priority, uint8_t type) {
@@ -63,7 +74,17 @@ uint16_t make_id(uint8_t id, bool priority, uint8_t type) {
 		(uint16_t) id;
 }
 
-void send_message(unsigned char* message) {
+struct module get_module_info(uint16_t can_id) {
+  uint8_t module_type = can_id & 0x0300;
+  uint8_t module_id = can_id & 0x00FF;
+
+  struct module module_info;
+  module_info.type = module_type;
+  module_info.id = module_id;
+  return module_info;
+}
+
+void send_message(uint8_t* message) {
   struct can_frame send_frame;
   
   send_frame.can_id = make_id(OBUS_CONTROLLER_ID, false, OBUS_TYPE_CONTROLLER);
@@ -77,44 +98,79 @@ void send_message(unsigned char* message) {
 void start_hello() {
 	state = STATE_HELLO;
   hello_round_start = millis();
+  nr_connected_modules = 0;
 
-  unsigned char message[OBUS_MSG_LENGTH];
+  uint8_t message[OBUS_MSG_LENGTH];
   message[0] = OBUS_MSGTYPE_C_HELLO;
 
   send_message(message);
   
-	Serial.println("sent");
+	Serial.println("Start of discovery round");
 }
 
 void send_ack() {
-  unsigned char message[OBUS_MSG_LENGTH];
+  uint8_t message[OBUS_MSG_LENGTH];
   message[0] = OBUS_MSGTYPE_C_ACK;
 
   send_message(message);
-
-  Serial.println("Send ACK");
 }
 
 void receive_hello() {
   struct can_frame receive_frame;
-  unsigned long current_time = millis();
+  uint16_t current_time = millis();
   
   if (mcp2515.readMessage(&receive_frame) == MCP2515::ERROR_OK) {
-    Serial.println("Received message");
     if (receive_frame.data[0] ==  OBUS_MSGTYPE_M_HELLO) {
-      uint8_t module_id = receive_frame.can_id;
-      Serial.print("Hello from module ");
-      Serial.println(module_id);
-      connected_modules_ids[nr_connected_modules] = module_id;
+      struct module new_module = get_module_info(receive_frame.can_id);
+      Serial.print("Registered module ");
+      Serial.println(new_module.id);
+      connected_modules_ids[nr_connected_modules] = new_module;
       nr_connected_modules++;
       send_ack();
-    } else {
-      Serial.println("Not implemented");
     }
   } else if (current_time - hello_round_start > OBUS_DISC_DURATION * 1000) {
     state = STATE_GAME;
-    Serial.println("Initializing game");
+    Serial.println("End of discovery round");
   }
+}
+
+void initialize_game() {
+  strikeouts = 0;
+
+  uint16_t game_duration_millis = (uint16_t) OBUS_GAME_DURATION * 1000;
+
+  uint8_t message[OBUS_MSG_LENGTH];
+  message[0] = OBUS_MSGTYPE_C_GAMESTART;
+  message[1] = (uint8_t) ((game_duration_millis & 0xFF000000) >> 0x18);
+  message[2] = (uint8_t) ((game_duration_millis & 0x00FF0000) >> 0x10);
+  message[3] = (uint8_t) ((game_duration_millis & 0x0000FF00) >> 0x08);
+  message[4] = (uint8_t) (game_duration_millis & 0x000000FF);
+  message[5] = strikeouts;
+  message[6] = OBUS_MAX_STRIKEOUTS;
+
+  send_message(message);
+
+  game_running = 1;
+  game_start = millis();
+  last_update = game_star();
+
+  Serial.println("Game started");
+}
+
+void receive_module_update() {
+  if (receive_frame.data[0] == OBUS_MSGTYPE_M_STRIKE) {
+    // Handle strikeout
+  } else if (receive_frame.data[0] == OBUS_MSGTYPE_M_SOLVED) {
+    // Handle solved module
+  }
+}
+
+void game_loop() {
+  
+  
+  uint16_t current_time = millis();
+  uint16_t elapsed_time = current_time - last_update;
+
 }
 
 void loop() {
@@ -123,6 +179,10 @@ void loop() {
   } else if (state == STATE_HELLO) {
     receive_hello();
   } else if (state == STATE_GAME) {
-    // Game loop  
+    if (game_running) {
+      game_loop();
+    } else {
+      initialize_game();  
+    }
   }
 }
