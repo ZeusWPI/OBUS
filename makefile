@@ -13,7 +13,13 @@ ifeq ($(origin BOARDS_TXT), undefined)
 BOARDS_TXT         := $(shell locate '*/arduino/*/boards.txt')  # ¯\_(ツ)_/¯
 endif
 
-ARDMK_DIR          ?= ../arduino-makefile
+ifeq ($(wildcard /usr/share/arduino),)
+ARDUINO_DIR ?= /usr/lib/arduino
+else
+ARDUINO_DIR ?= /usr/share/arduino
+endif
+
+ARDMK_DIR          ?= ./arduino-makefile
 AVR_TOOLS_DIR      ?= /usr
 
 include $(ARDMK_DIR)/Arduino.mk
