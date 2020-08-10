@@ -1,4 +1,5 @@
 #include <mcp2515.h>
+#include <assert.h>
 
 #define STATE_INACTIVE 0
 #define STATE_HELLO    1
@@ -55,19 +56,34 @@ uint16_t make_id(uint8_t id, bool priority, uint8_t type) {
 void start_hello() {
 	state = STATE_HELLO;
 
-	char message[OBUS_MSG_LENGTH + 1];
-	message[OBUS_MSG_LENGTH] = '\0';
+  struct can_frame send_frame;
+  
 	send_frame.can_id = make_id(OBUS_CONTROLLER_ID, false, OBUS_TYPE_CONTROLLER);
 	send_frame.can_dlc = OBUS_MSG_LENGTH;
+
+  send_frame.data[0] = OBUS_MSGTYPE_C_HELLO;
+ 
 	mcp2515.sendMessage(&send_frame);
 	Serial.println("sent");
+}
+
+void receive_hello() {
+  struct can_frame receive_frame;
+  if (mcp2515.readMessage(&receive_frame) == MCP2515::ERROR_OK) {
+    Serial.println("Received message");
+    if (receive_frame.data[0] ==  OBUS_MSGTYPE_M_HELLO) {
+      Serial.println("Hello"); 
+    } else {
+      Serial.println("Not implemented");
+    }
+  }
 }
 
 void loop() {
   if (state == STATE_INACTIVE) {
     start_hello();  
   } else if (state == STATE_HELLO) {
-    // Group hello messages from controllers and register them  
+      receive_hello();
   } else if (state == STATE_GAME) {
     // Game loop  
   }
