@@ -1,0 +1,11 @@
+extends /assets/templates/main.pug
+block variables
+    - var title = "home";
+    - var subject = "";
+    - var description = "";
+    - var keywords = "";
+    include /assets/templates/nav_items.pug
+    - var nav_active = 3;
+
+block main
+    include:markdown-it(html) blog.md
