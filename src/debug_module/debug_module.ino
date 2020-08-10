@@ -11,7 +11,8 @@ int soundpin = 9;
 
 
 void setup() {
-  Serial.begin(9600);
+  // Serial.begin(9600);
+  Serial.begin(115200);
   mcp2515.reset();
   mcp2515.setBitrate(CAN_50KBPS);
   mcp2515.setNormalMode();
