@@ -68,9 +68,49 @@ def json_to_multi_html(filename:str):
     return res
 
 if __name__ == "__main__":
-    print(json_to_multi_html('controllers.json'))
-    print(json_to_multi_html('inputs.json'))
-    print(json_to_multi_html('outputs.json'))
-    print(json_to_multi_html('panics.json'))
+    catalog = '<!DOCTYPE html>\n<html lang="en-gb">\n<head>\n'
+    # Add head stuffs
+    catalog += '<meta charset="UTF-8" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n<title>OBUS Catalog</title>\n'
+    catalog += '<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" />\n'
+    catalog += '<link rel="stylesheet" href="https://meyerweb.com/eric/tools/css/reset/reset.css" />\n'
+    catalog += '<link rel="stylesheet" href="assets/css/main.css" />\n'
+    catalog += '</head>\n'
 
+    # Add scroll to top button
+    catalog += '<body>\n<div class="back-to-top" onclick="window.scrollTo(0,0);">\n<div class="button">\n'
+    catalog += '<i class="fas fa-arrow-up"></i>\n</div>\n</div>\n'
+
+    # Add header
+    catalog += '<header>\n<div class="hrd-left">\n<div class="hdr-img-container">\n<img src="assets/img/logo.svg" alt="Zeus logo" />\n'
+    catalog += '\n</div>\n</div>\n<div class="hdr-center">\n<p class="hdr-title">O.B.U.S. Catalog</p>\n'
+    catalog += '</div>\n<div class="hdr-right">\n<p class="hdr-p">August 2020</p>\n</div>\n</header>\n'
+
+    # Add page title
+    catalog += '<main>\n<h1>OBUS catalog</h1>\n<div class="img-container">\n<img src="assets/img/shell.jpeg" />\n</div>\n'
+
+    # Add introduction and overview
+
+
+    catalog += '<article>\n<div class="anchor" id="controllers"></div>\n<h2>Controllers</h2>\n'
+    catalog += json_to_multi_html('controllers.json') + '\n</article>\n'
+    
+    catalog += '<article>\n<div class="anchor" id="input-modules"></div>\n<h2>Input modules</h2>\n'
+    catalog += json_to_multi_html('inputs.json') + '\n</article>\n'
+    
+    catalog += '<article>\n<div class="anchor" id="output-modules"></div>\n<h2>Output modules</h2>\n'
+    catalog += json_to_multi_html('outputs.json') + '\n</article>\n'
+    
+    catalog += '<article>\n<div class="anchor" id="panic-modules"></div>\n<h2>Panic modules</h2>\n'
+    catalog += json_to_multi_html('panics.json') + '\n</article>\n'
+
+    # Add footer and closing tags
+    catalog += '</main>\n<footer>\n<div class="hdr-left">\n<p>[Catalog is still a PoC]</p>\n'
+    catalog += '</div>\n<div class="hdr-center">\n<p>This is a game; not actual bombmaking...</p>\n'
+    catalog += '</div>\n<div class="hdr-right">\n<p>\nAll images in this catalog are for reference only, actual products may vary.\n'
+    catalog += '</p>\n</div>\n</footer>\n</body>\n</html>'
+
+    # print(catalog)
+
+    with open('catalog_test.html', 'w') as test_file:
+        test_file.write(catalog)
     
