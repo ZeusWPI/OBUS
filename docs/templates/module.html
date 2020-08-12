@@ -1,0 +1,83 @@
+<section>
+  <h3>{{ name }}</h3>
+  <div class="module-info">
+    <div class="img-container">
+      <div class="square-img">
+        <div class="aspect-img-wrapper">
+          <img src="{{ config.image }}"/>
+        </div>
+      </div>
+      <p class="caption">{{ name }}</p>
+    </div>
+    <div class="module-intro">
+      <h5>Features</h5>
+      <ul>
+        {% for feat in config.features %}
+          <li>{{ feat }}</li>
+        {% endfor %}
+      </ul>
+      <h5>Description</h5>
+      <p>{{ config.description }}</p>
+
+      <h5>Applications</h5>
+      <ul>
+        {% for appl in config.applications %}
+          <li>{{ appl }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="module-specs">
+    <h4>electrical specs</h4>
+    <div class="table-container">
+      <table>
+        <tr>
+          <th rowspan="2" class="bt-bord">Characteristic</th>
+          <th colspan="3">Limits</th>
+          <th rowspan="2" class="bt-bord">unit</th>
+        </tr>
+        <tr>
+          <th class="bt-bord">min</th>
+          <th class="bt-bord">typ</th>
+          <th class="bt-bord">max</th>
+        </tr>
+        {% for spec_key, specs in config["el-specs"].items() %}
+          <tr>
+            <td>{{ spec_key }}</td>
+            <td>{{ specs.min }}</td>
+            <td>{{ specs.typ }}</td>
+            <td>{{ specs.max }}</td>
+            <td>{{ specs.unit }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <h4>Application note</h4>
+    <p>{{ config["app-note"] }}</p>
+  </div>
+  <div class="module-documents">
+    <h4>documents</h4>
+    <ul>
+      {% for doctype, doclink in config.documents.items() %}
+        <li><a href="{{ doclink }}">{{ doctype }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="order-codes">
+    <h4>order codes</h4>
+    <div class="table-container">
+      <table>
+        <tr>
+          <th class="bt-bord">Description</th>
+          <th class="bt-bord">code</th>
+        </tr>
+        {% for code, desc in config["order-codes"].items() %}
+          <tr>
+            <td>{{ desc }}</td>
+            <td>{{ code }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+</section>

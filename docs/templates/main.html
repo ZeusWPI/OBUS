@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en-gb">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OBUS Catalog</title>
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"/>
+  <link rel="stylesheet" href="https://meyerweb.com/eric/tools/css/reset/reset.css"/>
+  <link rel="stylesheet" href="/assets/css/main.css"/>
+</head>
+<body>
+
+<!-- Add scroll to top button-->
+<div class="back-to-top" onclick="window.scrollTo(0,0);">
+  <div class="button">
+    <i class="fas fa-arrow-up"></i>
+  </div>
+</div>
+
+<!--Add header-->
+<header>
+  <div class="hrd-left">
+    <div class="hdr-img-container">
+      <img src="assets/img/logo.svg" alt="Zeus logo"/>
+    </div>
+  </div>
+
+  <!--Add page title-->
+  <div class="hdr-center">
+    <p class="hdr-title">O.B.U.S. Catalog</p>
+  </div>
+  <div class="hdr-right">
+    <p class="hdr-p">August 2020</p>
+  </div>
+</header>
+<main>
+  <h1>OBUS catalog</h1>
+  <div class="img-container">
+    <img src="assets/img/shell.jpeg"/>
+  </div>
+
+  <!--Add introduction and overview-->
+
+  {{articles | safe}}
+
+  <!--Add footer and closing tags-->
+
+</main>
+<footer>
+  <div class="hdr-left">
+    <p>[Catalog is still a PoC]</p>
+  </div>
+  <div class="hdr-center">
+    <p>This is a game; not actual bombmaking...</p>
+  </div>
+  <div class="hdr-right">
+    <p>
+      All images in this catalog are for reference only, actual products may vary.
+    </p>
+  </div>
+</footer>
+</body>
+</html>
