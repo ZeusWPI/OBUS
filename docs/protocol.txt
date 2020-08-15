@@ -18,11 +18,11 @@ b bb bbbbbbbb
 |  |     ↓
 |  ↓     module-ID: 2⁸=256
 ↓  type: 2²=4
-priority bit (so that each type can send priority messages if need be)
+priority bit (so that each type can send priority messages if need be, 0 = high priority, 1 = low priority)
 
     type:
     - 0 controller; module ID is ignored
-    - 1 puzzel
+    - 1 puzzle
     - 2 needy
     - 3 reserved for future use
 
