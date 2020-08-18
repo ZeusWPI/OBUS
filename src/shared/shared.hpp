@@ -28,14 +28,18 @@
 #define CAN_DOMINANT  0
 #define CAN_RECESSIVE 1
 
+#define OBUS_MASK_PRIORITY = 0b10000000000
+#define OBUS_MASK_TYPE     = 0b01100000000
+#define OBUS_MASK_ID       = 0b00011111111
+
 struct module {
-	uint8_t id;
 	uint8_t type;
+	uint8_t id;
 };
 
 
-uint16_t make_id(uint8_t id, bool priority, uint8_t type) {
-	assert(type <= 0x11);
+uint16_t encode_can_id(struct module mod, bool priority) {
+	assert(mod.type <= 0b11);
 
 	/* b bb bbbbbbbb
 	 * ↓ type  module ID
@@ -43,8 +47,24 @@ uint16_t make_id(uint8_t id, bool priority, uint8_t type) {
 	 */
 	return \
 		((uint16_t) (priority ? CAN_DOMINANT : CAN_RECESSIVE) << 10) | \
-		((uint16_t) type << 8) | \
-		(uint16_t) id;
+		((uint16_t) mod.type << 8) | \
+		(uint16_t) mod.id;
+}
+
+uint16_t full_module_id(struct module mod) {
+	return \
+		((uint16_t) mod.type << 8) | \
+		(uint16_t) mod.id;
+}
+
+struct module decode_can_id(uint16_t can_id) {
+	struct module mod;
+	mod.type = (can_id & OBUS_MASK_TYPE) >> 8;
+	mod.id = can_id & OBUS_MASK_ID;
+
+	assert(mod.type <= 0x11);
+
+	return mod;
 }
 
 #endif /* end of include guard: OBUS_DEFS_H */

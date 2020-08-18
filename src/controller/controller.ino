@@ -1,7 +1,7 @@
 #include <mcp2515.h>
 #include <assert.h>
 
-#include "../shared/defs.hpp"
+#include "../shared/shared.hpp"
 
 #define STATE_INACTIVE 0
 #define STATE_HELLO    1
@@ -26,23 +26,19 @@ uint16_t hello_round_start;
 uint16_t game_start;
 uint16_t last_update;
 
+struct module this_module = (struct module) {
+	.type = OBUS_TYPE_CONTROLLER;
+	.id = OBUS_CONTROLLER_ID;
+};
+
 
 void setup() {
 	Serial.begin(9600);
 	mcp2515.reset();
 	mcp2515.setBitrate(CAN_50KBPS);
 	mcp2515.setNormalMode();
-}
 
-
-struct module get_module_info(uint16_t can_id) {
-	uint8_t module_type = can_id & 0x0300;
-	uint8_t module_id = can_id & 0x00FF;
-
-	struct module module_info;
-	module_info.type = module_type;
-	module_info.id = module_id;
-	return module_info;
+	state = STATE_INACTIVE;
 }
 
 
@@ -73,9 +69,12 @@ void solve_module_in_bit_vector(uint8_t module_id) {
 
 
 void send_message(uint8_t* message, uint8_t length) {
+	send_message(message, length, false);
+}
+void send_message(uint8_t* message, uint8_t length, bool priority) {
 	struct can_frame send_frame;
 
-	send_frame.can_id = make_id(OBUS_CONTROLLER_ID, false, OBUS_TYPE_CONTROLLER);
+	send_frame.can_id = encode_can_id(this_module, priority);
 	send_frame.can_dlc = length;
 
 	memcpy(send_frame.data, message, OBUS_MSG_LENGTH);
@@ -117,14 +116,14 @@ void receive_hello() {
 
 	if (mcp2515.readMessage(&receive_frame) == MCP2515::ERROR_OK) {
 		if (receive_frame.data[0] ==  OBUS_MSGTYPE_M_HELLO) {
-			struct module new_module = get_module_info(receive_frame.can_id);
+			struct module new_module = decode_can_id(receive_frame.can_id);
 			Serial.print("Registered module ");
-			Serial.println(new_module.id);
+			Serial.println(full_module_id(new_module));
 			connected_modules_ids[nr_connected_modules] = new_module;
 			nr_connected_modules++;
 
 			if (new_module.type == OBUS_TYPE_PUZZLE) {
-				add_module_to_bit_vector(new_module.id);
+				add_module_to_bit_vector(full_module_id(new_module));
 			}
 
 			send_ack();
@@ -169,8 +168,8 @@ void receive_module_update() {
 		if (receive_frame.data[0] == OBUS_MSGTYPE_M_STRIKE) {
 			strikeouts++;
 		} else if (receive_frame.data[0] == OBUS_MSGTYPE_M_SOLVED) {
-			struct module module_info = get_module_info(receive_frame.can_id);
-			solve_module_in_bit_vector(module_info.id);
+			uint16_t module_id = full_module_id(decode_can_id(receive_frame.can_id));
+			solve_module_in_bit_vector(module_id);
 		}
 	}
 }
