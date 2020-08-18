@@ -1,43 +1,15 @@
 #include <mcp2515.h>
 #include <assert.h>
 
+#include "../shared/defs.hpp"
+
 #define STATE_INACTIVE 0
 #define STATE_HELLO    1
 #define STATE_GAME     2
 
-#define OBUS_CONTROLLER_ID 0x000
+#define OBUS_GAME_DURATION  60  // Duration of the game in seconds
+#define OBUS_MAX_STRIKEOUTS  3  // Number of strikeouts allowed until game over
 
-#define OBUS_TYPE_CONTROLLER 0
-#define OBUS_TYPE_PUZZLE     1
-#define OBUS_TYPE_NEEDY      2
-
-#define OBUS_MSG_LENGTH 8  // Max 8 to fit in a CAN message
-
-#define OBUS_MAX_MODULES     16
-#define OBUS_DISC_DURATION   5 // Duration of discovery round in seconds
-#define OBUS_GAME_DURATION   60 // Duration of the game in seconds
-#define OBUS_MAX_STRIKEOUTS  3 // Number of strikeouts allowed until game over
-#define OBUS_UPDATE_INTERVAL 500 // Number of milliseconds between game updates
-
-#define OBUS_MSGTYPE_C_ACK       0
-#define OBUS_MSGTYPE_C_HELLO     1
-#define OBUS_MSGTYPE_C_GAMESTART 2
-#define OBUS_MSGTYPE_C_STATE     3
-#define OBUS_MSGTYPE_C_SOLVED    4
-#define OBUS_MSGTYPE_C_TIMEOUT   5
-#define OBUS_MSGTYPE_C_STRIKEOUT 6
-
-#define OBUS_MSGTYPE_M_HELLO  0
-#define OBUS_MSGTYPE_M_STRIKE 1
-#define OBUS_MSGTYPE_M_SOLVED 2
-
-#define CAN_DOMINANT  0
-#define CAN_RECESSIVE 1
-
-struct module {
-	uint8_t id;
-	uint8_t type;
-};
 
 MCP2515 mcp2515(10);
 
@@ -45,7 +17,6 @@ uint8_t state = STATE_INACTIVE;
 struct module connected_modules_ids[OBUS_MAX_MODULES];
 uint8_t nr_connected_modules;
 uint8_t strikeouts;
-uint8_t game_running;
 
 // Bit vectors for checking if game is solved or not
 uint8_t unsolved_puzzles[32]; // 256 bits
@@ -61,22 +32,6 @@ void setup() {
 	mcp2515.reset();
 	mcp2515.setBitrate(CAN_50KBPS);
 	mcp2515.setNormalMode();
-
-	game_running = 0;
-}
-
-
-uint16_t make_id(uint8_t id, bool priority, uint8_t type) {
-	assert(type <= 0x11);
-
-	/* b bb bbbbbbbb
-	 * ↓ type  module ID
-	 * priority bit
-	 */
-	return \
-		((uint16_t) (priority ? CAN_DOMINANT : CAN_RECESSIVE) << 10) | \
-		((uint16_t) type << 8) | \
-		(uint16_t) id;
 }
 
 
@@ -176,8 +131,8 @@ void receive_hello() {
 			Serial.println("ACK");
 		}
 	} else if (current_time - hello_round_start > OBUS_DISC_DURATION * 1000) {
-		state = STATE_GAME;
 		Serial.println("End of discovery round");
+		initialize_game();
 	}
 }
 
@@ -198,9 +153,10 @@ void initialize_game() {
 
 	send_message(message, 7);
 
-	game_running = 1;
 	game_start = millis();
 	last_update = game_start;
+
+	state = STATE_GAME;
 
 	Serial.println("Game started");
 }
@@ -246,7 +202,7 @@ void game_loop() {
 		state = STATE_INACTIVE;
 		return;
 	} else if (game_duration >= (uint16_t) OBUS_GAME_DURATION * 1000) {
-		Serial.println("Times up");
+		Serial.println("Time's up");
 		send_game_update(OBUS_MSGTYPE_C_TIMEOUT, game_duration);
 		state = STATE_INACTIVE;
 		return;
@@ -268,15 +224,17 @@ void game_loop() {
 
 
 void loop() {
-	if (state == STATE_INACTIVE) {
-		start_hello();
-	} else if (state == STATE_HELLO) {
-		receive_hello();
-	} else if (state == STATE_GAME) {
-		if (game_running) {
+	switch (state) {
+		case STATE_INACTIVE:
+			start_hello();
+			break;
+
+		case STATE_HELLO:
+			receive_hello();
+			break;
+
+		case STATE_GAME:
 			game_loop();
-		} else {
-			initialize_game();
-		}
+			break;
 	}
 }
