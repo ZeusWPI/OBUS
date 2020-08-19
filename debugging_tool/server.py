@@ -3,6 +3,7 @@ from flask import Flask, jsonify, send_file
 from time import sleep
 from dataclasses import dataclass
 from datetime import datetime
+import serial
 
 app = Flask(__name__)
 shared_message_log = []
@@ -78,11 +79,18 @@ class Message:
 
 
 def serial_reader(messagelog):
-    while True:
-        sleep(5)
-        received = Message(b'\x00' * 8, 0b101000110, datetime.now(), len(messagelog))
-        messagelog.append(received.serialize())
-
+    with serial.Serial('/dev/ttyUSB0', 115200, timeout=10) as ser:
+        while True:
+            line = ser.readline()
+            print(line.decode('ascii'))
+            if line.startswith(b"message"):
+                line = line.decode('ascii')
+                line = line.strip()
+                parts = line.split(' ')
+                sender = int(parts[1])
+                message = bytes(int(p) for p in parts[2:])
+                received = Message(message, sender, datetime.now(), len(messagelog))
+                messagelog.append(received.serialize()
 
 @app.route('/')
 def index():
