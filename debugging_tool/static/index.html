@@ -2,8 +2,8 @@
 
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>CAN debugger</title>
+	<meta charset="utf-8">
+	<title>CAN debugger</title>
 	<style>
 
 		@keyframes fadein {
@@ -11,7 +11,7 @@
 			to   { opacity: 1; }
 		}
 		.message {
-  		display: flex;
+			display: flex;
 			animation: fadein 1s;
 		}
 		.message > * {
@@ -31,7 +31,7 @@
 			order: -5;
 		}
 		.time {
-		  order: 5;
+			order: 5;
 		}
 		.sender_id {
 			order: 1;
@@ -40,7 +40,7 @@
 		.parsed {
 			order: 2;
 			flex: 1;
-		  background: lightgreen;
+			background: lightgreen;
 		}
 
 		.pretty_raw_sender_id, .raw_message {
@@ -62,13 +62,13 @@
 <body>
 	<div>
 		<input type="checkbox" id="show_raw" name="show_raw" checked onchange="updateShow()">
-	  <label for="show_raw">Show raw address and payload</label>
+		<label for="show_raw">Show raw address and payload</label>
 		<input type="checkbox" id="pause" name="pause">
-	  <label for="pause">Pause</label>
+		<label for="pause">Pause</label>
 	</div>
 	<div id="messages">
 
 	</div>
-  <script src="static/script.js"></script>
+	<script src="static/script.js"></script>
 </body>
 </html>
