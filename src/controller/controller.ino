@@ -1,5 +1,4 @@
-#include "shared.hpp"
-#include "obus_can.hpp"
+#include <obus_can.h>
 
 
 #define STATE_INACTIVE 0
@@ -9,8 +8,12 @@
 #define OBUS_MAX_STRIKES    3 // Number of strikes allowed until game over
 #define OBUS_GAME_DURATION 10 // Duration of the game in seconds
 
+#define OBUS_MAX_MODULES      16
+#define OBUS_DISC_DURATION     5 // Duration of discovery round in seconds
+#define OBUS_UPDATE_INTERVAL 500 // Number of milliseconds between game updates
 
 #define OBUS_GAME_DURATION_MS ((uint32_t) OBUS_GAME_DURATION*1000)
+#define OBUS_DISC_DURATION_MS ((uint32_t) OBUS_DISC_DURATION*1000)
 
 #define DIVIDE_CEIL(dividend, divisor) ((dividend + (divisor - 1)) / divisor)
 #define MAX_AMOUNT_PUZZLES 256 // The ID of a puzzle is uint8
@@ -85,6 +88,13 @@ void start_hello() {
 }
 
 
+uint16_t full_module_id(struct module mod) {
+	return \
+		((uint16_t) mod.type << 8) | \
+		(uint16_t) mod.id;
+}
+
+
 void receive_hello() {
 	struct obus_message msg;
 	uint32_t current_time = millis();
@@ -93,11 +103,14 @@ void receive_hello() {
 		if (msg.msg_type == OBUS_MSGTYPE_M_HELLO) {
 			Serial.print("  Registered module ");
 			Serial.println(full_module_id(msg.from));
-			connected_modules_ids[nr_connected_modules] = msg.from;
-			nr_connected_modules++;
 
-			if (msg.from.type == OBUS_TYPE_PUZZLE) {
-				add_module_to_bit_vector(full_module_id(msg.from));
+			if (nr_connected_modules < OBUS_MAX_MODULES) {
+				connected_modules_ids[nr_connected_modules] = msg.from;
+				nr_connected_modules++;
+
+				if (msg.from.type == OBUS_TYPE_PUZZLE) {
+					add_module_to_bit_vector(full_module_id(msg.from));
+				}
 			}
 
 			obuscan_send_c_ack(this_module);

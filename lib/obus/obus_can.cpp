@@ -1,6 +1,6 @@
 #include <mcp2515.h>
 
-#include "obus_can.hpp"
+#include "obus_can.h"
 
 
 MCP2515 mcp2515(10);
