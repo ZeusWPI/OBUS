@@ -6,11 +6,14 @@
 #define STATE_HELLO    1
 #define STATE_GAME     2
 
-#define OBUS_MAX_STRIKES    3   // Number of strikes allowed until game over
+#define OBUS_MAX_STRIKES    3 // Number of strikes allowed until game over
 #define OBUS_GAME_DURATION 10 // Duration of the game in seconds
 
 
 #define OBUS_GAME_DURATION_MS ((uint32_t) OBUS_GAME_DURATION*1000)
+
+#define DIVIDE_CEIL(dividend, divisor) ((dividend + (divisor - 1)) / divisor)
+#define MAX_AMOUNT_PUZZLES 256 // The ID of a puzzle is uint8
 
 
 uint8_t state = STATE_INACTIVE;
@@ -18,10 +21,12 @@ struct module connected_modules_ids[OBUS_MAX_MODULES];
 uint8_t nr_connected_modules;
 uint8_t strikes;
 
-// Bit vectors for checking if game is solved or not
-uint8_t unsolved_puzzles[32]; // 256 bits
+// Bitvector for checking if game is solved or not
+// 32 bits per uint32 bitvector field
+#define N_UNSOLVED_PUZZLES DIVIDE_CEIL(MAX_AMOUNT_PUZZLES, 32)
+uint32_t unsolved_puzzles[N_UNSOLVED_PUZZLES];
 
-// TIMERS
+// Timers
 uint32_t hello_round_start;
 uint32_t game_start;
 uint32_t last_update;
@@ -40,15 +45,13 @@ void setup() {
 }
 
 
-uint8_t check_solved() {
-	uint8_t solved = 1;
-	for (uint8_t i = 0; i < 32; i++) {
-		if (unsolved_puzzles != 0) {
-			solved = 0;
-			break;
+bool check_solved() {
+	for (uint8_t i = 0; i < N_UNSOLVED_PUZZLES; i++) {
+		if (unsolved_puzzles[i] != 0) {
+			return false;
 		}
 	}
-	return solved;
+	return true;
 }
 
 
@@ -72,20 +75,13 @@ void start_hello() {
 	nr_connected_modules = 0;
 
 	// Zero bit vectors
-	for (uint8_t i = 0; i < 32; i++) {
+	for (uint8_t i = 0; i < N_UNSOLVED_PUZZLES; i++) {
 		unsolved_puzzles[i] = 0;
 	}
 
-	struct obus_message msg = obuscan_msg_c_hello(this_module);
-	obuscan_send(&msg);
+	obuscan_send_c_hello(this_module);
 
-	Serial.println(F("Start of discovery round"));
-}
-
-
-void send_ack() {
-	struct obus_message msg = obuscan_msg_c_ack(this_module);
-	obuscan_send(&msg);
+	Serial.println(F("  Start of discovery round"));
 }
 
 
@@ -94,8 +90,8 @@ void receive_hello() {
 	uint32_t current_time = millis();
 
 	if (obuscan_receive(&msg)) {
-		if (msg.msg_type ==  OBUS_MSGTYPE_M_HELLO) {
-			Serial.print("Registered module ");
+		if (msg.msg_type == OBUS_MSGTYPE_M_HELLO) {
+			Serial.print("  Registered module ");
 			Serial.println(full_module_id(msg.from));
 			connected_modules_ids[nr_connected_modules] = msg.from;
 			nr_connected_modules++;
@@ -104,11 +100,11 @@ void receive_hello() {
 				add_module_to_bit_vector(full_module_id(msg.from));
 			}
 
-			send_ack();
-			Serial.println("ACK");
+			obuscan_send_c_ack(this_module);
+			Serial.println("  ACK");
 		}
 	} else if (current_time - hello_round_start > OBUS_DISC_DURATION_MS) {
-		Serial.println("End of discovery round");
+		Serial.println("  End of discovery round");
 		initialize_game();
 	}
 }
@@ -121,9 +117,9 @@ void initialize_game() {
 	last_update = game_start;
 	state = STATE_GAME;
 
-	Serial.println("Game started");
+	Serial.println("  Game started");
 
-	send_game_update(OBUS_MSGTYPE_C_GAMESTART, OBUS_GAME_DURATION_MS);
+	obuscan_send_c_gamestart(this_module, OBUS_GAME_DURATION_MS, strikes, OBUS_MAX_STRIKES);
 }
 
 
@@ -152,22 +148,6 @@ void receive_module_update() {
 }
 
 
-void send_game_update(uint8_t msg_type, uint32_t time_left) {
-	Serial.print(F("Send "));
-	Serial.print(msg_type);
-	Serial.print(F(": "));
-	Serial.print(time_left);
-	Serial.print(F(", "));
-	Serial.print(strikes);
-	Serial.print(F("/"));
-	Serial.println(OBUS_MAX_STRIKES);
-
-	struct obus_message msg = obuscan_msg_c_payld_gamestatus(
-			this_module, false, msg_type, time_left, strikes, OBUS_MAX_STRIKES);
-	obuscan_send(&msg);
-}
-
-
 void game_loop() {
 	uint32_t current_time = millis();
 	uint32_t time_elapsed =  current_time - game_start;
@@ -178,24 +158,26 @@ void game_loop() {
 	receive_module_update();
 
 	if (check_solved()) {
-		Serial.println("Game solved");
-		send_game_update(OBUS_MSGTYPE_C_SOLVED, time_left);
+		Serial.println("  Game solved");
+		obuscan_send_c_solved(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		state = STATE_INACTIVE;
 		return;
-	} else if (time_left == 0) {
-		Serial.println("Time's up");
-		send_game_update(OBUS_MSGTYPE_C_TIMEOUT, time_left);
+	}
+	if (time_left == 0) {
+		Serial.println("  Time's up");
+		obuscan_send_c_timeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		state = STATE_INACTIVE;
 		return;
-	} else if (strikes >= OBUS_MAX_STRIKES) {
-		Serial.println("Strikeout");
-		send_game_update(OBUS_MSGTYPE_C_STRIKEOUT, time_left);
+	}
+	if (strikes >= OBUS_MAX_STRIKES) {
+		Serial.println("  Strikeout");
+		obuscan_send_c_strikeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		state = STATE_INACTIVE;
 		return;
 	}
 
 	if (last_update + OBUS_UPDATE_INTERVAL <= current_time) {
-		send_game_update(OBUS_MSGTYPE_C_STATE, time_left);
+		obuscan_send_c_state(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		last_update = current_time;
 	}
 }

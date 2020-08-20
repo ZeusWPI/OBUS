@@ -1,5 +1,4 @@
 #include <mcp2515.h>
-#include <assert.h>
 
 #include "obus_can.hpp"
 
@@ -29,6 +28,42 @@ void _decode_can_id(uint16_t can_id, struct module *mod, bool *priority) {
 	assert(mod->type <= 0b11);
 }
 
+uint8_t obuscan_payload_type(uint8_t module_type, uint8_t msg_type) {
+	if (module_type == OBUS_TYPE_CONTROLLER) {
+		switch (msg_type) {
+			case OBUS_MSGTYPE_C_ACK:
+			case OBUS_MSGTYPE_C_HELLO:
+				return OBUS_PAYLDTYPE_EMPTY;
+
+			case OBUS_MSGTYPE_C_GAMESTART:
+			case OBUS_MSGTYPE_C_STATE:
+			case OBUS_MSGTYPE_C_SOLVED:
+			case OBUS_MSGTYPE_C_TIMEOUT:
+			case OBUS_MSGTYPE_C_STRIKEOUT:
+				return OBUS_PAYLDTYPE_GAMESTATUS;
+
+			default:
+				return false;
+				break;
+		}
+
+	// Module messages
+	} else {
+		switch (msg_type) {
+			case OBUS_MSGTYPE_M_STRIKE:
+				return OBUS_PAYLDTYPE_IDEMPOTENCY_ID;
+
+			case OBUS_MSGTYPE_M_HELLO:
+			case OBUS_MSGTYPE_M_SOLVED:
+				return OBUS_PAYLDTYPE_EMPTY;
+
+			default:
+				return -1;
+				break;
+		}
+	}
+}
+
 
 void obuscan_init() {
 	obuscan_is_init = true;
@@ -38,41 +73,9 @@ void obuscan_init() {
 }
 
 
-void obuscan_send(struct obus_message *msg) {
-	if (!obuscan_is_init) {
-		Serial.println(F("Call obuscan_init first"));
-		return;
-	}
-
-	struct can_frame send_frame;
-
-	memset(&send_frame.data, 0, CAN_MAX_DLEN);
-
-	uint8_t length = 1;
-	send_frame.data[0] = msg->msg_type;
-
-	switch (msg->payload_type) {
-		case OBUS_PAYLDTYPE_EMPTY: break;
-		case OBUS_PAYLDTYPE_GAMESTATUS:
-			send_frame.data[1] = (uint8_t) ((msg->gamestatus.time_left & 0xFF000000) >> 0x18);
-			send_frame.data[2] = (uint8_t) ((msg->gamestatus.time_left & 0x00FF0000) >> 0x10);
-			send_frame.data[3] = (uint8_t) ((msg->gamestatus.time_left & 0x0000FF00) >> 0x08);
-			send_frame.data[4] = (uint8_t) (msg->gamestatus.time_left & 0x000000FF);
-			send_frame.data[5] = msg->gamestatus.strikes;
-			send_frame.data[6] = msg->gamestatus.max_strikes;
-      length = 7;
-	}
-
-	send_frame.can_id = _encode_can_id(msg->from, msg->priority);
-	send_frame.can_dlc = length;
-
-	mcp2515.sendMessage(&send_frame);
-}
-
-
 bool obuscan_receive(struct obus_message *msg) {
 	if (!obuscan_is_init) {
-		Serial.println(F("Call obuscan_init first"));
+		Serial.println(F("E Call obuscan_init first"));
 		return false;
 	}
 
@@ -92,50 +95,13 @@ bool obuscan_receive(struct obus_message *msg) {
 	}
 
 	uint8_t msg_type = receive_frame.data[0];
-	uint8_t payload_type = -1;
 
-	_decode_can_id(receive_frame.can_id, &msg->from, &msg->priority);
+	struct module from;
+	bool priority;
+	_decode_can_id(receive_frame.can_id, &from, &priority);
+
 	// Controller messages
-	// TODO ifdef, ignore not for us and assume for us
-	if (msg->from.type == OBUS_TYPE_CONTROLLER) {
-		switch (msg_type) {
-			case OBUS_MSGTYPE_C_ACK: // fall-through
-			case OBUS_MSGTYPE_C_HELLO:
-				payload_type = OBUS_PAYLDTYPE_EMPTY;
-				break;
-
-			case OBUS_MSGTYPE_C_GAMESTART: // fall-through
-			case OBUS_MSGTYPE_C_STATE:
-			case OBUS_MSGTYPE_C_SOLVED:
-			case OBUS_MSGTYPE_C_TIMEOUT:
-			case OBUS_MSGTYPE_C_STRIKEOUT:
-				payload_type = OBUS_PAYLDTYPE_GAMESTATUS;
-				break;
-
-			default:
-				return false;
-				break;
-		}
-
-	// Module messages
-	} else {
-		switch (msg_type) {
-			case OBUS_MSGTYPE_M_STRIKE:
-				payload_type = OBUS_PAYLDTYPE_IDEMPOTENCY_ID;
-				break;
-
-			case OBUS_MSGTYPE_M_HELLO:
-			case OBUS_MSGTYPE_M_SOLVED:
-				payload_type = OBUS_PAYLDTYPE_EMPTY;
-				break;
-
-			default:
-				return false;
-				break;
-		}
-	}
-
-	switch (payload_type) {
+	switch (obuscan_payload_type(from.type, msg_type)) {
 		case OBUS_PAYLDTYPE_EMPTY:
 			break;
 
@@ -158,102 +124,52 @@ bool obuscan_receive(struct obus_message *msg) {
 			break;
 
 		default:
-			assert(false);
-			break;
+			Serial.println(F("W Couldn't determine payload type"));
+			return false;
 	}
 
+	msg->from = from;
+	msg->priority = priority;
 	msg->msg_type = msg_type;
-	msg->payload_type = payload_type;
 
 	return true;
 }
 
 
-inline struct obus_message _obuscan_msg(
-		struct module from, bool priority, uint8_t msg_type, uint8_t payload_type) {
+void obuscan_send(struct obus_message *msg) {
+	if (!obuscan_is_init) {
+		Serial.println(F("E Call obuscan_init first"));
+		return;
+	}
 
-	struct obus_message msg;
-	msg.from = from;
-	msg.priority = priority;
-	msg.msg_type = msg_type;
-	msg.payload_type = payload_type;
-	return msg;
-}
+	struct can_frame send_frame;
 
+	memset(&send_frame.data, 0, CAN_MAX_DLEN);
 
-struct obus_message obuscan_msg_c_payld_gamestatus(
-		struct module from, bool priority, uint8_t msg_type,
-		uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
+	uint8_t length = 1;
+	send_frame.data[0] = msg->msg_type;
 
-	assert(from.type == OBUS_TYPE_CONTROLLER);
+	switch (obuscan_payload_type(msg->from.type, msg->msg_type)) {
+		case OBUS_PAYLDTYPE_EMPTY:
+			break;
 
-	struct obus_message msg = _obuscan_msg(
-			from, priority, msg_type, OBUS_PAYLDTYPE_GAMESTATUS);
-	msg.gamestatus.time_left = time_left;
-	msg.gamestatus.strikes = strikes;
-	msg.gamestatus.max_strikes = max_strikes;
-	return msg;
-}
+		case OBUS_PAYLDTYPE_GAMESTATUS:
+			send_frame.data[1] = (uint8_t) ((msg->gamestatus.time_left & 0xFF000000) >> 0x18);
+			send_frame.data[2] = (uint8_t) ((msg->gamestatus.time_left & 0x00FF0000) >> 0x10);
+			send_frame.data[3] = (uint8_t) ((msg->gamestatus.time_left & 0x0000FF00) >> 0x08);
+			send_frame.data[4] = (uint8_t) (msg->gamestatus.time_left & 0x000000FF);
+			send_frame.data[5] = msg->gamestatus.strikes;
+			send_frame.data[6] = msg->gamestatus.max_strikes;
+			length = 7;
+			break;
 
+		default:
+			Serial.println(F("Unknown payload type"));
+			return;
+	}
 
-struct obus_message obuscan_msg_c_ack(struct module from) {
-	assert(from.type == OBUS_TYPE_CONTROLLER);
-	return _obuscan_msg(from, false, OBUS_MSGTYPE_C_ACK, OBUS_PAYLDTYPE_EMPTY);
-}
+	send_frame.can_id = _encode_can_id(msg->from, msg->priority);
+	send_frame.can_dlc = length;
 
-struct obus_message obuscan_msg_c_hello(struct module from) {
-	assert(from.type == OBUS_TYPE_CONTROLLER);
-	return _obuscan_msg(from, false, OBUS_MSGTYPE_C_HELLO, OBUS_PAYLDTYPE_EMPTY);
-}
-
-
-struct obus_message obuscan_msg_c_gamestart(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
-
-	return obuscan_msg_c_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_GAMESTART, time_left, strikes, max_strikes);
-}
-
-struct obus_message obuscan_msg_c_state(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
-
-	return obuscan_msg_c_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_STATE, time_left, strikes, max_strikes);
-}
-
-struct obus_message obuscan_msg_c_solved(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
-
-	return obuscan_msg_c_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_SOLVED, time_left, strikes, max_strikes);
-}
-
-struct obus_message obuscan_msg_c_timeout(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
-
-	return obuscan_msg_c_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_TIMEOUT, time_left, strikes, max_strikes);
-}
-
-struct obus_message obuscan_msg_c_strikeout(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
-
-	return obuscan_msg_c_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_STRIKEOUT, time_left, strikes, max_strikes);
-}
-
-
-struct obus_message obuscan_msg_m_hello(struct module from) {
-	assert(from.type != OBUS_TYPE_CONTROLLER);
-	return _obuscan_msg(from, false, OBUS_MSGTYPE_M_HELLO, OBUS_PAYLDTYPE_EMPTY);
-}
-
-struct obus_message obuscan_msg_m_strike(struct module from) {
-	assert(from.type != OBUS_TYPE_CONTROLLER);
-	return _obuscan_msg(from, false, OBUS_MSGTYPE_M_STRIKE, OBUS_PAYLDTYPE_EMPTY);
-}
-
-struct obus_message obuscan_msg_m_solved(struct module from) {
-	assert(from.type != OBUS_TYPE_CONTROLLER);
-	return _obuscan_msg(from, false, OBUS_MSGTYPE_M_STRIKE, OBUS_PAYLDTYPE_EMPTY);
+	mcp2515.sendMessage(&send_frame);
 }
