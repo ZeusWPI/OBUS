@@ -7,7 +7,10 @@ void setup() {
 	mcp2515.reset();
 	mcp2515.setBitrate(CAN_50KBPS);
 	mcp2515.setNormalMode();
-	Serial.println("begin");
+	for (int i = 0; i < 5; i++) {
+		Serial.println("begin");
+		delay(1000);
+	}
 }
 
 void loop() {

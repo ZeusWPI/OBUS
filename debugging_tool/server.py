@@ -79,7 +79,7 @@ class Message:
 
 
 def serial_reader(messagelog):
-    with serial.Serial('/dev/ttyUSB0', 115200, timeout=10) as ser:
+    with serial.Serial('/dev/ttyACM0', 115200, timeout=10) as ser:
         while True:
             line = ser.readline()
             print(line.decode('ascii'))
@@ -90,7 +90,8 @@ def serial_reader(messagelog):
                 sender = int(parts[1])
                 message = bytes(int(p) for p in parts[2:])
                 received = Message(message, sender, datetime.now(), len(messagelog))
-                messagelog.append(received.serialize()
+                messagelog.append(received.serialize())
+                print(len(messagelog))
 
 @app.route('/')
 def index():
@@ -98,10 +99,10 @@ def index():
 
 @app.route('/api.json')
 def api():
-    return jsonify([m for m in shared_message_log])
+    return jsonify(shared_message_log)
 
 
 if __name__ == '__main__':
     thread = Thread(target=serial_reader, args=(shared_message_log, ))
     thread.start()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
