@@ -1,7 +1,15 @@
 # Ontmijnen van een Bom vereist Uitstekende Samenwerking
 
-OBUS is a real-life version of the multiplayer game "Keep Talking And Nobody Explodes"
+OBUS is a real-life version of the multiplayer game "Keep Talking And Nobody Explodes".
 
+# Get started writing a module
+
+1. [Install](https://www.arduino.cc/en/Guide/#install-the-arduino-desktop-ide) the Arduino IDE.
+2. Clone this repository with Git in a permanent location on your drive.
+3. Symlink the library: `ln -s /ABSOLUTE/PATH/TO/REPO/lib /PATH/TO/Arduino/libraries/obus`
+4. TODO
+
+# Background
 ## Game
 
 The game is played by at least two players. The goal is to defuse a bomb,
@@ -10,10 +18,10 @@ timer runs out.
 
 There are two roles:
 
-- Experts: this person can read the manual about how to defuse the bomb, but cannot see nor interact with the bomb
+- Expert: this person can read the manual about how to defuse the bomb, but cannot see nor interact with the bomb
 - Defuser: this person can see and interact with the bomb, but cannot read the manual
 
-These two roles can communicate with each other. To succesfully defuse the bomb, they must
+These two roles can communicate with each other. To successfully defuse the bomb, they must
 communicate efficiently and clearly. If a mistake is made, the team gets a strike.
 If they get too many strikes, the bomb explodes, even if the timer hasn't run out yet.
 
@@ -24,7 +32,7 @@ it should be easy to 1) make new modules and 2) attach them to a bomb. To do thi
 a protocol, both in hardware and in software.
 
 The idea is to have one bomb controller that keeps track of the timer, the amount of strikes and of whether
-the bomb has been succesfully disarmed, and to have multiple modules that have one or more challenges on them
+the bomb has been successfully disarmed, and to have multiple modules that have one or more challenges on them
 that need to be solved.
 
 ### Hardware
@@ -48,9 +56,9 @@ The payload of a CAN packet is 8 bytes long, this should be enough.
 
 ## Software
 
-We need to decide on a protocol to communicate between the bomb controller and the modules (and possibly also between modules?).
+We needed to decide on a protocol to communicate between the bomb controller and the modules (and possibly also between modules?).
 
-Some things we'll need to consider:
+Some things we had to consider:
 
 - payload is 8 bytes per packet
 - packets can be delayed or not received on every node, so detection of this and retransmission might be needed: if the bomb interactor solves a module and the packet that communicates this with the bomb does not get delivered to the controller, the bomb will still go off, even if all modules have been solved
