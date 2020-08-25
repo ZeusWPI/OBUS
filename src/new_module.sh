@@ -8,8 +8,8 @@ IFS=$'\n\t'
 cd "$(dirname "$0")"
 
 # Make sure the template dir exists so we don't let people enter details unnecessarily
-if [ ! -d ./module_template ]; then
-	echo "module_template doesn't exist" >&2
+if [ ! -d ./template_module ]; then
+	echo "template_module doesn't exist" >&2
 	exit 1
 fi
 
