@@ -51,7 +51,7 @@ uint8_t obuscan_payload_type(uint8_t module_type, uint8_t msg_type) {
 	} else {
 		switch (msg_type) {
 			case OBUS_MSGTYPE_M_STRIKE:
-				return OBUS_PAYLDTYPE_IDEMPOTENCY_ID;
+				return OBUS_PAYLDTYPE_COUNT;
 
 			case OBUS_MSGTYPE_M_HELLO:
 			case OBUS_MSGTYPE_M_SOLVED:
@@ -119,8 +119,8 @@ bool obuscan_receive(struct obus_message *msg) {
 			msg->gamestatus.max_strikes = receive_frame.data[6];
 			break;
 
-		case OBUS_PAYLDTYPE_IDEMPOTENCY_ID:
-			msg->idempotency.id = receive_frame.data[1];
+		case OBUS_PAYLDTYPE_COUNT:
+			msg->count = receive_frame.data[1];
 			break;
 
 		default:
@@ -161,6 +161,11 @@ void obuscan_send(struct obus_message *msg) {
 			send_frame.data[5] = msg->gamestatus.strikes;
 			send_frame.data[6] = msg->gamestatus.max_strikes;
 			length = 7;
+			break;
+
+		case OBUS_PAYLDTYPE_COUNT:
+			send_frame.data[1] = msg->count;
+			length = 2;
 			break;
 
 		default:

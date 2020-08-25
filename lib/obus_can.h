@@ -26,9 +26,9 @@
 #define OBUS_MSGTYPE_M_STRIKE 1
 #define OBUS_MSGTYPE_M_SOLVED 2
 
-#define OBUS_PAYLDTYPE_EMPTY          0
-#define OBUS_PAYLDTYPE_GAMESTATUS     1
-#define OBUS_PAYLDTYPE_IDEMPOTENCY_ID 2
+#define OBUS_PAYLDTYPE_EMPTY      0
+#define OBUS_PAYLDTYPE_GAMESTATUS 1
+#define OBUS_PAYLDTYPE_COUNT      2
 
 struct module {
 	uint8_t type;
@@ -41,9 +41,6 @@ struct payld_gamestatus {
 	uint8_t strikes;
 	uint8_t max_strikes;
 };
-struct payld_idempotency {
-	uint8_t id;
-};
 
 
 struct obus_message {
@@ -53,7 +50,7 @@ struct obus_message {
 	union {
 		struct payld_empty empty;
 		struct payld_gamestatus gamestatus;
-		struct payld_idempotency idempotency;
+		uint8_t count;
 	};
 };
 
@@ -210,9 +207,10 @@ inline void obuscan_send_m_hello(struct module from) {
 /**
  * Send a module "strike" OBUS message
  */
-inline void obuscan_send_m_strike(struct module from) {
+inline void obuscan_send_m_strike(struct module from, uint8_t count) {
 	assert(from.type != OBUS_TYPE_CONTROLLER);
 	struct obus_message msg = _obuscan_msg(from, false, OBUS_MSGTYPE_M_STRIKE);
+	msg.count = count;
 	obuscan_send(&msg);
 }
 
