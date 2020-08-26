@@ -2,9 +2,12 @@
 
 #include "obus_can.h"
 
+// Chip select for the CAN module
+#define MCP_CS 8
+
 namespace obus_can {
 
-MCP2515 mcp2515(10);
+MCP2515 mcp2515(MCP_CS);
 bool is_init = false;
 
 
