@@ -18,7 +18,7 @@ b bb bbbbbbbb
 |  |     ↓
 |  ↓     module-ID: 2⁸=256
 ↓  type: 2²=4
-priority bit (so that each type can send priority messages if need be)
+priority bit (so that each type can send priority messages if need be, 0 = high priority, 1 = low priority)
 
     type:
     - 0 module-ID 0: controller, >0: info
@@ -30,7 +30,7 @@ Payload:
 [ B B B B  B B B B ]
   -
   ↓
- type (per module type)
+ type of the message (per module type)
 
 - - - - - - - - - - - - - - - - - - -
 
@@ -79,15 +79,15 @@ Types for info:
 
 Types for modules:
 
-    - 0 hanlo
+    - 0 register
       [ X B B B  B B B B ]
           --------------
              reserved
 
     - 1 strike
       [ X B B B  B B B B ]
-          --------------
-             reserved
+          ↓ -----↓------
+    #strikes  reserved
 
     - 2 solved (not for needy modules)
       [ X B B B  B B B B ]
