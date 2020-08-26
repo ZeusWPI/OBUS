@@ -32,6 +32,7 @@ void setup(uint8_t type, uint8_t id) {
 	pinMode(GREEN_LED, OUTPUT);
 	digitalWrite(RED_LED, LOW);
 	digitalWrite(GREEN_LED, LOW);
+	attachInterrupt(digitalPinToInterrupt(MCP_INT), interrupt_can_error, RISING);
 }
 
 bool loop(obus_can::message* message) {

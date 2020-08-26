@@ -74,6 +74,7 @@ void init() {
 	mcp2515.reset();
 	mcp2515.setBitrate(CAN_50KBPS);
 	mcp2515.setNormalMode();
+	mcp2515.setRegister(MCP_CANINTE, CANINTF_ERRIF);
 }
 
 
