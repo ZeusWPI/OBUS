@@ -20,7 +20,7 @@
 
 
 uint8_t state = STATE_INACTIVE;
-struct module connected_modules_ids[OBUS_MAX_MODULES];
+struct obus_can::module connected_modules_ids[OBUS_MAX_MODULES];
 uint8_t nr_connected_modules;
 uint8_t strikes;
 
@@ -34,7 +34,7 @@ uint32_t hello_round_start;
 uint32_t game_start;
 uint32_t last_update;
 
-struct module this_module = {
+struct obus_can::module this_module = {
 	.type = OBUS_TYPE_CONTROLLER,
 	.id = OBUS_CONTROLLER_ID
 };
@@ -42,7 +42,7 @@ struct module this_module = {
 
 void setup() {
 	Serial.begin(9600);
-	obuscan_init();
+	obus_can::init();
 
 	state = STATE_INACTIVE;
 }
@@ -82,13 +82,13 @@ void start_hello() {
 		unsolved_puzzles[i] = 0;
 	}
 
-	obuscan_send_c_hello(this_module);
+	obus_can::send_c_hello(this_module);
 
 	Serial.println(F("  Start of discovery round"));
 }
 
 
-uint16_t full_module_id(struct module mod) {
+uint16_t full_module_id(struct obus_can::module mod) {
 	return \
 		((uint16_t) mod.type << 8) | \
 		(uint16_t) mod.id;
@@ -96,10 +96,10 @@ uint16_t full_module_id(struct module mod) {
 
 
 void receive_hello() {
-	struct obus_message msg;
+	struct obus_can::message msg;
 	uint32_t current_time = millis();
 
-	if (obuscan_receive(&msg)) {
+	if (obus_can::receive(&msg)) {
 		if (msg.msg_type == OBUS_MSGTYPE_M_HELLO) {
 			Serial.print("  Registered module ");
 			Serial.println(full_module_id(msg.from));
@@ -113,7 +113,7 @@ void receive_hello() {
 				}
 			}
 
-			obuscan_send_c_ack(this_module);
+			obus_can::send_c_ack(this_module);
 			Serial.println("  ACK");
 		}
 	} else if (current_time - hello_round_start > OBUS_DISC_DURATION_MS) {
@@ -132,14 +132,14 @@ void initialize_game() {
 
 	Serial.println("  Game started");
 
-	obuscan_send_c_gamestart(this_module, OBUS_GAME_DURATION_MS, strikes, OBUS_MAX_STRIKES);
+	obus_can::send_c_gamestart(this_module, OBUS_GAME_DURATION_MS, strikes, OBUS_MAX_STRIKES);
 }
 
 
 void receive_module_update() {
-	struct obus_message msg;
+	struct obus_can::message msg;
 
-	if (obuscan_receive(&msg)) {
+	if (obus_can::receive(&msg)) {
 
 		switch (msg.msg_type) {
 			case OBUS_MSGTYPE_M_STRIKE:
@@ -172,25 +172,25 @@ void game_loop() {
 
 	if (check_solved()) {
 		Serial.println("  Game solved");
-		obuscan_send_c_solved(this_module, time_left, strikes, OBUS_MAX_STRIKES);
+		obus_can::send_c_solved(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		state = STATE_INACTIVE;
 		return;
 	}
 	if (time_left == 0) {
 		Serial.println("  Time's up");
-		obuscan_send_c_timeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
+		obus_can::send_c_timeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		state = STATE_INACTIVE;
 		return;
 	}
 	if (strikes >= OBUS_MAX_STRIKES) {
 		Serial.println("  Strikeout");
-		obuscan_send_c_strikeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
+		obus_can::send_c_strikeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		state = STATE_INACTIVE;
 		return;
 	}
 
 	if (last_update + OBUS_UPDATE_INTERVAL <= current_time) {
-		obuscan_send_c_state(this_module, time_left, strikes, OBUS_MAX_STRIKES);
+		obus_can::send_c_state(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		last_update = current_time;
 	}
 }

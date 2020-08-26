@@ -2,9 +2,10 @@
 
 #include "obus_can.h"
 
+namespace obus_can {
 
 MCP2515 mcp2515(10);
-bool obuscan_is_init = false;
+bool is_init = false;
 
 
 uint16_t _encode_can_id(struct module mod, bool priority) {
@@ -28,7 +29,7 @@ void _decode_can_id(uint16_t can_id, struct module *mod, bool *priority) {
 	assert(mod->type <= 0b11);
 }
 
-uint8_t obuscan_payload_type(uint8_t module_type, uint8_t msg_type) {
+uint8_t payload_type(uint8_t module_type, uint8_t msg_type) {
 	if (module_type == OBUS_TYPE_CONTROLLER) {
 		switch (msg_type) {
 			case OBUS_MSGTYPE_C_ACK:
@@ -65,17 +66,17 @@ uint8_t obuscan_payload_type(uint8_t module_type, uint8_t msg_type) {
 }
 
 
-void obuscan_init() {
-	obuscan_is_init = true;
+void init() {
+	is_init = true;
 	mcp2515.reset();
 	mcp2515.setBitrate(CAN_50KBPS);
 	mcp2515.setNormalMode();
 }
 
 
-bool obuscan_receive(struct obus_message *msg) {
-	if (!obuscan_is_init) {
-		Serial.println(F("E Call obuscan_init first"));
+bool receive(struct message *msg) {
+	if (!is_init) {
+		Serial.println(F("E Call init first"));
 		return false;
 	}
 
@@ -101,7 +102,7 @@ bool obuscan_receive(struct obus_message *msg) {
 	_decode_can_id(receive_frame.can_id, &from, &priority);
 
 	// Controller messages
-	switch (obuscan_payload_type(from.type, msg_type)) {
+	switch (payload_type(from.type, msg_type)) {
 		case OBUS_PAYLDTYPE_EMPTY:
 			break;
 
@@ -136,9 +137,9 @@ bool obuscan_receive(struct obus_message *msg) {
 }
 
 
-void obuscan_send(struct obus_message *msg) {
-	if (!obuscan_is_init) {
-		Serial.println(F("E Call obuscan_init first"));
+void send(struct message *msg) {
+	if (!is_init) {
+		Serial.println(F("E Call init first"));
 		return;
 	}
 
@@ -149,7 +150,7 @@ void obuscan_send(struct obus_message *msg) {
 	uint8_t length = 1;
 	send_frame.data[0] = msg->msg_type;
 
-	switch (obuscan_payload_type(msg->from.type, msg->msg_type)) {
+	switch (payload_type(msg->from.type, msg->msg_type)) {
 		case OBUS_PAYLDTYPE_EMPTY:
 			break;
 
@@ -177,4 +178,6 @@ void obuscan_send(struct obus_message *msg) {
 	send_frame.can_dlc = length;
 
 	mcp2515.sendMessage(&send_frame);
+}
+
 }
