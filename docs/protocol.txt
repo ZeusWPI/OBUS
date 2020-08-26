@@ -21,8 +21,8 @@ b bb bbbbbbbb
 priority bit (so that each type can send priority messages if need be, 0 = high priority, 1 = low priority)
 
     type:
-    - 0 controller; module ID is ignored
-    - 1 puzzle
+    - 0 module-ID 0: controller, >0: info
+    - 1 puzzel
     - 2 needy
     - 3 reserved for future use
 
@@ -65,6 +65,15 @@ Types for controller:
             #strikes #max strikes
 
     - 7-255 reserved
+
+- - - - - - - - - - - - - - - - - - -
+
+Types for info:
+
+    These are managed by MOANA: the Modules of OBUS Authority for Numbers Assignment.
+    You can reach MOANA in the ~obus Mattermost channel.
+
+    (none yet)
 
 - - - - - - - - - - - - - - - - - - -
 
