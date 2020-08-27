@@ -29,9 +29,11 @@ void setup(uint8_t type, uint8_t id) {
 }
 
 bool loop(obus_can::message* message) {
-	// Check if the message buffer overflowed
+	// Check if we need to turn the red "strike" LED back off after
+	//  turning it on because of a strike
 	if (time_stop_strike_led && time_stop_strike_led > millis()) {
 		digitalWrite(RED_LED, LOW);
+		time_stop_strike_led = 0;
 	}
 	// TODO this can be more efficient by only enabling error interrupts and
 	//  reacting to the interrupt instead of checking if the flag is set in a loop
@@ -46,12 +48,25 @@ bool loop(obus_can::message* message) {
 			delay(500);
 		}
 	}
-	bool received = receive(message);
-	if (received) {
-		if (message->msg_type == OBUS_MSGTYPE_C_GAMESTART) {
-			callback_game_start();
-		} /*  TODO extend this for all messages */ else {
-			return true;
+	if (obus_can::receive(message)) {
+		switch(message->msg_type) {
+			case OBUS_MSGTYPE_C_GAMESTART:
+				running = true;
+				callback_game_start();
+				break;
+			case OBUS_MSGTYPE_C_HELLO:
+				obus_can::send_m_hello(this_module);
+				break;
+			case OBUS_MSGTYPE_C_SOLVED:
+			case OBUS_MSGTYPE_C_TIMEOUT:
+			case OBUS_MSGTYPE_C_STRIKEOUT:
+				running = false;
+				callback_game_stop();
+				break;
+			case OBUS_MSGTYPE_C_ACK:
+				break;
+			case OBUS_MSGTYPE_C_STATE:
+				return true;
 		}
 		return false;
 	}
