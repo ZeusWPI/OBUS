@@ -12,12 +12,7 @@ namespace obus_module {
 struct obus_can::module this_module;
 uint8_t strike_count;
 bool running;
-bool error;
 uint32_t time_stop_strike_led;
-
-void interrupt_can_error() {
-	error = true;
-}
 
 void setup(uint8_t type, uint8_t id) {
 	this_module.type = type;
@@ -27,18 +22,22 @@ void setup(uint8_t type, uint8_t id) {
 
 	strike_count = 0;
 	running = false;
-	error = false;
 	pinMode(RED_LED, OUTPUT);
 	pinMode(GREEN_LED, OUTPUT);
 	digitalWrite(RED_LED, LOW);
 	digitalWrite(GREEN_LED, LOW);
-	attachInterrupt(digitalPinToInterrupt(MCP_INT), interrupt_can_error, RISING);
 }
 
 bool loop(obus_can::message* message) {
 	// Check if the message buffer overflowed
-	if (error) {
-		// Loop forever while blinking status led orange
+	if (time_stop_strike_led && time_stop_strike_led > millis()) {
+		digitalWrite(RED_LED, LOW);
+	}
+	// TODO this can be more efficient by only enabling error interrupts and
+	//  reacting to the interrupt instead of checking if the flag is set in a loop
+	//  We will need to fork our CAN library for this, because the needed functions
+	//  are private
+	if (obus_can::is_error_condition()) {
 		bool blink = false;
 		while (true) {
 			digitalWrite(RED_LED, blink);
@@ -47,10 +46,15 @@ bool loop(obus_can::message* message) {
 			delay(500);
 		}
 	}
-	if (time_stop_strike_led && time_stop_strike_led > millis()) {
-		digitalWrite(RED_LED, LOW);
+	bool received = receive(message);
+	if (received) {
+		if (message->msg_type == OBUS_MSGTYPE_C_GAMESTART) {
+			callback_game_start();
+		} /*  TODO extend this for all messages */ else {
+			return true;
+		}
+		return false;
 	}
-	// TODO receive CAN frame and call callback functions
 
 }
 

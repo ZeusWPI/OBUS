@@ -74,7 +74,6 @@ void init() {
 	mcp2515.reset();
 	mcp2515.setBitrate(CAN_50KBPS);
 	mcp2515.setNormalMode();
-	mcp2515.setRegister(MCP_CANINTE, CANINTF_ERRIF);
 }
 
 
@@ -140,6 +139,9 @@ bool receive(struct message *msg) {
 	return true;
 }
 
+bool is_error_condition() {
+	return mcp2515.getInterrupts() & MCP2515::CANINTF_ERRIF;
+}
 
 void send(struct message *msg) {
 	if (!is_init) {
