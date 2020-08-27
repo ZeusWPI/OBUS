@@ -12,11 +12,15 @@ namespace obus_module {
 
 void setup(uint8_t type, uint8_t id);
 
-bool loop(obus_can::message* message);
+bool loopPuzzle(obus_can::message* message);
+
+bool loopNeedy(obus_can::message* message);
 
 void strike();
 
 void solve();
+
+bool is_active();
 
 }
 
