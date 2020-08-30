@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width">
+		<meta name="robots" content="noindex">
+		<title>MOANA: Modules of OBUS Assigned Numbers Authority</title>
+		<style type="text/css" media="screen">
+html {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	background: hsl(38, 10%, 97%);
+}
+body {
+	margin: 0 auto;
+	padding: 1rem;
+	max-width: 65rem;
+	line-height: 1.4;
+	font-family: sans;
+	color: hsl(0, 0%, 5%);
+}
+header {
+	margin-bottom: 2rem;
+	border-bottom: 2px solid hsl(0, 0%, 30%);
+	text-align: center;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	line-height: 1.2;
+}
+.keyword {
+	text-transform: uppercase;
+	font-size: 0.9em;
+}
+
+@media (min-width: 500px) {
+	.tabular {
+		margin: 0 1rem;
+	}
+}
+.tabular, pre {
+	overflow-x: auto;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+thead th {
+	border-top: 2px solid hsl(0, 0%, 25%);
+	border-bottom: 2px solid hsl(0, 0%, 25%);
+}
+th, td {
+	text-align: left;
+	margin: 0;
+	padding: 0.2em 0.7em;
+	line-height: 1.2;
+	border-bottom: 1px solid hsl(0, 0%, 90%);
+}
+th {
+	white-space: nowrap;
+}
+td {
+	vertical-align: top;
+}
+tbody tr:last-child th, tbody tr:last-child td {
+	border-bottom: 1px solid hsl(0, 0%, 0%);
+}
+
+.typ-id, .id-rng, .mod-id {
+	text-align: right;
+}
+
+section {
+	margin-bottom: 2rem;
+	padding-bottom: 2rem;
+	border-bottom: 1px dashed hsl(0, 0%, 30%);
+}
+
+footer {
+	margin-top: 2rem;
+	color: hsl(0, 0%, 30%);
+}
+
+pre {
+	font-size: 100%;
+}
+
+.code-header {
+	font-weight: bold;
+}
+		</style>
+	</head>
+	<body>
+		<header>
+			<h1>MOANA: Modules of OBUS Assigned Numbers Authority</h1>
+		</header>
+
+		<section>
+			<h2 id="current-numbers">Current numbers</h2>
+			<h3 id="module-types">Module types</h3>
+			<div class="tabular">
+				<table>
+					<thead>
+						<tr>
+							<th class="typ-id">Type ID</th>
+							<th class="id-rng">Module ID range</th>
+							<th class="mod-tp">Type</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr id="module-type-controller">
+							<td class="typ-id" rowspan="2">0</td>
+							<td class="id-rng">0</td>
+							<td class="mod-tp">controller</td>
+						</tr>
+						<tr id="module-type-info">
+							<td class="id-rng">1&ndash;255</td>
+							<td class="mod-tp">info</td>
+						</tr>
+						<tr id="module-type-puzzle">
+							<td class="typ-id">1</td>
+							<td class="id-rng">0&ndash;255</td>
+							<td class="mod-tp">puzzle</td>
+						</tr>
+						<tr id="module-type-needy">
+							<td class="typ-id">2</td>
+							<td class="id-rng">0&ndash;255</td>
+							<td class="mod-tp">needy</td>
+						</tr>
+						<tr>
+							<td class="typ-id">3</td>
+							<td class="id-rng">0&ndash;255</td>
+							<td class="mod-tp"><span class="keyword">reserved</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h3 id="module-identifiers">Module identifiers</h3>
+			<div class="tabular">
+				<table>
+					<thead>
+						<tr>
+							<th class="mod-tp">Type</th>
+							<th class="mod-id">ID</th>
+							<th class="issuee">Issued to</th>
+							<th class="mod-nm">Module name</th>
+							<th class="remark">Remarks</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr id="controller-0">
+							<td class="mod-tp">controller</td>
+							<td class="mod-id">0</td>
+							<td class="issuee">&mdash;</td>
+							<td class="mod-nm">Controller</td>
+							<td class="remark">There should always be only one controller per CAN network. It should use this ID.</td>
+						</tr>
+						<tr id="info-255">
+							<td class="mod-tp">info</td>
+							<td class="mod-id">255</td>
+							<td class="issuee"><span class="keyword">private use</span></td>
+							<td class="mod-nm">Development</td>
+							<td class="remark">Developers may use this ID when they have not yet received an identifier from MOANA.</td>
+						</tr>
+						<tr id="puzzle-255">
+							<td class="mod-tp">puzzle</td>
+							<td class="mod-id">255</td>
+							<td class="issuee"><span class="keyword">private use</span></td>
+							<td class="mod-nm">Development</td>
+							<td class="remark">Developers may use this ID when they have not yet received an identifier from MOANA.</td>
+						</tr>
+						<tr id="needy-255">
+							<td class="mod-tp">needy</td>
+							<td class="mod-id">255</td>
+							<td class="issuee"><span class="keyword">private use</span></td>
+							<td class="mod-nm">Development</td>
+							<td class="remark">Developers may use this ID when they have not yet received an identifier from MOANA.</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<section>
+			<h2 id="requesting-an-identifier-for-your-module">Requesting an identifier for your module</h2>
+			<p>During development, you may use the development identifiers. To participate in games, you should request a unique ID.</p>
+			<p>To request an identifier, contact MOANA in the ~obus channel on the Zeus Mattermost. Use this template:</p>
+			<pre><code><span class="code-header">### MOANA &ndash; Request for OBUS Module ID</span>
+My name, for the "issued to" field: <!---->
+Module type: puzzle needy info (remove what does not apply)</i>
+Remarks: </code></pre>
+		</section>
+
+		<section>
+			<h2 id="about-obus">About OBUS</h2>
+			<p>
+				You see an armed time bomb but don't know how to disarm it. Your friends found a manual to defuse the bomb and you have them on call.
+				This is the premise of the game <a href="https://git.zeus.gent/kelder/obus/">OBUS</a>, a hardware project by
+				<a href="https://zeus.gent/">Zeus WPI</a>.
+			</p>
+			<p>
+				OBUS consists of different modules (a controller, puzzles, needy modules, info modules) that are connected on a CAN bus. To make sure
+				each module has a unique identifier, MOANA was created.
+			</p>
+		</section>
+
+		<footer>
+			©2020 <a href="https://zeus.gent/">Zeus WPI</a>.
+		</footer>
+	</body>
+</html>
