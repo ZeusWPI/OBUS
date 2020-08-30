@@ -1,6 +1,6 @@
 # Ontmijnen van een Bom vereist Uitstekende Samenwerking
 
-OBUS is a real-life version of the multiplayer game "Keep Talking And Nobody Explodes".
+You see an armed time bomb but don't know how to disarm it. Your friends found a manual to defuse the bomb and you have them on call. This is the premise of the game OBUS, a hardware project by [Zeus WPI](https://zeus.ugent.be).
 
 # Get started writing a module
 
