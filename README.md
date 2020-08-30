@@ -1,6 +1,6 @@
 # Ontmijnen van een Bom vereist Uitstekende Samenwerking
 
-You see an armed time bomb but don't know how to disarm it. Your friends found a manual to defuse the bomb and you have them on call. This is the premise of the game OBUS, a hardware project by [Zeus WPI](https://zeus.ugent.be).
+You see an armed time bomb but don't know how to disarm it. Your friends found a manual to defuse the bomb and you have them on call. This is the premise of the game OBUS, a hardware project by [Zeus WPI](https://zeus.ugent.be). Inspired by the amazing software game [Keep Talking and Nobody Explodes](https://www.keeptalkinggame.com/).
 
 # Get started writing a module
 
