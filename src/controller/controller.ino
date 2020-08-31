@@ -23,6 +23,7 @@
 uint8_t state = STATE_INACTIVE;
 struct obus_can::module connected_modules_ids[OBUS_MAX_MODULES];
 uint8_t nr_connected_modules;
+uint8_t nr_connected_puzzles;
 uint8_t strikes;
 
 // Bitvector for checking if game is solved or not
@@ -87,6 +88,7 @@ void start_hello() {
 	state = STATE_HELLO;
 	hello_round_start = millis();
 	nr_connected_modules = 0;
+	nr_connected_puzzles = 0;
 
 	// Zero bit vectors
 	for (uint8_t i = 0; i < N_UNSOLVED_PUZZLES; i++) {
@@ -121,6 +123,7 @@ void receive_hello() {
 				nr_connected_modules++;
 
 				if (msg.from.type == OBUS_TYPE_PUZZLE) {
+					nr_connected_puzzles++;
 					add_module_to_bit_vector(full_module_id(msg.from));
 				}
 			}
@@ -128,7 +131,12 @@ void receive_hello() {
 			obus_can::send_c_ack(this_module);
 			Serial.println("  ACK");
 		}
+
 	} else if (current_time - hello_round_start > OBUS_DISC_DURATION_MS) {
+		if (nr_connected_puzzles == 0) {
+			hello_round_start = current_time;
+			Serial.println("  No puzzle modules found, restarting discovery round");
+		}
 		Serial.println("  End of discovery round");
 		initialize_game();
 	}
