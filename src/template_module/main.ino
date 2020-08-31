@@ -16,7 +16,8 @@ void setup() {
 obus_can::message message;
 
 void loop() {
-	bool is_message_valid = obus_module::loop(&message);
+	bool is_message_valid = obus_module::loop_puzzle(&message);
+	// bool bool is_message_valid = obus_module::loop_needy(&message);
 }
 
 void callback_game_start() {
