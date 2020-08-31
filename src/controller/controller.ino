@@ -1,4 +1,5 @@
 #include <obus_can.h>
+#include <TM1638plus.h>
 
 
 #define STATE_INACTIVE 0
@@ -40,11 +41,21 @@ struct obus_can::module this_module = {
 };
 
 
+// For the display/button chip
+#define  STROBE_TM 4
+#define  CLOCK_TM 6
+#define  DIO_TM 7
+#define  HI_FREQ false // If using a high freq CPU > ~100 MHZ set to true.
+TM1638plus tm(STROBE_TM, CLOCK_TM , DIO_TM, HI_FREQ);
+
+
 void setup() {
 	Serial.begin(9600);
 	obus_can::init();
 
 	state = STATE_INACTIVE;
+
+	tm.displayBegin();
 }
 
 
@@ -85,6 +96,7 @@ void start_hello() {
 	obus_can::send_c_hello(this_module);
 
 	Serial.println(F("  Start of discovery round"));
+	tm.displayText("dISCOvEr");
 }
 
 
@@ -174,24 +186,33 @@ void game_loop() {
 		Serial.println("  Game solved");
 		obus_can::send_c_solved(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		state = STATE_INACTIVE;
+		tm.displayText("dISArmEd");
 		return;
 	}
 	if (time_left == 0) {
 		Serial.println("  Time's up");
 		obus_can::send_c_timeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		state = STATE_INACTIVE;
+		tm.displayText("boom");
 		return;
 	}
 	if (strikes >= OBUS_MAX_STRIKES) {
 		Serial.println("  Strikeout");
 		obus_can::send_c_strikeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		state = STATE_INACTIVE;
+		tm.displayText("boom");
 		return;
 	}
 
 	if (last_update + OBUS_UPDATE_INTERVAL <= current_time) {
 		obus_can::send_c_state(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		last_update = current_time;
+
+		int totalsec = (current_time + 100) / 1000;
+		int minutes = totalsec / 60;
+		char buffer[10];
+		snprintf(buffer, 10, "%06d.%02d", minutes, totalsec % 60);
+		tm.displayText(buffer);
 	}
 }
 
