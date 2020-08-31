@@ -10,7 +10,7 @@ void setup() {
 	// Puzzle: a module that must be solved
 	obus_module::setup(OBUS_TYPE_PUZZLE, /* Retrieve ID from MOANA */);
 	// Needy: a module that periodically requires an action not to get strikes
-	// obusmodule_init(OBUS_TYPE_NEEDY, /* Retrieve ID from MOANA */);
+	// obus_module::setup(OBUS_TYPE_NEEDY, /* Retrieve ID from MOANA */);
 }
 
 
