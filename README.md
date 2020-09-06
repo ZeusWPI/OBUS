@@ -7,7 +7,9 @@ You see an armed time bomb but don't know how to disarm it. Your friends found a
 1. [Install](https://www.arduino.cc/en/Guide/#install-the-arduino-desktop-ide) the Arduino IDE.
 2. Clone this repository with Git in a permanent location on your drive.
 3. Symlink the library: `ln -s /ABSOLUTE/PATH/TO/REPO/lib /PATH/TO/Arduino/libraries/obus`
-4. TODO
+  (on most Linux distro's, this the Arduino folder is in `$HOME/Arduino`)
+4. Follow [these steps](https://github.com/autowp/arduino-mcp2515/#software-usage) to install the CAN library
+5. Execute `./src/new_module.sh` to create a new module
 
 # Background
 ## Game
