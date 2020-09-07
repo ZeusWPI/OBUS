@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 # "Bash strict mode", see http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -euo pipefail
@@ -21,7 +21,7 @@ if [[ $module_name == *%* ]]; then
 fi
 
 # Determine a "clean" module name: lowercase, no spaces
-module="${module_name,,}"
+module="$(tr [A-Z] [a-z] <<< "$module_name")"
 module="${module// /_}"
 module="${module//\'/}"
 
