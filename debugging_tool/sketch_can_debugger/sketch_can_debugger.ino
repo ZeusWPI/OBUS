@@ -1,6 +1,6 @@
 #include <mcp2515.h>
 
-MCP2515 mcp2515(10);
+MCP2515 mcp2515(8);
 
 void setup() {
 	Serial.begin(115200);
