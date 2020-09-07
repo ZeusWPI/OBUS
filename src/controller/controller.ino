@@ -51,7 +51,7 @@ TM1638plus tm(STROBE_TM, CLOCK_TM , DIO_TM, HI_FREQ);
 
 
 void setup() {
-	Serial.begin(9600);
+	Serial.begin(19200);
 	obus_can::init();
 
 	state = STATE_INACTIVE;
@@ -115,10 +115,10 @@ void receive_hello() {
 
 	if (obus_can::receive(&msg)) {
 		if (msg.msg_type == OBUS_MSGTYPE_M_HELLO) {
-			Serial.print("  Registered module ");
-			Serial.println(full_module_id(msg.from));
-
 			if (nr_connected_modules < OBUS_MAX_MODULES) {
+				Serial.print(F("  Registered module "));
+				Serial.println(full_module_id(msg.from));
+
 				connected_modules_ids[nr_connected_modules] = msg.from;
 				nr_connected_modules++;
 
@@ -126,6 +126,12 @@ void receive_hello() {
 					nr_connected_puzzles++;
 					add_module_to_bit_vector(full_module_id(msg.from));
 				}
+
+				char buffer[10];
+				snprintf(buffer, 10, " %02d OF %02d", nr_connected_modules, OBUS_MAX_MODULES);
+				tm.displayText(buffer);
+			} else {
+				Serial.println(F("W Max # modules reached"));
 			}
 
 			obus_can::send_c_ack(this_module);
@@ -135,10 +141,12 @@ void receive_hello() {
 	} else if (current_time - hello_round_start > OBUS_DISC_DURATION_MS) {
 		if (nr_connected_puzzles == 0) {
 			hello_round_start = current_time;
-			Serial.println("  No puzzle modules found, restarting discovery round");
+			obus_can::send_c_hello(this_module);
+			Serial.println(F("  No puzzle modules, resend hello"));
+		} else {
+			Serial.println(F("  End of discovery round"));
+			initialize_game();
 		}
-		Serial.println("  End of discovery round");
-		initialize_game();
 	}
 }
 
