@@ -2,9 +2,12 @@
 
 #include "obus_can.h"
 
+// Chip select for the CAN module
+#define MCP_CS 8
+
 namespace obus_can {
 
-MCP2515 mcp2515(10);
+MCP2515 mcp2515(MCP_CS);
 bool is_init = false;
 
 
@@ -136,6 +139,9 @@ bool receive(struct message *msg) {
 	return true;
 }
 
+bool is_error_condition() {
+	return mcp2515.getInterrupts() & MCP2515::CANINTF_ERRIF;
+}
 
 void send(struct message *msg) {
 	if (!is_init) {

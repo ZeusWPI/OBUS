@@ -77,7 +77,7 @@ void init();
 /**
  * Receive a message
  *
- * @param msg Pointer to memory where the received message will be wriitten
+ * @param msg Pointer to memory where the received message will be written
  * @return true if a message was received, false otherwise
  */
 bool receive(struct message *msg);
@@ -89,6 +89,8 @@ bool receive(struct message *msg);
  * @param msg Pointer to a message to send
  */
 void send(struct message *msg);
+
+bool is_error_condition();
 
 
 /**

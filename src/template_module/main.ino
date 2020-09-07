@@ -4,7 +4,7 @@
 #include <obus_module.h>
 
 void setup() {
-	Serial.begin(9600);
+	Serial.begin(115200);
 
 	// Choose one
 	// Puzzle: a module that must be solved
@@ -13,7 +13,17 @@ void setup() {
 	// obus_module::setup(OBUS_TYPE_NEEDY, OBUS_NEEDY_ID_DEVELOPMENT);
 }
 
+obus_can::message message;
 
 void loop() {
-	obus_module::loop();
+	bool is_message_valid = obus_module::loop_puzzle(&message);
+	// bool bool is_message_valid = obus_module::loop_needy(&message);
+}
+
+void callback_game_start() {
+
+}
+
+void callback_game_stop() {
+
 }
