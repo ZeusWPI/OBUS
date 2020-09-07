@@ -124,6 +124,10 @@ bool receive(struct message *msg) {
 			break;
 
 		case OBUS_PAYLDTYPE_COUNT:
+			if (receive_frame.can_dlc < 2) {
+				Serial.println(F("W Received illegal count msg: payload <2"));
+				return false;
+			}
 			msg->count = receive_frame.data[1];
 			break;
 
@@ -156,7 +160,8 @@ void send(struct message *msg) {
 	uint8_t length = 1;
 	send_frame.data[0] = msg->msg_type;
 
-	switch (payload_type(msg->from.type, msg->msg_type)) {
+	uint8_t pyld_type = payload_type(msg->from.type, msg->msg_type);
+	switch (pyld_type) {
 		case OBUS_PAYLDTYPE_EMPTY:
 			break;
 
@@ -176,7 +181,8 @@ void send(struct message *msg) {
 			break;
 
 		default:
-			Serial.println(F("Unknown payload type"));
+			Serial.print(F("E Unknown payload type "));
+			Serial.println(pyld_type);
 			return;
 	}
 
