@@ -5,9 +5,10 @@
 #define STATE_INACTIVE 0
 #define STATE_HELLO    1
 #define STATE_GAME     2
+#define STATE_GAMEOVER 3
 
 #define OBUS_MAX_STRIKES    3 // Number of strikes allowed until game over
-#define OBUS_GAME_DURATION 10 // Duration of the game in seconds
+#define OBUS_GAME_DURATION 60 // Duration of the game in seconds
 
 #define OBUS_MAX_MODULES      16
 #define OBUS_DISC_DURATION     5 // Duration of discovery round in seconds
@@ -27,13 +28,14 @@ uint8_t nr_connected_puzzles;
 uint8_t strikes;
 
 // Bitvector for checking if game is solved or not
-// 32 bits per uint32 bitvector field
-#define N_UNSOLVED_PUZZLES DIVIDE_CEIL(MAX_AMOUNT_PUZZLES, 32)
-uint32_t unsolved_puzzles[N_UNSOLVED_PUZZLES];
+// 8 bits per uint8 bitvector field
+#define N_UNSOLVED_PUZZLES DIVIDE_CEIL(MAX_AMOUNT_PUZZLES, 8)
+uint8_t unsolved_puzzles[N_UNSOLVED_PUZZLES];
 
 // Timers
 uint32_t hello_round_start;
 uint32_t game_start;
+uint32_t last_draw;
 uint32_t last_update;
 
 struct obus_can::module this_module = {
@@ -70,14 +72,14 @@ bool check_solved() {
 }
 
 
-void add_module_to_bit_vector(uint8_t module_id) {
+void add_puzzle_to_bit_vector(uint8_t module_id) {
 	uint8_t byte_index = module_id >> 3;
 	uint8_t bit_index = module_id & 0x07;
 	unsolved_puzzles[byte_index] |= 0x1 << bit_index;
 }
 
 
-void solve_module_in_bit_vector(uint8_t module_id) {
+void solve_puzzle_in_bit_vector(uint8_t module_id) {
 	uint8_t byte_index = module_id >> 3;
 	uint8_t bit_index = module_id & 0x07;
 	unsolved_puzzles[byte_index] &= ~(0x1 << bit_index);
@@ -104,8 +106,8 @@ void start_hello() {
 
 uint16_t full_module_id(struct obus_can::module mod) {
 	return \
-		((uint16_t) mod.type << 8) | \
-		(uint16_t) mod.id;
+		(((uint16_t) mod.type) << 8) | \
+		((uint16_t) mod.id);
 }
 
 
@@ -124,7 +126,7 @@ void receive_hello() {
 
 				if (msg.from.type == OBUS_TYPE_PUZZLE) {
 					nr_connected_puzzles++;
-					add_module_to_bit_vector(full_module_id(msg.from));
+					add_puzzle_to_bit_vector(msg.from.id);
 				}
 
 				char buffer[10];
@@ -155,11 +157,13 @@ void initialize_game() {
 	strikes = 0;
 	game_start = millis();
 
+	last_draw = 0;
 	last_update = game_start;
 	state = STATE_GAME;
 
 	Serial.println("  Game started");
 
+	draw_display(millis(), OBUS_GAME_DURATION_MS);
 	obus_can::send_c_gamestart(this_module, OBUS_GAME_DURATION_MS, strikes, OBUS_MAX_STRIKES);
 }
 
@@ -176,7 +180,7 @@ void receive_module_update() {
 				break;
 
 			case OBUS_MSGTYPE_M_SOLVED:
-				solve_module_in_bit_vector(full_module_id(msg.from));
+				solve_puzzle_in_bit_vector(full_module_id(msg.from));
 				break;
 
 			default:
@@ -185,6 +189,22 @@ void receive_module_update() {
 				break;
 		}
 
+	}
+}
+
+
+void draw_display(uint32_t current_time, uint32_t time_left) {
+	if (last_draw + 100 <= current_time) {
+		// +25 to avoid rounding down when the loop runs early
+		int totaldecisec = (time_left + 25) / 100;
+		int decisec = totaldecisec % 10;
+		int seconds = (totaldecisec / 10) % 60;
+		int minutes = (totaldecisec / 10 / 60) % 60;
+		int hours = totaldecisec / 10 / 60 / 60;
+		char buffer[10];
+		snprintf(buffer, 10, "%01dh%02d %02d.%01d", hours, minutes, seconds, decisec);
+		tm.displayText(buffer);
+		last_draw = current_time;
 	}
 }
 
@@ -201,34 +221,36 @@ void game_loop() {
 	if (check_solved()) {
 		Serial.println("  Game solved");
 		obus_can::send_c_solved(this_module, time_left, strikes, OBUS_MAX_STRIKES);
-		state = STATE_INACTIVE;
+		state = STATE_GAMEOVER;
 		tm.displayText("dISArmEd");
 		return;
 	}
 	if (time_left == 0) {
 		Serial.println("  Time's up");
 		obus_can::send_c_timeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
-		state = STATE_INACTIVE;
-		tm.displayText("boom");
+		state = STATE_GAMEOVER;
+		tm.displayText(" boo   t");
+		// m
+		tm.display7Seg(4, 0b01010100);
+		tm.display7Seg(5, 0b01000100);
 		return;
 	}
 	if (strikes >= OBUS_MAX_STRIKES) {
 		Serial.println("  Strikeout");
 		obus_can::send_c_strikeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
-		state = STATE_INACTIVE;
-		tm.displayText("boom");
+		state = STATE_GAMEOVER;
+		tm.displayText(" boo   S");
+		// m
+		tm.display7Seg(4, 0b01010100);
+		tm.display7Seg(5, 0b01000100);
 		return;
 	}
+
+	draw_display(current_time, time_left);
 
 	if (last_update + OBUS_UPDATE_INTERVAL <= current_time) {
 		obus_can::send_c_state(this_module, time_left, strikes, OBUS_MAX_STRIKES);
 		last_update = current_time;
-
-		int totalsec = (current_time + 100) / 1000;
-		int minutes = totalsec / 60;
-		char buffer[10];
-		snprintf(buffer, 10, "%06d.%02d", minutes, totalsec % 60);
-		tm.displayText(buffer);
 	}
 }
 
@@ -245,6 +267,9 @@ void loop() {
 
 		case STATE_GAME:
 			game_loop();
+			break;
+
+		case STATE_GAMEOVER:
 			break;
 	}
 }
