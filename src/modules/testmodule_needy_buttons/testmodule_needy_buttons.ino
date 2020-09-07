@@ -10,8 +10,7 @@ ezButton green_button(6);
 
 void setup() {
 	Serial.begin(115200);
-	// WARNING: do not use 255 for your module
-	obus_module::setup(OBUS_TYPE_NEEDY, 255);
+	obus_module::setup(OBUS_TYPE_NEEDY, OBUS_NEEDY_ID_DEVELOPMENT);
 	green_button.setDebounceTime(100);
 }
 
