@@ -41,16 +41,25 @@ if [[ $author == *%* ]]; then
 fi
 
 # Copy the template directory
-cp -r -T template_module "$module_dir"
+cp -r template_module "$module_dir"
 cd "$module_dir"
 
 # Fill in the blanks in the template
-sed -i "
-	s/{YEAR}/$(date +%Y)/
-	s%{AUTHOR}%$author%
-	s%{MODULE_NAME}%$module_name%
-	s%{MODULE}%$module%
-	" $(find -type f)
+if [ "$(uname)" == "Darwin" ]; then
+	 sed -i '' -e "
+                s/{YEAR}/$(date +%Y)/
+                s%{AUTHOR}%$author%
+                s%{MODULE_NAME}%$module_name%
+                s%{MODULE}%$module%
+                " $(find . -type f)
+else
+	sed -i "
+		s/{YEAR}/$(date +%Y)/
+		s%{AUTHOR}%$author%
+		s%{MODULE_NAME}%$module_name%
+		s%{MODULE}%$module%
+		" $(find -type f)
+fi
 # Arduino IDE requires .ino sketches to have the same name as their directory
 mv main.ino "$module.ino"
 
