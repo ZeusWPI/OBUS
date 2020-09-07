@@ -1,11 +1,11 @@
 // yellow
-#define CLOCK_PIN  8
+#define CLOCK_PIN  6
 
 // orange
-#define DATA_PIN 10
+#define DATA_PIN 7
 
 // green
-#define READ_PIN 7
+#define READ_PIN 5
 
 uint8_t shiftInFixed(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder) {
 
