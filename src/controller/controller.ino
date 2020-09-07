@@ -128,7 +128,7 @@ void receive_hello() {
 				}
 
 				char buffer[10];
-				snprintf(buffer, 10, " %02d OF %02d", nr_connected_modules, OBUS_MAX_MODULES);
+				snprintf(buffer, 10, "%02d oF %02d", nr_connected_modules, OBUS_MAX_MODULES);
 				tm.displayText(buffer);
 			} else {
 				Serial.println(F("W Max # modules reached"));
