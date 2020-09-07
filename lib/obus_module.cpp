@@ -4,15 +4,65 @@
 #define RED_LED A4
 #define GREEN_LED A5
 
+#define BLINK_DELAY_SLOW 1000
+#define BLINK_DELAY_NORMAL 500
+#define BLINK_DELAY_FAST 300
+
 #define MCP_INT 2
 
-namespace obus_module {
+#define COLOR_OFF    ((struct color) {false, false})
+#define COLOR_RED    ((struct color) {true,  false})
+#define COLOR_GREEN  ((struct color) {false, true})
+#define COLOR_YELLOW ((struct color) {true,  true})
 
+namespace obus_module {
 
 struct obus_can::module this_module;
 uint8_t strike_count;
 bool active;
 uint32_t time_stop_strike_led;
+
+// Current LED status
+struct color { bool red; bool green; };
+struct color led_color;
+bool blink_on = false;
+int blink_delay = 0;
+unsigned long blink_next_time = 0;
+
+
+// Update blink of status LED, to be called in some loop
+void _updateLed() {
+	if (blink_delay && millis() > blink_next_time) {
+		blink_on = !blink_on;
+		if (blink_on) {
+			digitalWrite(RED_LED, led_color.red ? HIGH : LOW);
+			digitalWrite(GREEN_LED, led_color.green ? HIGH : LOW);
+		} else {
+			digitalWrite(RED_LED, false);
+			digitalWrite(GREEN_LED, false);
+		}
+
+		blink_next_time = millis() + BLINK_DELAY_SLOW;
+	}
+}
+
+void _setLed(struct color color) {
+	led_color = color;
+	blink_delay = 0;
+
+	digitalWrite(RED_LED, color.red ? HIGH : LOW);
+	digitalWrite(GREEN_LED, color.green ? HIGH : LOW);
+}
+
+void _setLedBlink(struct color color, uint16_t delay) {
+	led_color = color;
+	blink_on = false;
+	blink_delay = delay;
+	blink_next_time = millis();
+
+	_updateLed();
+}
+
 
 void setup(uint8_t type, uint8_t id) {
 	this_module.type = type;
@@ -22,16 +72,17 @@ void setup(uint8_t type, uint8_t id) {
 
 	strike_count = 0;
 	active = false;
+
 	pinMode(RED_LED, OUTPUT);
 	pinMode(GREEN_LED, OUTPUT);
-	digitalWrite(RED_LED, LOW);
-	digitalWrite(GREEN_LED, LOW);
+
+	_setLedBlink(COLOR_GREEN, BLINK_DELAY_SLOW);
 }
 
 bool loopPuzzle(obus_can::message* message) {
 	// Check if we need to turn the red "strike" LED back off after
 	//  turning it on because of a strike
-	if (time_stop_strike_led && time_stop_strike_led > millis()) {
+	if (time_stop_strike_led && millis() > time_stop_strike_led) {
 		digitalWrite(RED_LED, LOW);
 		time_stop_strike_led = 0;
 	}
@@ -45,13 +96,16 @@ bool loopPuzzle(obus_can::message* message) {
 			digitalWrite(RED_LED, blink);
 			digitalWrite(GREEN_LED, blink);
 			blink = !blink;
-			delay(500);
+			delay(BLINK_DELAY_NORMAL);
 		}
 	}
+
+	bool interesting_message = false;
 	if (obus_can::receive(message)) {
-		switch(message->msg_type) {
+		switch (message->msg_type) {
 			case OBUS_MSGTYPE_C_GAMESTART:
 				active = true;
+				_setLed(COLOR_OFF);
 				callback_game_start();
 				break;
 			case OBUS_MSGTYPE_C_HELLO:
@@ -66,10 +120,16 @@ bool loopPuzzle(obus_can::message* message) {
 			case OBUS_MSGTYPE_C_ACK:
 				break;
 			case OBUS_MSGTYPE_C_STATE:
-				return true;
+				interesting_message = true;
+				break;
+			default:
+				break;
 		}
-		return false;
 	}
+
+	_updateLed();
+
+	return interesting_message;
 }
 
 bool loopNeedy(obus_can::message* message) {
@@ -82,8 +142,8 @@ void strike() {
 		return;
 	}
 	strike_count++;
-	digitalWrite(RED_LED, HIGH);
-	time_stop_strike_led = millis() + 1000;
+	_setLedBlink(COLOR_RED, BLINK_DELAY_FAST);
+	time_stop_strike_led = millis() + 2000;
 	obus_can::send_m_strike(this_module, strike_count);
 }
 
