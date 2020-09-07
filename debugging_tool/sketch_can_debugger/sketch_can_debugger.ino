@@ -14,13 +14,11 @@ void setup() {
 }
 
 void loop() {
-	char message[9];
-	message[8] = '\0';
 	struct can_frame receive_frame;
 	if (mcp2515.readMessage(&receive_frame) == MCP2515::ERROR_OK) {
 		Serial.print("message ");
 		Serial.print(receive_frame.can_id, DEC);
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < receive_frame.can_dlc; i++) {
 			Serial.print(" ");
 			Serial.print(receive_frame.data[i], DEC);
 		}

@@ -60,7 +60,7 @@ class Message:
             if message_type == 0:
                 return "REGISTER"
             elif message_type == 1:
-                return f"STRIKE {self.payload[5]}"
+                return f"STRIKE {self.payload[1]}"
             elif message_type == 2:
                 return f"SOLVED"
         else:
