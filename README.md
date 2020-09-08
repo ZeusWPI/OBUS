@@ -68,4 +68,6 @@ Some things we had to consider:
 
 ## Development setup
 
+In the Arduino IDE, select the correct board (Arduino Nano) and processor (ATmega328P (Old Bootloader)).
+
 We use [this](https://github.com/autowp/arduino-mcp2515/) library for CAN communications. See [this](https://github.com/autowp/arduino-mcp2515/#software-usage) header for 3 simple steps on how to use it in the arduino IDE

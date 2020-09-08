@@ -42,7 +42,7 @@ void _updateLed() {
 			digitalWrite(GREEN_LED, false);
 		}
 
-		blink_next_time = millis() + BLINK_DELAY_SLOW;
+		blink_next_time = millis() + blink_delay;
 	}
 }
 
@@ -71,7 +71,7 @@ void setup(uint8_t type, uint8_t id) {
 	obus_can::init();
 
 	strike_count = 0;
-	active = false;
+	active = true;
 
 	pinMode(RED_LED, OUTPUT);
 	pinMode(GREEN_LED, OUTPUT);
@@ -142,7 +142,7 @@ void strike() {
 		return;
 	}
 	strike_count++;
-	_setLedBlink(COLOR_RED, BLINK_DELAY_FAST);
+	digitalWrite(RED_LED, HIGH);
 	time_stop_strike_led = millis() + 2000;
 	obus_can::send_m_strike(this_module, strike_count);
 }
