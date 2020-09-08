@@ -4,7 +4,6 @@ from time import sleep
 from dataclasses import dataclass
 from datetime import datetime
 import serial
-import random
 
 app = Flask(__name__)
 shared_message_log = []
