@@ -35,19 +35,7 @@ read author
 cp -r -- template_module "$module_dir"
 cd -- "$module_dir"
 
-# Fill in the blanks in the template
-# `sed -i` is not portable so we create something like it ourselves
-sed_inplace="`mktemp`"
-cleanup_sed() { rm -f -- "$sed_inplace"; }
-trap cleanup_sed EXIT
-print '
-	filename="$1"
-	shift 1
-	tmpfile="`mktemp`"
-	sed "$@" -- "$filename" > "$tmpfile"
-	mv -- "$tmpfile" "$filename"
-' > "$sed_inplace"
-chmod 0500 -- "$sed_inplace" # Make executable
+# Disallow % in fields that will be used in %-delimited ed substitution
 assert_no_percent() {
 	case "$1" in
 		*"%"*) println "$2 must not contain %" >&2; exit 1 ;;
@@ -56,11 +44,25 @@ assert_no_percent() {
 assert_no_percent "$author" "Author name"
 assert_no_percent "$module_name" "Module name"
 assert_no_percent "$module" "Module path name"
-find . -type f -exec "$sed_inplace" '{}' -e "
-	s/{YEAR}/$(date +%Y)/
-	s%{AUTHOR}%$author%
-	s%{MODULE_NAME}%$module_name%
-	s%{MODULE}%$module%" \;
+
+# Fill in the blanks in the template
+# `sed -i` is not portable so we create something like it ourselves
+reced() {
+	for file in "$1"/*; do
+		if [ -f "$file" ]; then
+			ed "$file" <<HERE
+%s/{YEAR}/$(date +%Y)/
+%s%{AUTHOR}%$author%
+%s%{MODULE_NAME}%$module_name%
+%s%{MODULE}%$module%
+wq
+HERE
+		elif [ -d "$file" ]; then
+			reced "$file"
+		fi
+	done
+}
+reced .
 
 # Arduino IDE requires .ino sketches to have the same name as their directory
 mv -- main.ino "$module.ino"
