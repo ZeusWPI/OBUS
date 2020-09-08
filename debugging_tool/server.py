@@ -81,25 +81,19 @@ class Message:
 
 
 def serial_reader(messagelog):
-    # with serial.Serial('/dev/ttyACM0', 115200, timeout=10) as ser:
-    #     while True:
-    #         line = ser.readline()
-    #         print(line.decode('ascii'))
-    #         if line.startswith(b"message"):
-    #             line = line.decode('ascii')
-    #             line = line.strip()
-    #             parts = line.split(' ')
-    #             sender = int(parts[1])
-    #             message = bytes(int(p) for p in parts[2:])
-    #             received = Message(message, sender, datetime.now(), len(messagelog))
-    #             messagelog.append(received.serialize())
-    #             print(len(messagelog))
-    for i in range(500):
-        sender = random.randrange(0, 0x800)
-        message = bytes(random.randrange(256) for i in range(random.randint(1, 8)))
-        received = Message(message, sender, datetime.now(), len(messagelog))
-        messagelog.append(received.serialize())
-        # sleep(5)
+    with serial.Serial('/dev/ttyACM0', 115200, timeout=10) as ser:
+        while True:
+            line = ser.readline()
+            print(line.decode('ascii'))
+            if line.startswith(b"message"):
+                line = line.decode('ascii')
+                line = line.strip()
+                parts = line.split(' ')
+                sender = int(parts[1])
+                message = bytes(int(p) for p in parts[2:])
+                received = Message(message, sender, datetime.now(), len(messagelog))
+                messagelog.append(received.serialize())
+                print(len(messagelog))
 
 @app.route('/')
 def index():
