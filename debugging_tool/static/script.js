@@ -1,15 +1,17 @@
-
 let maxseen = 0;
 let paused = true;
 let updaterID = null;
 
+let color_classes = {
+	"RESERVED TYPE": "error",
+	"controller": "controller",
+	"puzzle": "puzzle",
+	"needy": "needy",
+}
+
 function updateShow() {
 	for (let item of document.getElementsByClassName("raw")) {
-		if (document.getElementById('show_raw').checked) {
-			item.classList.remove("hide");
-		} else {
-			item.classList.add("hide");
-		}
+		item.classList.toggle("hide", !document.getElementById('show_raw').checked);
 	}
 }
 
@@ -30,23 +32,28 @@ function updateMessages() {
 						let current = data[i];
 
 						let human_readable_type = row.insertCell(0)
-						human_readable_type.innerHTML = current['human_readable_type'];
-						human_readable_type.className = 'human_readable_type';
+						let colorblock = document.createElement("div");
+						colorblock.classList.add("colorblock");
+						human_readable_type.append(colorblock);
+
+						human_readable_type.innerHTML += current['human_readable_type'];
+
+						human_readable_type.classList.add(color_classes[current['human_readable_type']]);
+						human_readable_type.classList.add('human_readable_type');
 
 						let sender_id = row.insertCell(-1)
 						sender_id.innerHTML = current['sender_id'];
-						sender_id.className = 'sender_id';
-
+						sender_id.classList.add('sender_id');
 						let parsed = row.insertCell(-1)
 						if (current['parsed'].startsWith("PARSE ERROR")) {
-							parsed.setAttribute("error", true);
+							parsed.classList.add("error");
 						}
 						parsed.innerHTML = current['parsed'];
-						parsed.className += 'parsed';
+						parsed.classList.add('parsed');
 
 						let time = row.insertCell(-1)
 						time.innerHTML = current['time'];
-						time.className = 'time';
+						time.classList.add('time');
 
 						let raw_message = row.insertCell(-1);
 						raw_message.innerHTML = current['raw_message'];

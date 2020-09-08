@@ -33,7 +33,7 @@
 		}
 
 		th {
-			background-color: gold;
+			background-color: #ff7f00;;
 			border-bottom: 2px solid black;
 			border-top: 2px solid black;
 			height: 20px;
@@ -44,12 +44,34 @@
 			background-color: #aaa;
 		}
 
-		td[error] {
+		td.error, td.error > div {
 			background-color: rgb(255, 71, 71);
+		}
+
+		td.controller > div {
+			background-color: lightseagreen;
+		}
+
+		td.puzzle > div {
+			background-color: gold;
+		}
+
+		td.needy > div {
+			background-color: rgb(128, 10, 128);
 		}
 
 		.time, .raw_id, .sender_id {
 			text-align: right;
+		}
+
+		.colorblock {
+			height: 20px;
+			width: 20px;
+			margin: 3.4px;
+			margin-right: 8.4px;
+			display: inline-block;
+			background-color:lime;
+			vertical-align: middle;
 		}
 	</style>
 </head>
