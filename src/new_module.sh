@@ -1,62 +1,68 @@
-#!/bin/bash
+#!/bin/sh
 
-# "Bash strict mode", see http://redsymbol.net/articles/unofficial-bash-strict-mode/
-set -euo pipefail
-IFS=$'\n\t'
+print() { printf '%s' "$1"; }
+println() { printf '%s\n' "$1"; }
 
 # Go to the current working directory so things work if people are in a different one and e.g. use ../src/new_module.sh
-cd "$(dirname "$0")"
+cd -- "`dirname "$0"`"
 
 # Make sure the template dir exists so we don't let people enter details unnecessarily
 if [ ! -d ./template_module ]; then
-	echo "template_module doesn't exist" >&2
+	println "template_module doesn't exist" >&2
 	exit 1
 fi
 
 # Ask for module name
-read -p "Name of module (e.g. Oil gauge): " module_name
-if [[ $module_name == *%* ]]; then
-	echo "Module name must not contain %" >&2
-	exit 1
-fi
+print "Name of module (e.g. Oil gauge): "
+read module_name
 
-# Determine a "clean" module name: lowercase, no spaces
-module="$(tr [A-Z] [a-z] <<< "$module_name")"
-module="${module// /_}"
-module="${module//\'/}"
+# Determine a "clean" module name for paths: lowercase, no spaces
+module="`print "$module_name" | tr [A-Z] [a-z] | sed "s/ /_/g;s/'//g"`"
 
 # Make sure `modules` directory exists and target directory doesn't
 mkdir -p modules
 module_dir="modules/$module"
-if [[ -e "$module_dir" ]]; then
-	echo "$module_dir already exists" >&2
+if [ -e "$module_dir" ]; then
+	println "$module_dir already exists" >&2
 	exit 1
 fi
 
 # Ask for author name
-read -p "How would you like to be credited? Your name: " author
-if [[ $author == *%* ]]; then
-	echo "Author name must not contain %" >&2
-	exit 1
-fi
+print "How would you like to be credited? Your name: "
+read author
 
 # Copy the template directory
-cp -r template_module "$module_dir"
-cd "$module_dir"
+cp -r -- template_module "$module_dir"
+cd -- "$module_dir"
 
 # Fill in the blanks in the template
-sed_script="
+# `sed -i` is not portable so we create something like it ourselves
+sed_inplace="`mktemp`"
+cleanup_sed() { rm -f -- "$sed_inplace"; }
+trap cleanup_sed EXIT
+print '
+	filename="$1"
+	shift 1
+	tmpfile="`mktemp`"
+	sed "$@" -- "$filename" > "$tmpfile"
+	mv -- "$tmpfile" "$filename"
+' > "$sed_inplace"
+chmod 0500 -- "$sed_inplace" # Make executable
+assert_no_percent() {
+	case "$1" in
+		*"%"*) println "$2 must not contain %" >&2; exit 1 ;;
+	esac
+}
+assert_no_percent "$author" "Author name"
+assert_no_percent "$module_name" "Module name"
+assert_no_percent "$module" "Module path name"
+find . -type f -exec "$sed_inplace" '{}' -e "
 	s/{YEAR}/$(date +%Y)/
 	s%{AUTHOR}%$author%
 	s%{MODULE_NAME}%$module_name%
-	s%{MODULE}%$module%"
-case "$(sed --help 2>&1)" in
-	# GNU sed wants `-i` and BSD sed wants `-i ''`
-	*GNU*) sed -i    -e "$sed_script" $(find . -type f); ;;
-	*)     sed -i '' -e "$sed_script" $(find . -type f); ;;
-esac
+	s%{MODULE}%$module%" \;
 
 # Arduino IDE requires .ino sketches to have the same name as their directory
-mv main.ino "$module.ino"
+mv -- main.ino "$module.ino"
 
-echo "The basic structure for your module is now ready in $module_dir"
+println "The basic structure for your module is now ready in $module_dir"
