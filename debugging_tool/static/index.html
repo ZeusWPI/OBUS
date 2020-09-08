@@ -5,70 +5,71 @@
 	<meta charset="utf-8">
 	<title>CAN debugger</title>
 	<style>
-
-		@keyframes fadein {
-			from { opacity: 0; }
-			to   { opacity: 1; }
+		body {
+			font-family: sans-serif;
 		}
-		.message {
-			display: flex;
-			animation: fadein 1s;
-		}
-		.message > * {
-			margin-top: 0;
-			margin-bottom: 0;
-			padding: 0 1.5ch 0 1.5ch;
-		}
-		.hide_details .message .pretty_raw_sender_id {
+		
+		.hide {
 			display: none;
-		}
-
-		.hide_details .message .raw_message {
-			display: none;
-		}
-
-		.human_readable_type {
-			order: -5;
-		}
-		.time {
-			order: 5;
-		}
-		.sender_id {
-			order: 1;
 		}
 
 		.parsed {
-			order: 2;
-			flex: 1;
 			background: lightgreen;
 		}
 
-		.pretty_raw_sender_id, .raw_message {
+		td.raw {
 			font-family: monospace, monospace;
 		}
 
-		.pretty_raw_sender_id {
-			order: 9998;
+		table {
+			border-collapse: collapse;
+			width: 100%;
 		}
 
-		.raw_message {
-			order: 9999;
+		th, td {
+			border-left: 1px solid black;
+			border-right: 1px solid black;
+			padding: 5px;
 		}
 
+		th {
+			background-color: gold;
+			border-bottom: 2px solid black;
+			border-top: 2px solid black;
+			height: 20px;
+			text-align: left;
+		}
 
+		tr:hover {
+			background-color: #aaa;
+		}
+
+		td[error] {
+			background-color: rgb(255, 71, 71);
+		}
+
+		.time, .raw_id, .sender_id {
+			text-align: right;
+		}
 	</style>
 </head>
 
 <body>
-	<div>
-		<input type="checkbox" id="show_raw" name="show_raw" checked onchange="updateShow()">
+	<button onclick="toggle_logging()" id="toggle_button">Start</button>
+	
+		<input type="checkbox" id="show_raw" name="show_raw" checked autocomplete="off" onchange="updateShow()">
 		<label for="show_raw">Show raw address and payload</label>
-		<input type="checkbox" id="pause" name="pause">
-		<label for="pause">Pause</label>
-	</div>
-	<div id="messages">
-
-	</div>
+		
+	<table id="message_table">
+		<tr>
+			<th>Human-readable type</th>
+			<th>Sender ID</th>
+			<th>Parsed payload</th>
+			<th>Time</th>
+			<th class="raw">Raw Message</th>
+			<th class="raw">Raw ID</th>
+		</tr>
+	</table>
 	<script src="static/script.js"></script>
 </body>
 </html>

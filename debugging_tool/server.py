@@ -4,6 +4,7 @@ from time import sleep
 from dataclasses import dataclass
 from datetime import datetime
 import serial
+import random
 
 app = Flask(__name__)
 shared_message_log = []
@@ -41,30 +42,31 @@ class Message:
     def parse_message(self):
         sender_type = self.sender_type()
         message_type = self.payload[0]
-        if sender_type == 0b00:  # controller
-            if message_type == 0:
-                return "ACK"
-            elif message_type == 1:
-                return "HELLO"
-            elif message_type == 2:
-                return "START " + self._parse_state_update()
-            elif message_type == 3:
-                return "STATE " + self._parse_state_update()
-            elif message_type == 4:
-                return "SOLVED " + self._parse_state_update()
-            elif message_type == 5:
-                return "TIMEOUT " + self._parse_state_update()
-            elif message_type == 6:
-                return "STRIKEOUT " + self._parse_state_update()
-        elif sender_type == 0b01:  # puzzle
-            if message_type == 0:
-                return "REGISTER"
-            elif message_type == 1:
-                return f"STRIKE {self.payload[1]}"
-            elif message_type == 2:
-                return f"SOLVED"
-        else:
-            return f"PARSE ERROR {self.received_from:011b} {self.payload.hex(' ')}"
+        try:
+            if sender_type == 0b00:  # controller
+                if message_type == 0:
+                    return "ACK"
+                elif message_type == 1:
+                    return "HELLO"
+                elif message_type == 2:
+                    return "START " + self._parse_state_update()
+                elif message_type == 3:
+                    return "STATE " + self._parse_state_update()
+                elif message_type == 4:
+                    return "SOLVED " + self._parse_state_update()
+                elif message_type == 5:
+                    return "TIMEOUT " + self._parse_state_update()
+                elif message_type == 6:
+                    return "STRIKEOUT " + self._parse_state_update()
+            elif sender_type == 0b01:  # puzzle
+                if message_type == 0:
+                    return "REGISTER"
+                elif message_type == 1:
+                    return f"STRIKE {self.payload[1]}"
+                elif message_type == 2:
+                    return f"SOLVED"
+        finally:
+            return "PARSE ERROR"
 
     def serialize(self):
         return {
@@ -79,19 +81,25 @@ class Message:
 
 
 def serial_reader(messagelog):
-    with serial.Serial('/dev/ttyACM0', 115200, timeout=10) as ser:
-        while True:
-            line = ser.readline()
-            print(line.decode('ascii'))
-            if line.startswith(b"message"):
-                line = line.decode('ascii')
-                line = line.strip()
-                parts = line.split(' ')
-                sender = int(parts[1])
-                message = bytes(int(p) for p in parts[2:])
-                received = Message(message, sender, datetime.now(), len(messagelog))
-                messagelog.append(received.serialize())
-                print(len(messagelog))
+    # with serial.Serial('/dev/ttyACM0', 115200, timeout=10) as ser:
+    #     while True:
+    #         line = ser.readline()
+    #         print(line.decode('ascii'))
+    #         if line.startswith(b"message"):
+    #             line = line.decode('ascii')
+    #             line = line.strip()
+    #             parts = line.split(' ')
+    #             sender = int(parts[1])
+    #             message = bytes(int(p) for p in parts[2:])
+    #             received = Message(message, sender, datetime.now(), len(messagelog))
+    #             messagelog.append(received.serialize())
+    #             print(len(messagelog))
+    for i in range(500):
+        sender = random.randrange(0, 0x800)
+        message = bytes(random.randrange(256) for i in range(random.randint(1, 8)))
+        received = Message(message, sender, datetime.now(), len(messagelog))
+        messagelog.append(received.serialize())
+        # sleep(5)
 
 @app.route('/')
 def index():
