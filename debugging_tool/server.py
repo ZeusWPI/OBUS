@@ -43,7 +43,7 @@ class Message:
         return (self.received_from >> 0) & 0b1111_1111
 
     def human_readable_type(self):
-        return ['controller', 'puzzle', 'needy', 'RESERVED TYPE'][self.sender_type()]
+        return [('controller' if self.sender_id() == 0 else 'info'), 'puzzle', 'needy', 'RESERVED TYPE'][self.sender_type()]
 
     def _parse_state_update(self):
         timeleft = self.payload[1] << 0x18 | self.payload[2] << 0x10 | self.payload[3] << 0x08 | self.payload[4]
@@ -56,7 +56,7 @@ class Message:
         sender_type = self.sender_type()
         message_type = self.payload[0]
         try:
-            if sender_type == 0b00:  # controller
+            if sender_type == 0b00 and self.sender_id() == 0:  # controller
                 if message_type == 0:
                     return "ACK"
                 elif message_type == 1:
@@ -71,6 +71,8 @@ class Message:
                     return "TIMEOUT " + self._parse_state_update()
                 elif message_type == 6:
                     return "STRIKEOUT " + self._parse_state_update()
+                elif message_type == 7:
+                    return "INFO START"
             elif sender_type == 0b01:  # puzzle
                 if message_type == 0:
                     return "REGISTER"
@@ -78,9 +80,18 @@ class Message:
                     return f"STRIKE {self.payload[1]}"
                 elif message_type == 2:
                     return f"SOLVED"
+            elif sender_type == 0b10: # needy
+                if message_type == 0:
+                    return "REGISTER"
+                elif message_type == 1:
+                    return f"STRIKE {self.payload[1]}"
+            elif sender_type == 0b00 and self.sender_id() != 0: # info
+                if message_type == 0:
+                    return "FREE INFO MESSAGE"
+
         except:
             print("Unexpected error: ", sys.exc_info()[0])
-            return "PARSE ERROR"
+        return "PARSE ERROR"
 
     def serialize(self):
         return {
