@@ -225,7 +225,7 @@ inline void send_m_strike(struct module from, uint8_t count) {
  */
 inline void send_m_solved(struct module from) {
 	assert(from.type != OBUS_TYPE_CONTROLLER);
-	struct message msg = _msg(from, false, OBUS_MSGTYPE_M_STRIKE);
+	struct message msg = _msg(from, false, OBUS_MSGTYPE_M_SOLVED);
 	send(&msg);
 }
 
