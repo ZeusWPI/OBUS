@@ -77,21 +77,25 @@ void _setLedBlink(struct color color, uint16_t delay) {
 }
 
 
+void _resetState() {
+	strike_count = 0;
+	active = false;
+
+	if (this_module.type == OBUS_TYPE_PUZZLE || this_module.type == OBUS_TYPE_NEEDY) {
+		pinMode(RED_LED, OUTPUT);
+		pinMode(GREEN_LED, OUTPUT);
+
+		_setLedBlink(COLOR_GREEN, BLINK_DELAY_SLOW);
+	}
+}
+
 void setup(uint8_t type, uint8_t id) {
 	this_module.type = type;
 	this_module.id = id;
 
 	obus_can::init();
 
-	strike_count = 0;
-	active = true;
-
-	if (type == OBUS_TYPE_PUZZLE || type == OBUS_TYPE_NEEDY) {
-		pinMode(RED_LED, OUTPUT);
-		pinMode(GREEN_LED, OUTPUT);
-
-		_setLedBlink(COLOR_GREEN, BLINK_DELAY_SLOW);
-	}
+	_resetState();
 }
 
 bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void (*callback_game_stop)()) {
@@ -119,12 +123,14 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void 
 					callback_game_start();
 					break;
 				case OBUS_MSGTYPE_C_HELLO:
+					_resetState();
 					obus_can::send_m_hello(this_module);
 					break;
 				case OBUS_MSGTYPE_C_SOLVED:
 				case OBUS_MSGTYPE_C_TIMEOUT:
 				case OBUS_MSGTYPE_C_STRIKEOUT:
 					active = false;
+					_setLed(COLOR_OFF);
 					callback_game_stop();
 					break;
 				case OBUS_MSGTYPE_C_ACK:
@@ -148,15 +154,17 @@ bool loopNeedy(obus_can::message* message, void (*callback_game_start)(), void (
 	return loopPuzzle(message, callback_game_start, callback_game_stop);
 }
 
-bool loopInfo(obus_can::message* message, int (*info_generator)(char*)) {
+bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 	bool interesting_message = false;
 	if (obus_can::receive(message)) {
 		if (message->from.type == OBUS_TYPE_CONTROLLER && message->from.id == 0) {
 			switch (message->msg_type) {
 				case OBUS_MSGTYPE_C_INFOSTART:
-					char info_message[8];
-					int len = info_generator(info_message);
-					obus_can::send_i_infomessage(this_module, info_message);
+					{
+						uint8_t info_message[OBUS_PAYLD_INFO_MAXLEN];
+						int len = info_generator(info_message);
+						obus_can::send_i_infomessage(this_module, info_message, len);
+					}
 					break;
 				case OBUS_MSGTYPE_C_STATE:
 					interesting_message = true;

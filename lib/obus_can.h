@@ -36,6 +36,8 @@
 #define OBUS_PAYLDTYPE_COUNT      2
 #define OBUS_PAYLDTYPE_INFO       3
 
+#define OBUS_PAYLD_INFO_MAXLEN (OBUS_MSG_LENGTH - 1)
+
 namespace obus_can {
 
 struct module {
@@ -49,6 +51,10 @@ struct payld_gamestatus {
 	uint8_t strikes;
 	uint8_t max_strikes;
 };
+struct payld_infomessage {
+	uint8_t len;
+	uint8_t data[OBUS_PAYLD_INFO_MAXLEN];
+};
 
 
 struct message {
@@ -59,7 +65,7 @@ struct message {
 		struct payld_empty empty;
 		struct payld_gamestatus gamestatus;
 		uint8_t count;
-		uint8_t infomessage[OBUS_MSG_LENGTH - 1];
+		struct payld_infomessage infomessage;
 	};
 };
 
@@ -234,10 +240,21 @@ inline void send_m_solved(struct module from) {
 	send(&msg);
 }
 
-inline void send_i_infomessage(struct module from, uint8_t infomessage[OBUS_MSG_LENGTH - 1]) {
+/**
+ * Send an info module "information" OBUS message
+ */
+inline void send_i_infomessage(struct module from, uint8_t *data, uint8_t data_len) {
 	assert(from.type == OBUS_TYPE_INFO && from.id != OBUS_CONTROLLER_ID);
+
+	if (data_len > OBUS_PAYLD_INFO_MAXLEN) {
+		Serial.println(F("E Info payload too long"));
+		return;
+	}
+
 	struct message msg = _msg(from, false, OBUS_MSGTYPE_I_INFOMESSAGE);
-	memcpy(infomessage, msg.infomessage, OBUS_MSG_LENGTH - 1);
+	msg.infomessage.len = data_len;
+	memset(msg.infomessage.data, 0, OBUS_PAYLD_INFO_MAXLEN);
+	memcpy(msg.infomessage.data, data, data_len);
 	send(&msg);
 }
 

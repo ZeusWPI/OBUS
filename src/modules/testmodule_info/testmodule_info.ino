@@ -5,7 +5,7 @@
 #include <LiquidCrystal.h>
 
 
-char serial_number[7];
+uint8_t serial_number[7];
 LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
 
 
@@ -27,7 +27,7 @@ void loop() {
 	}
 }
 
-int info_generator(char* buffer) {
+int info_generator(uint8_t* buffer) {
 	serial_number[0] = random('A', 'Z');
 	serial_number[1] = random('A', 'Z');
 	serial_number[2] = random('A', 'Z');
