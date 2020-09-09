@@ -41,30 +41,32 @@ class Message:
     def parse_message(self):
         sender_type = self.sender_type()
         message_type = self.payload[0]
-        if sender_type == 0b00:  # controller
-            if message_type == 0:
-                return "ACK"
-            elif message_type == 1:
-                return "HELLO"
-            elif message_type == 2:
-                return "START " + self._parse_state_update()
-            elif message_type == 3:
-                return "STATE " + self._parse_state_update()
-            elif message_type == 4:
-                return "SOLVED " + self._parse_state_update()
-            elif message_type == 5:
-                return "TIMEOUT " + self._parse_state_update()
-            elif message_type == 6:
-                return "STRIKEOUT " + self._parse_state_update()
-        elif sender_type == 0b01:  # puzzle
-            if message_type == 0:
-                return "REGISTER"
-            elif message_type == 1:
-                return f"STRIKE {self.payload[1]}"
-            elif message_type == 2:
-                return f"SOLVED"
-        else:
-            return f"PARSE ERROR {self.received_from:011b} {self.payload.hex(' ')}"
+        try:
+            if sender_type == 0b00:  # controller
+                if message_type == 0:
+                    return "ACK"
+                elif message_type == 1:
+                    return "HELLO"
+                elif message_type == 2:
+                    return "START " + self._parse_state_update()
+                elif message_type == 3:
+                    return "STATE " + self._parse_state_update()
+                elif message_type == 4:
+                    return "SOLVED " + self._parse_state_update()
+                elif message_type == 5:
+                    return "TIMEOUT " + self._parse_state_update()
+                elif message_type == 6:
+                    return "STRIKEOUT " + self._parse_state_update()
+            elif sender_type == 0b01:  # puzzle
+                if message_type == 0:
+                    return "REGISTER"
+                elif message_type == 1:
+                    return f"STRIKE {self.payload[1]}"
+                elif message_type == 2:
+                    return f"SOLVED"
+        except:
+            print("Unexpected error: ", sys.exc_info()[0])
+            return "PARSE ERROR"
 
     def serialize(self):
         return {
@@ -105,4 +107,4 @@ def api():
 if __name__ == '__main__':
     thread = Thread(target=serial_reader, args=(shared_message_log, ))
     thread.start()
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=False, host='0.0.0.0')

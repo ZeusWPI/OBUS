@@ -9,8 +9,7 @@ ezButton green_button(6);
 
 void setup() {
 	Serial.begin(115200);
-	// WARNING: do not use 255 for your module
-	obus_module::setup(OBUS_TYPE_PUZZLE, 255);
+	obus_module::setup(OBUS_TYPE_PUZZLE, OBUS_PUZZLE_ID_DEVELOPMENT);
 	red_button.setDebounceTime(100);
 	green_button.setDebounceTime(100);
 }
