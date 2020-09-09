@@ -1,6 +1,13 @@
-let maxseen = 0;
+// Keep this the same as on the server!
+let max_messages = 200;
+
 let paused = true;
 let updaterID = null;
+
+let serverID = "";
+let newest_message_index = -1;
+let messageTable = document.getElementById('message_table');
+let header = document.getElementById("table_header").cloneNode(true);
 
 let color_classes = {
 	"RESERVED TYPE": "error",
@@ -14,7 +21,7 @@ function updateShow() {
 }
 
 function updateMessages() {
-	fetch('/api.json')
+	fetch(`/${newest_message_index}/api.json`)
 	.then(
 		function(response) {
 			if (response.status !== 200) {
@@ -22,13 +29,19 @@ function updateMessages() {
 				return;
 			}
 			response.json().then(function(data) {
-				if (data.length > maxseen) {
-					let messageTable = document.getElementById('message_table');
+				if (serverID !== data.server_id) {
+					messageTable.textContent = '';
+					messageTable.append(header);
+					serverID = data.server_id;
+					newest_message_index = -1;
+				}
 
-					for (let i = maxseen; i < data.length; i++) {
+				let new_messages = data.newest_msg - newest_message_index;
+				if (new_messages > 0) {
+					for (let message of data.messages) {
 						let row = messageTable.insertRow(1);
 						row.classList.add("fade");
-						let current = data[i];
+						let current = message;
 
 						let human_readable_type = row.insertCell(0)
 						let colorblock = document.createElement("div");
@@ -64,8 +77,15 @@ function updateMessages() {
 						raw_id.classList.add("raw");
 						raw_id.classList.add("raw_id");
 					}
-					maxseen = data.length;
 				}
+
+				// delete children if there are too many :O
+				// -1 so we don't delete the header :)
+				for (let i = 0; i < messageTable.children.length - max_messages - 1; i++) {
+					messageTable.removeChild(messageTable.lastChild);
+				}
+				newest_message_index = data.newest_msg;
+
 			});
 		}
 	)

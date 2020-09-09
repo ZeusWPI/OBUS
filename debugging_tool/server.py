@@ -4,10 +4,18 @@ from time import sleep
 from dataclasses import dataclass
 from datetime import datetime
 import serial
+import uuid
+from collections import deque
 
 app = Flask(__name__)
-shared_message_log = []
 
+last_message_index = -1
+# Keep this the same as max_messages on the client!
+max_message_cache = 200
+shared_message_log = deque(maxlen=max_message_cache)
+
+server_id = uuid.uuid4()
+print("Server ID: ", server_id)
 
 @dataclass
 class Message:
@@ -80,7 +88,8 @@ class Message:
         }
 
 
-def serial_reader(messagelog):
+def serial_reader(messagelog, message_index):
+    global last_message_index
     with serial.Serial('/dev/ttyACM0', 115200, timeout=10) as ser:
         while True:
             line = ser.readline()
@@ -93,18 +102,26 @@ def serial_reader(messagelog):
                 message = bytes(int(p) for p in parts[2:])
                 received = Message(message, sender, datetime.now(), len(messagelog))
                 messagelog.append(received.serialize())
-                print(len(messagelog))
+                last_message_index += 1
+                print(last_message_index)
 
 @app.route('/')
 def index():
     return send_file('static/index.html')
 
-@app.route('/api.json')
-def api():
-    return jsonify(shared_message_log)
+@app.route('/<last_received>/api.json')
+def api(last_received):
+    last_received = int(last_received)
+    if last_received < last_message_index - max_message_cache:
+        return jsonify({"server_id": server_id, "newest_msg": last_message_index, "messages": list(shared_message_log)})
+    else:
+        return jsonify({"server_id": server_id, "newest_msg": last_message_index, "messages": list(shared_message_log)[max_message_cache - (last_message_index - last_received):]})
 
+@app.route('/max_messages.json')
+def get_max_messages():
+    return jsonify([max_message_cache])
 
 if __name__ == '__main__':
-    thread = Thread(target=serial_reader, args=(shared_message_log, ))
+    thread = Thread(target=serial_reader, args=(shared_message_log, last_message_index,))
     thread.start()
     app.run(debug=False, host='0.0.0.0')
