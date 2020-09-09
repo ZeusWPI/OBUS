@@ -6,7 +6,7 @@
 
 
 // yellow
-#define DATE_CLOCK_PIN  6
+#define DATE_CLOCK_PIN 6
 // orange
 #define DATE_DATA_PIN 7
 // green
