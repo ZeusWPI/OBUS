@@ -16,8 +16,12 @@ let color_classes = {
 	"needy": "needy",
 }
 
-function updateShow() {
+function updateShowRaw() {
 	document.getElementById("message_table").classList.toggle("hide_raw", !document.getElementById('show_raw').checked);
+}
+
+function updateShowStates() {
+	document.getElementById("message_table").classList.toggle("hide_consecutive_states", !document.getElementById('show_consecutive_states').checked);
 }
 
 function updateMessages() {
@@ -59,6 +63,8 @@ function updateMessages() {
 						let parsed = row.insertCell(-1)
 						if (current['parsed'].startsWith("PARSE ERROR")) {
 							parsed.classList.add("error");
+						} else if (current['parsed'].startsWith("STATE")) {
+							parsed.classList.add("staterow");
 						}
 						parsed.innerHTML = current['parsed'];
 						parsed.classList.add('parsed');
