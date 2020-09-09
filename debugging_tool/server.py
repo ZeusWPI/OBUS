@@ -4,9 +4,23 @@ from time import sleep
 from dataclasses import dataclass
 from datetime import datetime
 import serial
+import uuid
+from collections import deque
 
 app = Flask(__name__)
-shared_message_log = []
+
+server_id = uuid.uuid4()
+print("Server ID: ", server_id)
+
+@dataclass
+class SharedData:
+    messages: deque
+    last_message_index: int
+
+# Keep this the same as max_messages on the client!
+max_message_cache = 200
+shared_data = SharedData(deque(maxlen=max_message_cache), -1)
+
 
 
 @dataclass
@@ -80,7 +94,7 @@ class Message:
         }
 
 
-def serial_reader(messagelog):
+def serial_reader(shared_data):
     with serial.Serial('/dev/ttyACM0', 115200, timeout=10) as ser:
         while True:
             line = ser.readline()
@@ -91,20 +105,24 @@ def serial_reader(messagelog):
                 parts = line.split(' ')
                 sender = int(parts[1])
                 message = bytes(int(p) for p in parts[2:])
-                received = Message(message, sender, datetime.now(), len(messagelog))
-                messagelog.append(received.serialize())
-                print(len(messagelog))
+                received = Message(message, sender, datetime.now(), len(shared_data.messages))
+                shared_data.messages.append(received.serialize())
+                shared_data.last_message_index += 1
+                print(shared_data.last_message_index)
 
 @app.route('/')
 def index():
     return send_file('static/index.html')
 
-@app.route('/api.json')
-def api():
-    return jsonify(shared_message_log)
-
+@app.route('/<last_received>/api.json')
+def api(last_received):
+    last_received = int(last_received)
+    if last_received < shared_data.last_message_index - len(shared_data.messages):
+        return jsonify({"server_id": server_id, "newest_msg": shared_data.last_message_index, "messages": list(shared_data.messages)})
+    else:
+        return jsonify({"server_id": server_id, "newest_msg": shared_data.last_message_index, "messages": list(shared_data.messages)[len(shared_data.messages) - (shared_data.last_message_index - last_received):]})
 
 if __name__ == '__main__':
-    thread = Thread(target=serial_reader, args=(shared_message_log, ))
+    thread = Thread(target=serial_reader, args=(shared_data, ))
     thread.start()
     app.run(debug=False, host='0.0.0.0')
