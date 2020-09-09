@@ -8,17 +8,15 @@
 #define OBUS_NEEDY_ID_DEVELOPMENT  255
 #define OBUS_INFO_ID_DEVELOPMENT   255
 
-void callback_game_start();
-
-void callback_game_stop();
-
 namespace obus_module {
 
 void setup(uint8_t type, uint8_t id);
 
-bool loopPuzzle(obus_can::message* message);
+bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void (*callback_game_stop)());
 
-bool loopNeedy(obus_can::message* message);
+bool loopNeedy(obus_can::message* message, void (*callback_game_start)(), void (*callback_game_stop)());
+
+bool loopInfo(obus_can::message* message, int (*info_generator)(char*));
 
 void strike();
 
