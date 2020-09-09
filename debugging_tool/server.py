@@ -109,7 +109,6 @@ def serial_reader(shared_data):
                 shared_data.messages.append(received.serialize())
                 shared_data.last_message_index += 1
                 print(shared_data.last_message_index)
-                print("READER = ", shared_data)
 
 @app.route('/')
 def index():
@@ -118,11 +117,10 @@ def index():
 @app.route('/<last_received>/api.json')
 def api(last_received):
     last_received = int(last_received)
-    print("REQUEST = ", shared_data)
-    if last_received < shared_data.last_message_index - max_message_cache:
-        return jsonify({"server_id": server_id, "newest_msg": last_message_index, "messages": list(shared_data.messages)})
+    if last_received < shared_data.last_message_index - len(shared_data.messages):
+        return jsonify({"server_id": server_id, "newest_msg": shared_data.last_message_index, "messages": list(shared_data.messages)})
     else:
-        return jsonify({"server_id": server_id, "newest_msg": shared_data.last_message_index, "messages": list(shared_data.messages)[max_message_cache - (shared_data.last_message_index - last_received):]})
+        return jsonify({"server_id": server_id, "newest_msg": shared_data.last_message_index, "messages": list(shared_data.messages)[len(shared_data.messages) - (shared_data.last_message_index - last_received):]})
 
 @app.route('/max_messages.json')
 def get_max_messages():
