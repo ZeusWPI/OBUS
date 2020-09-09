@@ -122,10 +122,6 @@ def api(last_received):
     else:
         return jsonify({"server_id": server_id, "newest_msg": shared_data.last_message_index, "messages": list(shared_data.messages)[len(shared_data.messages) - (shared_data.last_message_index - last_received):]})
 
-@app.route('/max_messages.json')
-def get_max_messages():
-    return jsonify([max_message_cache])
-
 if __name__ == '__main__':
     thread = Thread(target=serial_reader, args=(shared_data, ))
     thread.start()
