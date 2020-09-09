@@ -59,7 +59,7 @@ struct message {
 		struct payld_empty empty;
 		struct payld_gamestatus gamestatus;
 		uint8_t count;
-		uint8_t infomessage;
+		uint8_t infomessage[OBUS_MSG_LENGTH - 1];
 	};
 };
 
@@ -234,10 +234,10 @@ inline void send_m_solved(struct module from) {
 	send(&msg);
 }
 
-inline void send_i_infomessage(struct module from, uint8_t infomessage[7]) {
-	assert(from.type == OBUS_TYPE_INFO && from.id != 0);
+inline void send_i_infomessage(struct module from, uint8_t infomessage[OBUS_MSG_LENGTH - 1]) {
+	assert(from.type == OBUS_TYPE_INFO && from.id != OBUS_CONTROLLER_ID);
 	struct message msg = _msg(from, false, OBUS_MSGTYPE_I_INFOMESSAGE);
-	memcpy(infomessage, msg.infomessage, 7);
+	memcpy(infomessage, msg.infomessage, OBUS_MSG_LENGTH - 1);
 	send(&msg);
 }
 

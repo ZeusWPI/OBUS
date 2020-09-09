@@ -33,7 +33,7 @@ void _decode_can_id(uint16_t can_id, struct module *mod, bool *priority) {
 }
 
 uint8_t payload_type(uint8_t module_type, uint8_t module_id, uint8_t msg_type) {
-	if (module_type == OBUS_TYPE_CONTROLLER && module_type == 0) {
+	if (module_type == OBUS_TYPE_CONTROLLER && module_id == OBUS_CONTROLLER_ID) {
 		switch (msg_type) {
 			case OBUS_MSGTYPE_C_ACK:
 			case OBUS_MSGTYPE_C_HELLO:
@@ -50,8 +50,7 @@ uint8_t payload_type(uint8_t module_type, uint8_t module_id, uint8_t msg_type) {
 				return false;
 				break;
 		}
-	}
-	else if (module_type == OBUS_TYPE_INFO) {
+	} else if (module_type == OBUS_TYPE_INFO) {
 		// Info modules can only send 7 bytes of data
 		return OBUS_PAYLDTYPE_INFO;
 	// Module messages
@@ -139,7 +138,7 @@ bool receive(struct message *msg) {
 				Serial.println(F("W Received illegal count msg: payload <8"));
 				return false;
 			}
-			memcpy(msg->infomessage, &receive_frame.data[1], OBUS_MSG_LENGTH - 1);
+			memcpy(msg->infomessage, &(receive_frame.data[1]), OBUS_MSG_LENGTH - 1);
 			break;
 		default:
 			Serial.println(F("W Couldn't determine payload type"));
@@ -191,7 +190,7 @@ void send(struct message *msg) {
 			break;
 
 		case OBUS_PAYLDTYPE_INFO:
-			memcpy(&send_frame.data[1], msg->infomessage,  OBUS_MSG_LENGTH - 1);
+			memcpy(&(send_frame.data[1]), msg->infomessage,  OBUS_MSG_LENGTH - 1);
 			length = 8;
 			break;
 		default:
