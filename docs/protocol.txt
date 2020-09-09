@@ -64,7 +64,12 @@ Types for controller:
           end time ↓ ↓ reserved
             #strikes #max strikes
 
-    - 7-255 reserved
+		- 7 info start
+      [ X B B B  B B B B ]
+          --------------
+					   reserved
+
+    - 8-255 reserved
 
 - - - - - - - - - - - - - - - - - - -
 
