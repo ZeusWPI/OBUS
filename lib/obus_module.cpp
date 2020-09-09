@@ -43,7 +43,11 @@ void _setLed(struct color color) {
 void _ledLoop() {
 	// Check if we need to turn the LED back off, e.g. to reset the strike blinker
 	if (led_reset_time && millis() > led_reset_time) {
-		_setLed(COLOR_OFF);
+		if (active) {
+			_setLed(COLOR_YELLOW);
+		} else {
+			_setLed(COLOR_OFF);
+		}
 		led_reset_time = 0;
 	}
 
@@ -111,7 +115,7 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void 
 			switch (message->msg_type) {
 				case OBUS_MSGTYPE_C_GAMESTART:
 					active = true;
-					_setLed(COLOR_OFF);
+					_setLed(COLOR_YELLOW);
 					callback_game_start();
 					break;
 				case OBUS_MSGTYPE_C_HELLO:
