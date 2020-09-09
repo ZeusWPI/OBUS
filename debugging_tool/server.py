@@ -64,7 +64,8 @@ class Message:
                     return f"STRIKE {self.payload[1]}"
                 elif message_type == 2:
                     return f"SOLVED"
-        finally:
+        except:
+            print("Unexpected error: ", sys.exc_info()[0])
             return "PARSE ERROR"
 
     def serialize(self):
@@ -106,4 +107,4 @@ def api():
 if __name__ == '__main__':
     thread = Thread(target=serial_reader, args=(shared_message_log, ))
     thread.start()
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=False, host='0.0.0.0')

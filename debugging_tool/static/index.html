@@ -9,10 +9,6 @@
 			font-family: sans-serif;
 		}
 
-		.hide {
-			display: none;
-		}
-
 		.parsed {
 			background: lightgreen;
 		}
@@ -24,6 +20,7 @@
 		table {
 			border-collapse: collapse;
 			width: 100%;
+			border-bottom: 1px solid black;
 		}
 
 		th, td {
@@ -47,6 +44,10 @@
 
 		.fade {
 			animation: fadein 0.5s;
+		}
+
+		table.hide_raw .raw {
+			display:none;
 		}
 
 		tr:hover {

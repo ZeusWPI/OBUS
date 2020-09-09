@@ -10,9 +10,7 @@ let color_classes = {
 }
 
 function updateShow() {
-	for (let item of document.getElementsByClassName("raw")) {
-		item.classList.toggle("hide", !document.getElementById('show_raw').checked);
-	}
+	document.getElementById("message_table").classList.toggle("hide_raw", !document.getElementById('show_raw').checked);
 }
 
 function updateMessages() {
@@ -84,3 +82,5 @@ function toggle_logging() {
 		clearInterval(updaterID);
 	}
 }
+
+window.onload = toggle_logging;
