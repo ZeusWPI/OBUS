@@ -23,14 +23,18 @@
 #define OBUS_MSGTYPE_C_SOLVED    4
 #define OBUS_MSGTYPE_C_TIMEOUT   5
 #define OBUS_MSGTYPE_C_STRIKEOUT 6
+#define OBUS_MSGTYPE_C_INFOSTART 7
 
 #define OBUS_MSGTYPE_M_HELLO  0
 #define OBUS_MSGTYPE_M_STRIKE 1
 #define OBUS_MSGTYPE_M_SOLVED 2
 
+#define OBUS_MSGTYPE_I_INFOMESSAGE 0
+
 #define OBUS_PAYLDTYPE_EMPTY      0
 #define OBUS_PAYLDTYPE_GAMESTATUS 1
 #define OBUS_PAYLDTYPE_COUNT      2
+#define OBUS_PAYLDTYPE_INFO       3
 
 namespace obus_can {
 
@@ -55,6 +59,7 @@ struct message {
 		struct payld_empty empty;
 		struct payld_gamestatus gamestatus;
 		uint8_t count;
+		uint8_t infomessage;
 	};
 };
 
@@ -226,6 +231,13 @@ inline void send_m_strike(struct module from, uint8_t count) {
 inline void send_m_solved(struct module from) {
 	assert(from.type != OBUS_TYPE_CONTROLLER);
 	struct message msg = _msg(from, false, OBUS_MSGTYPE_M_SOLVED);
+	send(&msg);
+}
+
+inline void send_i_infomessage(struct module from, uint8_t infomessage[7]) {
+	assert(from.type == OBUS_TYPE_INFO && from.id != 0);
+	struct message msg = _msg(from, false, OBUS_MSGTYPE_I_INFOMESSAGE);
+	memcpy(infomessage, msg.infomessage, 7);
 	send(&msg);
 }
 

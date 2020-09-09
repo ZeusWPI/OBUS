@@ -32,8 +32,8 @@ void _decode_can_id(uint16_t can_id, struct module *mod, bool *priority) {
 	assert(mod->type <= 0b11);
 }
 
-uint8_t payload_type(uint8_t module_type, uint8_t msg_type) {
-	if (module_type == OBUS_TYPE_CONTROLLER) {
+uint8_t payload_type(uint8_t module_type, uint8_t module_id, uint8_t msg_type) {
+	if (module_type == OBUS_TYPE_CONTROLLER && module_type == 0) {
 		switch (msg_type) {
 			case OBUS_MSGTYPE_C_ACK:
 			case OBUS_MSGTYPE_C_HELLO:
@@ -50,7 +50,10 @@ uint8_t payload_type(uint8_t module_type, uint8_t msg_type) {
 				return false;
 				break;
 		}
-
+	}
+	else if (module_type == OBUS_TYPE_INFO) {
+		// Info modules can only send 7 bytes of data
+		return OBUS_PAYLDTYPE_INFO;
 	// Module messages
 	} else {
 		switch (msg_type) {
@@ -105,7 +108,7 @@ bool receive(struct message *msg) {
 	_decode_can_id(receive_frame.can_id, &from, &priority);
 
 	// Controller messages
-	switch (payload_type(from.type, msg_type)) {
+	switch (payload_type(from.type, from.id, msg_type)) {
 		case OBUS_PAYLDTYPE_EMPTY:
 			break;
 
@@ -131,6 +134,13 @@ bool receive(struct message *msg) {
 			msg->count = receive_frame.data[1];
 			break;
 
+		case OBUS_PAYLDTYPE_INFO:
+			if (receive_frame.can_dlc < 8) {
+				Serial.println(F("W Received illegal count msg: payload <8"));
+				return false;
+			}
+			memcpy(msg->infomessage, &receive_frame.data[1], OBUS_MSG_LENGTH - 1);
+			break;
 		default:
 			Serial.println(F("W Couldn't determine payload type"));
 			return false;
@@ -160,7 +170,7 @@ void send(struct message *msg) {
 	uint8_t length = 1;
 	send_frame.data[0] = msg->msg_type;
 
-	uint8_t pyld_type = payload_type(msg->from.type, msg->msg_type);
+	uint8_t pyld_type = payload_type(msg->from.type, msg->from.id, msg->msg_type);
 	switch (pyld_type) {
 		case OBUS_PAYLDTYPE_EMPTY:
 			break;
@@ -180,6 +190,10 @@ void send(struct message *msg) {
 			length = 2;
 			break;
 
+		case OBUS_PAYLDTYPE_INFO:
+			memcpy(&send_frame.data[1], msg->infomessage,  OBUS_MSG_LENGTH - 1);
+			length = 8;
+			break;
 		default:
 			Serial.print(F("E Unknown payload type "));
 			Serial.println(pyld_type);

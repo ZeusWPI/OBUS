@@ -30,7 +30,7 @@ uint8_t correct_code[4] = {
   DATE_MODE_STOP,
   12,
   34,
-  56  
+  56
 };
 
 ezButton solve_button(DATE_SOLVE_BTN);
@@ -47,7 +47,7 @@ void setup() {
 obus_can::message message;
 
 void loop() {
-  bool received = obus_module::loopPuzzle(&message);
+  bool received = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
   // TODO handle update frames (not needed for this module, but could be useful as example code)
   solve_button.loop();
   if (solve_button.getCount() > 0) {
@@ -102,12 +102,12 @@ void read_from_date_module(uint8_t* data_out) {
     data_out[i] = 10*(data_out[i] & 0x0F) + ((data_out[i] & 0xF0) >> 4);
   }
 
-  
+
   //for (int i = 0; i < 4; i++) {
   //  Serial.print(data_out[i]);
   //  Serial.print(" ");
   //}
-  
+
   //Serial.println();
   digitalWrite(DATE_CLOCK_PIN, LOW);
 }

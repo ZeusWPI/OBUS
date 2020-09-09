@@ -17,7 +17,7 @@ void setup() {
 obus_can::message message;
 
 void loop() {
-	bool received = obus_module::loopPuzzle(&message);
+	bool received = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
 	// TODO handle update frames (not needed for this module, but could be useful as example code)
 
 	red_button.loop();

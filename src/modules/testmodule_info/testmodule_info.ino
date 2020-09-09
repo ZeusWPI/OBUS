@@ -1,4 +1,4 @@
-// (c) {YEAR}, {AUTHOR}
+// (c) 2020, redfast00
 // See the LICENSE file for conditions for copying
 
 #include <obus_module.h>
