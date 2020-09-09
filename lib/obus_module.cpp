@@ -20,21 +20,37 @@ namespace obus_module {
 struct obus_can::module this_module;
 uint8_t strike_count;
 bool active;
-uint32_t time_stop_strike_led;
 
 // Current LED status
 struct color { bool red; bool green; };
 struct color led_color;
-bool blink_on = false;
+//   Keeps track of whether the LED is currently lit, when a blink pattern is active
+bool blink_led_lit = false;
 int blink_delay = 0;
 unsigned long blink_next_time = 0;
+uint32_t led_reset_time;
 
 
-// Update blink of status LED, to be called in some loop
-void _updateLed() {
+void _setLed(struct color color) {
+	led_color = color;
+	blink_delay = 0;
+	led_reset_time = 0;
+
+	digitalWrite(RED_LED, color.red ? HIGH : LOW);
+	digitalWrite(GREEN_LED, color.green ? HIGH : LOW);
+}
+
+void _ledLoop() {
+	// Check if we need to turn the LED back off, e.g. to reset the strike blinker
+	if (led_reset_time && millis() > led_reset_time) {
+		_setLed(COLOR_OFF);
+		led_reset_time = 0;
+	}
+
+	// Update blink of status LED
 	if (blink_delay && millis() > blink_next_time) {
-		blink_on = !blink_on;
-		if (blink_on) {
+		blink_led_lit = !blink_led_lit;
+		if (blink_led_lit) {
 			digitalWrite(RED_LED, led_color.red ? HIGH : LOW);
 			digitalWrite(GREEN_LED, led_color.green ? HIGH : LOW);
 		} else {
@@ -46,21 +62,14 @@ void _updateLed() {
 	}
 }
 
-void _setLed(struct color color) {
-	led_color = color;
-	blink_delay = 0;
-
-	digitalWrite(RED_LED, color.red ? HIGH : LOW);
-	digitalWrite(GREEN_LED, color.green ? HIGH : LOW);
-}
-
 void _setLedBlink(struct color color, uint16_t delay) {
 	led_color = color;
-	blink_on = false;
+	blink_led_lit = false;
 	blink_delay = delay;
 	blink_next_time = millis();
+	led_reset_time = 0;
 
-	_updateLed();
+	_ledLoop();
 }
 
 
@@ -82,12 +91,6 @@ void setup(uint8_t type, uint8_t id) {
 }
 
 bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void (*callback_game_stop)()) {
-	// Check if we need to turn the red "strike" LED back off after
-	//  turning it on because of a strike
-	if (time_stop_strike_led && millis() > time_stop_strike_led) {
-		digitalWrite(RED_LED, LOW);
-		time_stop_strike_led = 0;
-	}
 	// TODO this can be more efficient by only enabling error interrupts and
 	//  reacting to the interrupt instead of checking if the flag is set in a loop
 	// We will need to fork our CAN library for this, because the needed functions
@@ -131,7 +134,7 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void 
 		}
 	}
 
-	_updateLed();
+	_ledLoop();
 
 	return interesting_message;
 }
@@ -167,8 +170,8 @@ void strike() {
 		return;
 	}
 	strike_count++;
-	digitalWrite(RED_LED, HIGH);
-	time_stop_strike_led = millis() + 2000;
+	_setLedBlink(COLOR_RED, BLINK_DELAY_FAST);
+	led_reset_time = millis() + 2000;
 	obus_can::send_m_strike(this_module, strike_count);
 }
 
@@ -177,8 +180,8 @@ void solve() {
 		return;
 	}
 	obus_can::send_m_solved(this_module);
-	digitalWrite(GREEN_LED, HIGH);
 	active = false;
+	_setLed(COLOR_GREEN);
 }
 
 bool is_active() {
