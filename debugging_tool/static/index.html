@@ -8,7 +8,7 @@
 		body {
 			font-family: sans-serif;
 		}
-		
+
 		.hide {
 			display: none;
 		}
@@ -38,6 +38,15 @@
 			border-top: 2px solid black;
 			height: 20px;
 			text-align: left;
+		}
+
+		@keyframes fadein {
+			from { opacity: 0; }
+			to   { opacity: 1; }
+		}
+
+		.fade {
+			animation: fadein 0.5s;
 		}
 
 		tr:hover {
@@ -78,10 +87,10 @@
 
 <body>
 	<button onclick="toggle_logging()" id="toggle_button">Start</button>
-	
+
 		<input type="checkbox" id="show_raw" name="show_raw" checked autocomplete="off" onchange="updateShow()">
 		<label for="show_raw">Show raw address and payload</label>
-		
+
 	<table id="message_table">
 		<tr>
 			<th>Human-readable type</th>

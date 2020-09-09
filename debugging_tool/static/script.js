@@ -26,9 +26,10 @@ function updateMessages() {
 			response.json().then(function(data) {
 				if (data.length > maxseen) {
 					let messageTable = document.getElementById('message_table');
-					
+
 					for (let i = maxseen; i < data.length; i++) {
 						let row = messageTable.insertRow(1);
+						row.classList.add("fade");
 						let current = data[i];
 
 						let human_readable_type = row.insertCell(0)
@@ -83,4 +84,3 @@ function toggle_logging() {
 		clearInterval(updaterID);
 	}
 }
-
