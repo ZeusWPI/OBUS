@@ -16,7 +16,7 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void 
 
 bool loopNeedy(obus_can::message* message, void (*callback_game_start)(), void (*callback_game_stop)());
 
-bool loopInfo(obus_can::message* message, int (*info_generator)(char*));
+bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*));
 
 void strike();
 
