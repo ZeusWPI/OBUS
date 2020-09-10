@@ -17,7 +17,7 @@ void setup() {
 	Serial.begin(115200);
 	lcd.begin(16, 2);
 	lcd.clear();
-	obus_module::setup(OBUS_TYPE_INFO, OBUS_INFO_ID_DEVELOPMENT);
+	obus_module::setup(OBUS_TYPE_INFO, 1);
 }
 
 obus_can::message message;
