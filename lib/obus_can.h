@@ -35,6 +35,7 @@
 #define OBUS_PAYLDTYPE_GAMESTATUS 1
 #define OBUS_PAYLDTYPE_COUNT      2
 #define OBUS_PAYLDTYPE_INFO       3
+#define OBUS_PAYLDTYPE_MODULEADDR 4
 
 #define OBUS_PAYLD_INFO_MAXLEN (OBUS_MSG_LENGTH - 1)
 
@@ -66,6 +67,7 @@ struct message {
 		struct payld_gamestatus gamestatus;
 		uint8_t count;
 		struct payld_infomessage infomessage;
+		struct module payload_address;
 	};
 };
 

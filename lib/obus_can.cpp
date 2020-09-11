@@ -36,6 +36,7 @@ uint8_t payload_type(uint8_t module_type, uint8_t module_id, uint8_t msg_type) {
 	if (module_type == OBUS_TYPE_CONTROLLER && module_id == OBUS_CONTROLLER_ID) {
 		switch (msg_type) {
 			case OBUS_MSGTYPE_C_ACK:
+			  return OBUS_PAYLDTYPE_MODULEADDR;
 			case OBUS_MSGTYPE_C_HELLO:
 				return OBUS_PAYLDTYPE_EMPTY;
 
@@ -140,6 +141,16 @@ bool receive(struct message *msg) {
 				msg->infomessage.len = data_len;
 			}
 			break;
+		case OBUS_PAYLDTYPE_MODULEADDR:
+			{
+				if (receive_frame.can_dlc < 3) {
+					Serial.println(F("W Received illegal count msg: payload <3"));
+					return false;
+				}
+				msg->payload_address.type = receive_frame.data[1];
+				msg->payload_address.id = receive_frame.data[2];
+			}
+			break;
 		default:
 			Serial.println(F("W Couldn't determine payload type"));
 			return false;
@@ -193,6 +204,11 @@ void send(struct message *msg) {
 			memcpy(&(send_frame.data[1]), msg->infomessage.data, msg->infomessage.len);
 			length = msg->infomessage.len + 1;
 			break;
+
+		case OBUS_PAYLDTYPE_MODULEADDR:
+			send_frame.data[1] = msg->payload_address.type;
+			send_frame.data[2] = msg->payload_address.id;
+		break;
 
 		default:
 			Serial.print(F("E Unknown payload type "));

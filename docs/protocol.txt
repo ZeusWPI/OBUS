@@ -38,8 +38,10 @@ Types for controller:
 
     - 0 acknowledge valid message
       [ X B B B  B B B B ]
-          --------------
-             reserved
+          - - ----------
+          | ↓  reserved
+					↓ module ID
+	     type
 
     - 1 hello
       [ X B B B  B B B B ]
