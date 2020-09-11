@@ -64,7 +64,7 @@ function updateMessages() {
 						if (current['parsed'].startsWith("PARSE ERROR")) {
 							parsed.classList.add("error");
 						} else if (current['parsed'].startsWith("STATE")) {
-							parsed.classList.add("staterow");
+							row.classList.add("staterow");
 						}
 						parsed.innerHTML = current['parsed'];
 						parsed.classList.add('parsed');
