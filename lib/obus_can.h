@@ -142,9 +142,10 @@ inline void _send_payld_gamestatus(
 /**
  * Send a controller "ACK" OBUS message
  */
-inline void send_c_ack(struct module from) {
+inline void send_c_ack(struct module from, struct module payload_address) {
 	assert(from.type == OBUS_TYPE_CONTROLLER);
 	struct message msg = _msg(from, false, OBUS_MSGTYPE_C_ACK);
+	msg.payload_address = payload_address;
 	send(&msg);
 }
 
