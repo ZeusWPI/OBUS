@@ -3,19 +3,22 @@
 
 
 #define STATE_INACTIVE 0
-#define STATE_HELLO    1
-#define STATE_GAME     2
-#define STATE_GAMEOVER 3
+#define STATE_INFO     1
+#define STATE_HELLO    2
+#define STATE_GAME     3
+#define STATE_GAMEOVER 4
 
 #define OBUS_MAX_STRIKES    3 // Number of strikes allowed until game over
 #define OBUS_GAME_DURATION 60 // Duration of the game in seconds
 
 #define OBUS_MAX_MODULES      16
+#define OBUS_INFO_DURATION     3 // Duration of discovery round in seconds
 #define OBUS_DISC_DURATION     5 // Duration of discovery round in seconds
 #define OBUS_UPDATE_INTERVAL 500 // Number of milliseconds between game updates
 
 #define OBUS_GAME_DURATION_MS ((uint32_t) OBUS_GAME_DURATION*1000)
 #define OBUS_DISC_DURATION_MS ((uint32_t) OBUS_DISC_DURATION*1000)
+#define OBUS_INFO_DURATION_MS ((uint32_t) OBUS_INFO_DURATION*1000)
 
 #define DIVIDE_CEIL(dividend, divisor) ((dividend + (divisor - 1)) / divisor)
 #define MAX_AMOUNT_PUZZLES 256 // The ID of a puzzle is uint8
@@ -34,6 +37,7 @@ uint8_t unsolved_puzzles[N_UNSOLVED_PUZZLES];
 
 // Timers
 uint32_t hello_round_start;
+uint32_t info_round_start;
 uint32_t game_start;
 uint32_t last_draw;
 uint32_t last_update;
@@ -83,6 +87,23 @@ void solve_puzzle_in_bit_vector(uint8_t module_id) {
 	uint8_t byte_index = module_id >> 3;
 	uint8_t bit_index = module_id & 0x07;
 	unsolved_puzzles[byte_index] &= ~(0x1 << bit_index);
+}
+
+void start_info() {
+	state = STATE_INFO;
+	info_round_start = millis();
+	obus_can::send_c_infostart(this_module);
+	Serial.println(F("  Start of info round"));
+	tm.displayText("InFO");
+}
+
+void wait_info() {
+	struct obus_can::message msg;
+	obus_can::receive(&msg);
+
+	if (millis() - info_round_start > OBUS_INFO_DURATION_MS) {
+		start_hello();
+	}
 }
 
 
@@ -258,7 +279,11 @@ void game_loop() {
 void loop() {
 	switch (state) {
 		case STATE_INACTIVE:
-			start_hello();
+			start_info();
+			break;
+
+		case STATE_INFO:
+			wait_info();
 			break;
 
 		case STATE_HELLO:
