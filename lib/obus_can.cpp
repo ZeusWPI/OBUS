@@ -1,5 +1,6 @@
 #include <mcp2515.h>
 
+#include <obus_util.h>
 #include "obus_can.h"
 
 // Chip select for the CAN module
@@ -116,11 +117,7 @@ bool receive(struct message *msg) {
 				Serial.println(F("W Received illegal gamestatus msg: payload <7"));
 				return false;
 			}
-			msg->gamestatus.time_left   =
-				((uint32_t) receive_frame.data[1] << 0x18) |
-				((uint32_t) receive_frame.data[2] << 0x10) |
-				((uint32_t) receive_frame.data[3] << 0x08) |
-				((uint32_t) receive_frame.data[4]);
+			msg->gamestatus.time_left   = unpack_4b_into_u32(&(receive_frame.data[1]));
 			msg->gamestatus.strikes     = receive_frame.data[5];
 			msg->gamestatus.max_strikes = receive_frame.data[6];
 			break;
@@ -175,10 +172,7 @@ void send(struct message *msg) {
 			break;
 
 		case OBUS_PAYLDTYPE_GAMESTATUS:
-			send_frame.data[1] = (uint8_t) ((msg->gamestatus.time_left & 0xFF000000) >> 0x18);
-			send_frame.data[2] = (uint8_t) ((msg->gamestatus.time_left & 0x00FF0000) >> 0x10);
-			send_frame.data[3] = (uint8_t) ((msg->gamestatus.time_left & 0x0000FF00) >> 0x08);
-			send_frame.data[4] = (uint8_t) (msg->gamestatus.time_left & 0x000000FF);
+			pack_u32_into_4b(&(send_frame.data[1]), msg->gamestatus.time_left);
 			send_frame.data[5] = msg->gamestatus.strikes;
 			send_frame.data[6] = msg->gamestatus.max_strikes;
 			length = 7;
