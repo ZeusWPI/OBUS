@@ -203,6 +203,15 @@ inline void send_c_timeout(
 /**
  * Send a controller "strikeout" OBUS message
  */
+inline void send_c_infostart(struct module from) {
+	assert(from.type == OBUS_TYPE_CONTROLLER);
+	struct message msg = _msg(from, false, OBUS_MSGTYPE_C_INFOSTART);
+	send(&msg);
+}
+
+/**
+ * Send a controller "info start" OBUS message
+ */
 inline void send_c_strikeout(
 		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
 
