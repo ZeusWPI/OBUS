@@ -53,6 +53,10 @@
 			display:none;
 		}
 
+		table.hide_consecutive_states .staterow + .staterow {
+			display: none;
+		}
+
 		tr:hover {
 			background-color: #aaa;
 		}
@@ -92,8 +96,11 @@
 <body>
 	<button onclick="toggle_logging()" id="toggle_button">Start</button>
 
-		<input type="checkbox" id="show_raw" name="show_raw" checked autocomplete="off" onchange="updateShow()">
-		<label for="show_raw">Show raw address and payload</label>
+	<input type="checkbox" id="show_raw" name="show_raw" checked autocomplete="off" onchange="updateShowRaw()">
+	<label for="show_raw">Show raw address and payload</label>
+
+	<input type="checkbox" id="show_consecutive_states" name="show_consecutive_states" checked autocomplete="off" onchange="updateShowStates()">
+	<label for="show_consecutive_states">Show consecutive state updates</label>
 
 	<table id="message_table">
 		<tr id="table_header">
