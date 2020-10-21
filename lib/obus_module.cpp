@@ -5,7 +5,6 @@
 #define GREEN_LED A5
 
 #define BLINK_DELAY_SLOW 1000
-#define BLINK_DELAY_NORMAL 500
 #define BLINK_DELAY_FAST 300
 
 #define MCP_INT 2
@@ -108,8 +107,8 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void 
 		while (true) {
 			digitalWrite(RED_LED, blink);
 			digitalWrite(GREEN_LED, blink);
+			delay(blink ? BLINK_DELAY_SLOW : BLINK_DELAY_FAST);
 			blink = !blink;
-			delay(BLINK_DELAY_NORMAL);
 		}
 	}
 
