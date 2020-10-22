@@ -115,7 +115,7 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void 
 
 	bool interesting_message = false;
 	if (obus_can::receive(message)) {
-		if (message->from.type == OBUS_TYPE_CONTROLLER && message->from.id == 0) {
+		if (is_from_controller(message->from)) {
 			switch (message->msg_type) {
 				case OBUS_MSGTYPE_C_GAMESTART:
 					active = true;
@@ -157,7 +157,7 @@ bool loopNeedy(obus_can::message* message, void (*callback_game_start)(), void (
 bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 	bool interesting_message = false;
 	if (obus_can::receive(message)) {
-		if (message->from.type == OBUS_TYPE_CONTROLLER && message->from.id == 0) {
+		if (is_from_controller(message->from)) {
 			switch (message->msg_type) {
 				case OBUS_MSGTYPE_C_INFOSTART:
 					{
