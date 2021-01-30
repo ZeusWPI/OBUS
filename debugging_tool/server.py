@@ -42,8 +42,9 @@ class Message:
     def sender_id(self):
         return (self.received_from >> 0) & 0b1111_1111
 
-    def human_readable_type(self):
-        return [('controller' if self.sender_id() == 0 else 'info'), 'puzzle', 'needy', 'RESERVED TYPE'][self.sender_type()]
+    @staticmethod
+    def human_readable_type(sender_type, sender_id):
+        return [('controller' if sender_id == 0 else 'info'), 'puzzle', 'needy', 'RESERVED TYPE'][sender_type]
 
     def _parse_state_update(self):
         timeleft = self.payload[1] << 0x18 | self.payload[2] << 0x10 | self.payload[3] << 0x08 | self.payload[4]
@@ -58,7 +59,7 @@ class Message:
         try:
             if sender_type == 0b00 and self.sender_id() == 0:  # controller
                 if message_type == 0:
-                    return "ACK"
+                    return f"ACK {Message.human_readable_type(self.payload[1], self.payload[2])} {self.payload[2]}"
                 elif message_type == 1:
                     return "HELLO"
                 elif message_type == 2:
@@ -99,7 +100,7 @@ class Message:
             'parsed': self.parse_message(),
             'pretty_raw_sender_id': f'{self.priority_bit():01b} {self.sender_type():02b} {self.sender_id():08b}',
             'raw_message': f"{self.payload.hex(' ')}",
-            'human_readable_type': self.human_readable_type(),
+            'human_readable_type': Message.human_readable_type(self.sender_type(), self.sender_id()),
             'sender_id': self.sender_id(),
             'internal_id': self.internal_id
         }

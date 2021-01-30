@@ -38,8 +38,10 @@ Types for controller:
 
     - 0 acknowledge valid message
       [ X B B B  B B B B ]
-          --------------
-             reserved
+          - - ----------
+          | ↓  reserved
+          ↓ module ID
+       type
 
     - 1 hello
       [ X B B B  B B B B ]
@@ -64,10 +66,10 @@ Types for controller:
           end time ↓ ↓ reserved
             #strikes #max strikes
 
-		- 7 info start
+    - 7 info start
       [ X B B B  B B B B ]
           --------------
-					   reserved
+             reserved
 
     - 8-255 reserved
 

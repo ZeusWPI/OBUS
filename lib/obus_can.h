@@ -35,6 +35,7 @@
 #define OBUS_PAYLDTYPE_GAMESTATUS 1
 #define OBUS_PAYLDTYPE_COUNT      2
 #define OBUS_PAYLDTYPE_INFO       3
+#define OBUS_PAYLDTYPE_MODULEADDR 4
 
 #define OBUS_PAYLD_INFO_MAXLEN (OBUS_MSG_LENGTH - 1)
 
@@ -66,6 +67,7 @@ struct message {
 		struct payld_gamestatus gamestatus;
 		uint8_t count;
 		struct payld_infomessage infomessage;
+		struct module payload_address;
 	};
 };
 
@@ -140,9 +142,10 @@ inline void _send_payld_gamestatus(
 /**
  * Send a controller "ACK" OBUS message
  */
-inline void send_c_ack(struct module from) {
+inline void send_c_ack(struct module from, struct module payload_address) {
 	assert(from.type == OBUS_TYPE_CONTROLLER);
 	struct message msg = _msg(from, false, OBUS_MSGTYPE_C_ACK);
+	msg.payload_address = payload_address;
 	send(&msg);
 }
 
@@ -198,6 +201,15 @@ inline void send_c_timeout(
 	assert(from.type == OBUS_TYPE_CONTROLLER);
 	_send_payld_gamestatus(
 			from, false, OBUS_MSGTYPE_C_TIMEOUT, time_left, strikes, max_strikes);
+}
+
+/**
+ * Send a controller "info start" OBUS message
+ */
+inline void send_c_infostart(struct module from) {
+	assert(from.type == OBUS_TYPE_CONTROLLER);
+	struct message msg = _msg(from, false, OBUS_MSGTYPE_C_INFOSTART);
+	send(&msg);
 }
 
 /**
