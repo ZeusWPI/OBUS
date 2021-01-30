@@ -1,13 +1,14 @@
 #include "obus_can.h"
 #include "obus_module.h"
 
-#define RED_LED A4
-#define GREEN_LED A5
+#define RED_LED 4
+#define GREEN_LED 7
 
 #define BLINK_DELAY_SLOW 1000
 #define BLINK_DELAY_NORMAL 500
 #define BLINK_DELAY_FAST 300
 
+// Not used normally
 #define MCP_INT 2
 
 #define COLOR_OFF    ((struct color) {false, false})
@@ -98,11 +99,11 @@ void setup(uint8_t type, uint8_t id) {
 	_resetState();
 }
 
-bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void (*callback_game_stop)()) {
+bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void (*callback_game_stop)(), void (*callback_info)(uint8_t info_id, uint8_t [7])) {
 	// TODO this can be more efficient by only enabling error interrupts and
 	//  reacting to the interrupt instead of checking if the flag is set in a loop
-	// We will need to fork our CAN library for this, because the needed functions
-	//  are private
+	// We will need to fork our CAN library for this, because the needed functions are private.
+	// Also, we can't do this by default, because the INT pin is normally not connected to the board
 	if (obus_can::is_error_condition()) {
 		bool blink = false;
 		while (true) {
@@ -141,6 +142,10 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void 
 				default:
 					break;
 			}
+		} else if (message->from.type == OBUS_TYPE_INFO) {
+			uint8_t infobuffer[7] = {0};
+			memcpy(infobuffer, message->infomessage.data, message->infomessage.len);
+			callback_info(message->from.id, infobuffer);
 		}
 	}
 
@@ -149,9 +154,9 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void 
 	return interesting_message;
 }
 
-bool loopNeedy(obus_can::message* message, void (*callback_game_start)(), void (*callback_game_stop)()) {
+bool loopNeedy(obus_can::message* message, void (*callback_game_start)(), void (*callback_game_stop)(), void (*callback_info)(uint8_t info_id, uint8_t [7])) {
 	// For now this is the same function
-	return loopPuzzle(message, callback_game_start, callback_game_stop);
+	return loopPuzzle(message, callback_game_start, callback_game_stop, callback_info);
 }
 
 bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
