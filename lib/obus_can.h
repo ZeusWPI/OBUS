@@ -267,6 +267,10 @@ inline void send_i_infomessage(struct module from, uint8_t *data, uint8_t data_l
 	send(&msg);
 }
 
+inline bool is_from_controller(struct module from) {
+	return from.type == OBUS_TYPE_CONTROLLER && from.id == OBUS_CONTROLLER_ID;
+}
+
 }
 
 #endif /* end of include guard: OBUS_CAN_H */
