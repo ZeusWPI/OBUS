@@ -12,12 +12,16 @@ if [ ! -d ./template_module ]; then
 	exit 1
 fi
 
+# Ask for module type
+print "Type of module (puzzle/needy/info): "
+read module_type
+
 # Ask for module name
 print "Name of module (e.g. Oil gauge): "
 read module_name
 
 # Determine a "clean" module name for paths: lowercase, no spaces
-module="`print "$module_name" | tr [A-Z] [a-z] | sed "s/ /_/g;s/'//g"`"
+module="`print "${module_type}_${module_name}" | tr [A-Z] [a-z] | sed "s/ /_/g;s/'//g"`"
 
 # Make sure `modules` directory exists and target directory doesn't
 mkdir -p modules
