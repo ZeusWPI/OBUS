@@ -82,7 +82,7 @@ uint8_t read_value_from_date_module(uint8_t bit_order) {
     else
       value |= read_bit << (7 - i);
     digitalWrite(DATE_CLOCK_PIN, HIGH);
-    delay(1);
+    delayMicroseconds(3);
     digitalWrite(DATE_CLOCK_PIN, LOW);
   }
   return value;
@@ -90,7 +90,7 @@ uint8_t read_value_from_date_module(uint8_t bit_order) {
 
 void read_from_date_module(uint8_t* data_out) {
   digitalWrite(DATE_READ_PIN, HIGH);
-  delay(200);
+  delayMicroseconds(3);
   digitalWrite(DATE_READ_PIN, LOW);
 
   for (int i = 0; i < 4; i++) {

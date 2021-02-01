@@ -8,6 +8,8 @@
 #define BLINK_DELAY_NORMAL 500
 #define BLINK_DELAY_FAST 300
 
+#define MAX_TIME_BETWEEN_CALLS 100
+
 // Not used normally
 #define MCP_INT 2
 
@@ -21,6 +23,7 @@ namespace obus_module {
 struct obus_can::module this_module;
 uint8_t strike_count;
 bool active;
+uint32_t next_loop_call_deadline;
 
 // Current LED status
 struct color { bool red; bool green; };
@@ -81,6 +84,7 @@ void _setLedBlink(struct color color, uint16_t delay) {
 void _resetState() {
 	strike_count = 0;
 	active = false;
+	next_loop_call_deadline = 0;
 
 	if (this_module.type == OBUS_TYPE_PUZZLE || this_module.type == OBUS_TYPE_NEEDY) {
 		pinMode(RED_LED, OUTPUT);
@@ -113,20 +117,30 @@ void empty_callback_state(uint32_t time_left, uint8_t strikes, uint8_t max_strik
 	(void)puzzle_modules_solved;
 }
 
+void blink_error(String message) {
+	bool blink = false;
+	while (true) {
+		digitalWrite(RED_LED, blink);
+		digitalWrite(GREEN_LED, blink);
+		blink = !blink;
+		delay(BLINK_DELAY_NORMAL);
+		Serial.println(message);
+	}
+}
+
 bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(), void (*callback_game_stop)(), void (*callback_info)(uint8_t info_id, uint8_t infomessage[7]), void (*callback_state)(uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved)) {
 	// TODO this can be more efficient by only enabling error interrupts and
 	//  reacting to the interrupt instead of checking if the flag is set in a loop
 	// We will need to fork our CAN library for this, because the needed functions are private.
 	// Also, we can't do this by default, because the INT pin is normally not connected to the board
 	if (obus_can::is_error_condition()) {
-		bool blink = false;
-		while (true) {
-			digitalWrite(RED_LED, blink);
-			digitalWrite(GREEN_LED, blink);
-			blink = !blink;
-			delay(BLINK_DELAY_NORMAL);
-		}
+		blink_error(F("E CAN error"));
 	}
+
+	if (next_loop_call_deadline != 0 && millis() > next_loop_call_deadline) {
+		blink_error(F("E missed deadline"));
+	}
+	next_loop_call_deadline = millis() + MAX_TIME_BETWEEN_CALLS;
 
 	bool received_message = false;
 	if (obus_can::receive(message)) {
