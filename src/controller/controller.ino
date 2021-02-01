@@ -190,7 +190,7 @@ void initialize_game() {
 	Serial.println("  Game started");
 
 	draw_display(millis(), OBUS_GAME_DURATION_MS);
-	obus_can::send_c_gamestart(this_module, OBUS_GAME_DURATION_MS, strikes, OBUS_MAX_STRIKES, nr_solved_puzzles);
+	obus_can::send_c_gamestart(this_module, OBUS_GAME_DURATION_MS, strikes, OBUS_MAX_STRIKES, nr_connected_puzzles);
 }
 
 
