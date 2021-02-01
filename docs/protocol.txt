@@ -51,7 +51,7 @@ Types for controller:
     - 2 game start
       [ X B B B  B B B B ]
           -------- - - -
-         time left ↓ ↓ #puzzle modules - 1
+         time left ↓ ↓ #puzzle modules
             #strikes #max strikes
 
     - 3 state (every x ms – e.g. in the middle of each second)
