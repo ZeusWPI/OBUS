@@ -17,39 +17,36 @@ ezButton red_button(PIN_RED_BUTTON);
 ezButton green_button(PIN_GREEN_BUTTON);
 
 bool blue_state = false;
-bool checking_input = false;
 
 void setup() {
 	Serial.begin(115200);
 	obus_module::setup(OBUS_TYPE_PUZZLE, OBUS_PUZZLE_ID_DEVELOPMENT);
 	red_button.setDebounceTime(100);
 	green_button.setDebounceTime(100);
-	pinMode(BLUE_LED, OUTPUT);
+	pinMode(PIN_LED_BLUE, OUTPUT);
 }
 
 obus_can::message message;
 
 void loop() {
-	bool received = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
-	// TODO handle update frames (not needed for this module, but could be useful as example code)
+	obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
 
 	red_button.loop();
 	green_button.loop();
 
-	if (checking_input) {
+	// Check if this module is active: the timer is counting down and this modules hasn't been solved yet
+	if (obus_module::is_active()) {
 		if (red_button.getCount() > 0) {
 			if (blue_state) {
 				obus_module::strike();
 			} else {
 				obus_module::solve();
-				checking_input = blue_state = false;
 			}
 		}
 
 		if (green_button.getCount() > 0) {
 			if (blue_state) {
 				obus_module::solve();
-				checking_input = blue_state = false;
 			} else {
 				obus_module::strike();
 			}
@@ -58,15 +55,15 @@ void loop() {
 	red_button.resetCount();
 	green_button.resetCount();
 
-	digitalWrite(BLUE_LED, blue_state);
+	digitalWrite(PIN_LED_BLUE, blue_state);
 }
 
 void callback_game_start(uint8_t puzzle_modules_connected) {
+	// Ignore the amounf of puzzle modules connected
   (void)puzzle_modules_connected;
 	blue_state = random(0, 2);
-	checking_input = true;
 }
 
 void callback_game_stop() {
-	blue_state = checking_input = false;
+	blue_state = false;
 }
