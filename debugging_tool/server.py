@@ -50,8 +50,9 @@ class Message:
         timeleft = self.payload[1] << 0x18 | self.payload[2] << 0x10 | self.payload[3] << 0x08 | self.payload[4]
         strikes = self.payload[5]
         max_strikes = self.payload[6]
+        solved_puzzle_modules = self.payload[7]
 
-        return f'{timeleft/1000:3.2f} {strikes:02}/{max_strikes:02}'
+        return f'{timeleft/1000:3.2f} {strikes:02}/{max_strikes:02} [{solved_puzzle_modules:02}]'
 
     def parse_message(self):
         sender_type = self.sender_type()
