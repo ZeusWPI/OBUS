@@ -35,6 +35,7 @@
 #define OBUS_PAYLDTYPE_GAMESTATUS 1
 #define OBUS_PAYLDTYPE_COUNT      2
 #define OBUS_PAYLDTYPE_INFO       3
+#define OBUS_PAYLDTYPE_MODULEADDR 4
 
 #define OBUS_PAYLD_INFO_MAXLEN (OBUS_MSG_LENGTH - 1)
 
@@ -50,6 +51,7 @@ struct payld_gamestatus {
 	uint32_t time_left;
 	uint8_t strikes;
 	uint8_t max_strikes;
+	uint8_t puzzle_modules_solved;
 };
 struct payld_infomessage {
 	uint8_t len;
@@ -66,6 +68,7 @@ struct message {
 		struct payld_gamestatus gamestatus;
 		uint8_t count;
 		struct payld_infomessage infomessage;
+		struct module payload_address;
 	};
 };
 
@@ -126,12 +129,13 @@ inline struct message _msg(struct module from, bool priority, uint8_t msg_type) 
  */
 inline void _send_payld_gamestatus(
 		struct module from, bool priority, uint8_t msg_type,
-		uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
+		uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved) {
 
 	struct message msg = _msg(from, priority, msg_type);
 	msg.gamestatus.time_left = time_left;
 	msg.gamestatus.strikes = strikes;
 	msg.gamestatus.max_strikes = max_strikes;
+	msg.gamestatus.puzzle_modules_solved = puzzle_modules_solved;
 	send(&msg);
 }
 
@@ -140,9 +144,10 @@ inline void _send_payld_gamestatus(
 /**
  * Send a controller "ACK" OBUS message
  */
-inline void send_c_ack(struct module from) {
+inline void send_c_ack(struct module from, struct module payload_address) {
 	assert(from.type == OBUS_TYPE_CONTROLLER);
 	struct message msg = _msg(from, false, OBUS_MSGTYPE_C_ACK);
+	msg.payload_address = payload_address;
 	send(&msg);
 }
 
@@ -160,44 +165,44 @@ inline void send_c_hello(struct module from) {
  * Send a controller "game start" OBUS message
  */
 inline void send_c_gamestart(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
+		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved) {
 
 	assert(from.type == OBUS_TYPE_CONTROLLER);
 	_send_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_GAMESTART, time_left, strikes, max_strikes);
+			from, false, OBUS_MSGTYPE_C_GAMESTART, time_left, strikes, max_strikes, puzzle_modules_solved);
 }
 
 /**
  * Send a controller "state" OBUS message
  */
 inline void send_c_state(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
+		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved) {
 
 	assert(from.type == OBUS_TYPE_CONTROLLER);
 	_send_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_STATE, time_left, strikes, max_strikes);
+			from, false, OBUS_MSGTYPE_C_STATE, time_left, strikes, max_strikes, puzzle_modules_solved);
 }
 
 /**
  * Send a controller "solved" OBUS message
  */
 inline void send_c_solved(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
+		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved) {
 
 	assert(from.type == OBUS_TYPE_CONTROLLER);
 	_send_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_SOLVED, time_left, strikes, max_strikes);
+			from, false, OBUS_MSGTYPE_C_SOLVED, time_left, strikes, max_strikes, puzzle_modules_solved);
 }
 
 /**
  * Send a controller "timeout" OBUS message
  */
 inline void send_c_timeout(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
+		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved) {
 
 	assert(from.type == OBUS_TYPE_CONTROLLER);
 	_send_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_TIMEOUT, time_left, strikes, max_strikes);
+			from, false, OBUS_MSGTYPE_C_TIMEOUT, time_left, strikes, max_strikes, puzzle_modules_solved);
 }
 
 /**
@@ -213,11 +218,11 @@ inline void send_c_infostart(struct module from) {
  * Send a controller "strikeout" OBUS message
  */
 inline void send_c_strikeout(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes) {
+		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved) {
 
 	assert(from.type == OBUS_TYPE_CONTROLLER);
 	_send_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_STRIKEOUT, time_left, strikes, max_strikes);
+			from, false, OBUS_MSGTYPE_C_STRIKEOUT, time_left, strikes, max_strikes, puzzle_modules_solved);
 }
 
 
@@ -265,6 +270,10 @@ inline void send_i_infomessage(struct module from, uint8_t *data, uint8_t data_l
 	memset(msg.infomessage.data, 0, OBUS_PAYLD_INFO_MAXLEN);
 	memcpy(msg.infomessage.data, data, data_len);
 	send(&msg);
+}
+
+inline bool is_from_controller(struct module from) {
+	return from.type == OBUS_TYPE_CONTROLLER && from.id == OBUS_CONTROLLER_ID;
 }
 
 }

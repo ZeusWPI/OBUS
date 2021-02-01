@@ -58,8 +58,9 @@ void loop() {
 	}
 }
 
-void callback_game_start() {
-
+void callback_game_start(uint8_t puzzle_modules_connected) {
+	// Intentionally emtpy
+	(void)puzzle_modules_connected;
 }
 
 void callback_game_stop() {

@@ -18,7 +18,7 @@ uint8_t shiftInFixed(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder) {
 	 else
 	 	value |= digitalRead(dataPin) << (7 - i);
 	 digitalWrite(clockPin, HIGH);
-	 delay(1);
+	 delayMicroseconds(3);
 	 digitalWrite(clockPin, LOW);
  }
  return value;
@@ -50,7 +50,7 @@ void loop() // run over and over
 {
 	// read data in
 	digitalWrite(READ_PIN, HIGH);
-	delay(200);
+	delayMicroseconds(3);
 	digitalWrite(READ_PIN, LOW);
 
 	// shift data bit by bit
