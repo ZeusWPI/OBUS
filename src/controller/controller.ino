@@ -28,6 +28,7 @@ uint8_t state = STATE_INACTIVE;
 struct obus_can::module connected_modules_ids[OBUS_MAX_MODULES];
 uint8_t nr_connected_modules;
 uint8_t nr_connected_puzzles;
+uint8_t nr_solved_puzzles;
 uint8_t strikes;
 
 // Bitvector for checking if game is solved or not
@@ -86,6 +87,9 @@ void add_puzzle_to_bit_vector(uint8_t module_id) {
 void solve_puzzle_in_bit_vector(uint8_t module_id) {
 	uint8_t byte_index = module_id >> 3;
 	uint8_t bit_index = module_id & 0x07;
+	if (unsolved_puzzles[byte_index] & (0x1 << bit_index)) {
+		nr_solved_puzzles++;
+	}
 	unsolved_puzzles[byte_index] &= ~(0x1 << bit_index);
 }
 
@@ -176,6 +180,7 @@ void receive_hello() {
 
 void initialize_game() {
 	strikes = 0;
+	nr_solved_puzzles = 0;
 	game_start = millis();
 
 	last_draw = 0;
@@ -185,7 +190,7 @@ void initialize_game() {
 	Serial.println("  Game started");
 
 	draw_display(millis(), OBUS_GAME_DURATION_MS);
-	obus_can::send_c_gamestart(this_module, OBUS_GAME_DURATION_MS, strikes, OBUS_MAX_STRIKES);
+	obus_can::send_c_gamestart(this_module, OBUS_GAME_DURATION_MS, strikes, OBUS_MAX_STRIKES, nr_connected_puzzles);
 }
 
 
@@ -241,14 +246,14 @@ void game_loop() {
 
 	if (check_solved()) {
 		Serial.println("  Game solved");
-		obus_can::send_c_solved(this_module, time_left, strikes, OBUS_MAX_STRIKES);
+		obus_can::send_c_solved(this_module, time_left, strikes, OBUS_MAX_STRIKES, nr_solved_puzzles);
 		state = STATE_GAMEOVER;
 		tm.displayText("dISArmEd");
 		return;
 	}
 	if (time_left == 0) {
 		Serial.println("  Time's up");
-		obus_can::send_c_timeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
+		obus_can::send_c_timeout(this_module, time_left, strikes, OBUS_MAX_STRIKES, nr_solved_puzzles);
 		state = STATE_GAMEOVER;
 		tm.displayText(" boo   t");
 		// m
@@ -258,7 +263,7 @@ void game_loop() {
 	}
 	if (strikes >= OBUS_MAX_STRIKES) {
 		Serial.println("  Strikeout");
-		obus_can::send_c_strikeout(this_module, time_left, strikes, OBUS_MAX_STRIKES);
+		obus_can::send_c_strikeout(this_module, time_left, strikes, OBUS_MAX_STRIKES, nr_solved_puzzles);
 		state = STATE_GAMEOVER;
 		tm.displayText(" boo   S");
 		// m
@@ -270,7 +275,7 @@ void game_loop() {
 	draw_display(current_time, time_left);
 
 	if (last_update + OBUS_UPDATE_INTERVAL <= current_time) {
-		obus_can::send_c_state(this_module, time_left, strikes, OBUS_MAX_STRIKES);
+		obus_can::send_c_state(this_module, time_left, strikes, OBUS_MAX_STRIKES, nr_solved_puzzles);
 		last_update = current_time;
 	}
 }

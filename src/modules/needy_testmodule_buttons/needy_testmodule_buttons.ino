@@ -20,7 +20,7 @@ uint32_t next_activation_time = 0;
 uint32_t trigger_time = 0;
 
 void loop() {
-	bool is_message_valid = obus_module::loopNeedy(&message, callback_game_start, callback_game_stop, callback_info);
+	bool is_message_valid = obus_module::loopNeedy(&message, callback_game_start, callback_game_stop);
 	green_button.loop();
 
 	// Every second, have a 1/20 chance to trigger the countdown
@@ -58,14 +58,11 @@ void loop() {
 	}
 }
 
-void callback_game_start() {
-
+void callback_game_start(uint8_t puzzle_modules_connected) {
+	// Intentionally emtpy
+	(void)puzzle_modules_connected;
 }
 
 void callback_game_stop() {
 
-}
-
-void callback_info(uint8_t info_id, uint8_t [7]) {
-	// Intentionally empty
 }

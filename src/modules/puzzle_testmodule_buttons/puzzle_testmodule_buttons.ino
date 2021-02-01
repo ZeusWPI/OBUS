@@ -27,7 +27,7 @@ void setup() {
 obus_can::message message;
 
 void loop() {
-	bool received = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop, callback_info);
+	bool received = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
 	// TODO handle update frames (not needed for this module, but could be useful as example code)
 
 	red_button.loop();
@@ -58,15 +58,12 @@ void loop() {
 	digitalWrite(BLUE_LED, blue_state);
 }
 
-void callback_game_start() {
+void callback_game_start(uint8_t puzzle_modules_connected) {
+  (void)puzzle_modules_connected;
 	blue_state = random(0, 2);
 	checking_input = true;
 }
 
 void callback_game_stop() {
 	blue_state = checking_input = false;
-}
-
-void callback_info(uint8_t info_id, uint8_t [7]) {
-	// Intentionally empty
 }

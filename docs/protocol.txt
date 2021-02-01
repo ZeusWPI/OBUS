@@ -51,19 +51,19 @@ Types for controller:
     - 2 game start
       [ X B B B  B B B B ]
           -------- - - -
-         time left ↓ ↓ reserved
+         time left ↓ ↓ #puzzle modules
             #strikes #max strikes
 
     - 3 state (every x ms – e.g. in the middle of each second)
       [ X B B B  B B B B ]
           -------- - - -
-         time left ↓ ↓ reserved
+         time left ↓ ↓ #solved puzzle modules
             #strikes #max strikes
 
     - 4-6 solved, timeout, strikeout
       [ X B B B  B B B B ]
           -------- - - -
-          end time ↓ ↓ reserved
+          end time ↓ ↓ #solved puzzle modules
             #strikes #max strikes
 
     - 7 info start
