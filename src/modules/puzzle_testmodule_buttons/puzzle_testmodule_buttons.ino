@@ -34,7 +34,7 @@ void loop() {
 	red_button.loop();
 	green_button.loop();
 
-	// Check if this module is active: the timer is counting down and this modules hasn't been solved yet
+	// Check if this module is active: the timer is counting down and this module hasn't been solved yet
 	if (obus_module::is_active()) {
 		if (red_button.getCount() > 0) {
 			if (blue_state) {
@@ -59,8 +59,8 @@ void loop() {
 }
 
 void callback_game_start(uint8_t puzzle_modules_connected) {
-	// Ignore the amounf of puzzle modules connected
-  (void)puzzle_modules_connected;
+	// Ignore the amount of puzzle modules connected
+	(void)puzzle_modules_connected;
 	blue_state = random(0, 2);
 }
 
