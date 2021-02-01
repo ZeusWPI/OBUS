@@ -1,6 +1,6 @@
 ## Testmodule buttons
 
-Don't press the red button. Press the green button to solve the module.
+If the blue LED is lit, press the green button, otherwise press the red button.
 
 ### Credits
 Module developed by redfast00.
