@@ -9,9 +9,6 @@
 
 #define MAX_TIME_BETWEEN_CALLS 100
 
-// Not used normally
-#define MCP_INT 2
-
 #define COLOR_OFF    ((struct color) {false, false})
 #define COLOR_RED    ((struct color) {true,  false})
 #define COLOR_GREEN  ((struct color) {false, true})
