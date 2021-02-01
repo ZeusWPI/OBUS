@@ -136,8 +136,9 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 		blink_error(F("E CAN error"));
 	}
 
+	// Force the user of the library to periodically call loop
 	if (next_loop_call_deadline != 0 && millis() > next_loop_call_deadline) {
-		blink_error(F("E missed deadline"));
+		blink_error(F("E Missed loop deadline"));
 	}
 	next_loop_call_deadline = millis() + MAX_TIME_BETWEEN_CALLS;
 
