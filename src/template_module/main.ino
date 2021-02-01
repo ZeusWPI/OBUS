@@ -16,8 +16,8 @@ void setup() {
 obus_can::message message;
 
 void loop() {
-	bool is_message_valid = obus_module::loop_puzzle(&message, callback_game_start, callback_game_stop, callback_info);
-	// bool is_message_valid = obus_module::loop_needy(&message, callback_game_start, callback_game_stop, callback_info);
+	bool is_message_valid = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
+	// bool is_message_valid = obus_module::loopNeedy(&message, callback_game_start, callback_game_stop);
 }
 
 void callback_game_start() {
@@ -25,9 +25,5 @@ void callback_game_start() {
 }
 
 void callback_game_stop() {
-
-}
-
-void callback_info(uint8_t info_id, uint8_t [7]) {
 
 }
