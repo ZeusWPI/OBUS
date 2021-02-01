@@ -27,3 +27,26 @@ void pack_u16_into_2b(uint8_t *dest, uint16_t data) {
 	dest[0] = (uint8_t) ((data & 0xFF00) >> 0x08);
 	dest[1] = (uint8_t)  (data & 0x00FF);
 }
+
+
+bool Debounced::loop(bool currently_down) {
+	uint32_t now = millis();
+	if (currently_down) {
+		press_last_detected = now;
+		if (!pressing) {
+			// Start of new button press
+			pressing = true;
+			press_count++;
+			return true;
+		}
+	} else {
+		if (pressing && now > press_last_detected + debounce) {
+			pressing = false;
+		}
+	}
+	return false;
+}
+
+uint16_t Debounced::get_press_count() {
+	return press_count;
+}

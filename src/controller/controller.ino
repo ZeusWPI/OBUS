@@ -1,4 +1,5 @@
 #include <obus_can.h>
+#include <obus_util.h>
 #include <TM1638plus.h>
 
 
@@ -13,15 +14,20 @@
 
 #define OBUS_MAX_MODULES      16
 #define OBUS_INFO_DURATION     3 // Duration of discovery round in seconds
-#define OBUS_DISC_DURATION     5 // Duration of discovery round in seconds
 #define OBUS_UPDATE_INTERVAL 500 // Number of milliseconds between game updates
 
 #define OBUS_GAME_DURATION_MS ((uint32_t) OBUS_GAME_DURATION*1000)
-#define OBUS_DISC_DURATION_MS ((uint32_t) OBUS_DISC_DURATION*1000)
 #define OBUS_INFO_DURATION_MS ((uint32_t) OBUS_INFO_DURATION*1000)
 
 #define DIVIDE_CEIL(dividend, divisor) ((dividend + (divisor - 1)) / divisor)
 #define MAX_AMOUNT_PUZZLES 256 // The ID of a puzzle is uint8
+
+
+// buttons contains a byte with values of button s8s7s6s5s4s3s2s1
+#define BUTTON_BITMASK(button_id) (1 << (button_id - 1))
+#define BUTTON_LESS_TIME  BUTTON_BITMASK(1)
+#define BUTTON_MORE_TIME  BUTTON_BITMASK(2)
+#define BUTTON_STARTPAUSE BUTTON_BITMASK(8)
 
 
 uint8_t state = STATE_INACTIVE;
@@ -53,7 +59,9 @@ struct obus_can::module this_module = {
 #define  CLOCK_TM 6
 #define  DIO_TM 7
 #define  HI_FREQ false // If using a high freq CPU > ~100 MHZ set to true.
-TM1638plus tm(STROBE_TM, CLOCK_TM , DIO_TM, HI_FREQ);
+TM1638plus tm(STROBE_TM, CLOCK_TM, DIO_TM, HI_FREQ);
+
+Debounced startpauseButton;
 
 
 void setup() {
@@ -94,7 +102,7 @@ void start_info() {
 	info_round_start = millis();
 	obus_can::send_c_infostart(this_module);
 	Serial.println(F("  Start of info round"));
-	tm.displayText("InFO");
+	tm.displayText("InFO    ");
 }
 
 void wait_info() {
@@ -132,12 +140,22 @@ uint16_t full_module_id(struct obus_can::module mod) {
 }
 
 
+boolean module_is_connected(struct obus_can::module mod) {
+	for (int i = 0; i < nr_connected_modules; i++) {
+		if (connected_modules_ids[i].type == mod.type &&
+				connected_modules_ids[i].id == mod.id) {
+			return true;
+		}
+	}
+	return false;
+}
+
+
 void receive_hello() {
 	struct obus_can::message msg;
-	uint32_t current_time = millis();
 
 	if (obus_can::receive(&msg)) {
-		if (msg.msg_type == OBUS_MSGTYPE_M_HELLO) {
+		if (msg.msg_type == OBUS_MSGTYPE_M_HELLO && !module_is_connected(msg.from)) {
 			if (nr_connected_modules < OBUS_MAX_MODULES) {
 				Serial.print(F("  Registered module "));
 				Serial.println(full_module_id(msg.from));
@@ -160,21 +178,16 @@ void receive_hello() {
 			obus_can::send_c_ack(this_module);
 			Serial.println("  ACK");
 		}
-
-	} else if (current_time - hello_round_start > OBUS_DISC_DURATION_MS) {
-		if (nr_connected_puzzles == 0) {
-			hello_round_start = current_time;
-			obus_can::send_c_hello(this_module);
-			Serial.println(F("  No puzzle modules, resend hello"));
-		} else {
-			Serial.println(F("  End of discovery round"));
-			initialize_game();
-		}
 	}
 }
 
 
 void initialize_game() {
+	if (nr_connected_puzzles == 0) {
+		Serial.println("W Can't start: no puzzle modules");
+		return;
+	}
+
 	strikes = 0;
 	game_start = millis();
 
@@ -276,7 +289,37 @@ void game_loop() {
 }
 
 
+void read_buttons() {
+	uint8_t buttons = tm.readButtons();
+
+	if (startpauseButton.loop(buttons & BUTTON_STARTPAUSE)) {
+		switch (state) {
+			case STATE_HELLO:
+				Serial.println(F("  Pressed start"));
+				initialize_game();
+				break;
+
+			case STATE_GAME:
+				Serial.println(F("  Aborted"));
+				state = STATE_GAMEOVER;
+				tm.displayText("AbortEd ");
+				break;
+
+			case STATE_GAMEOVER:
+				state = STATE_INACTIVE;
+				break;
+
+			default:
+				Serial.println(F("W Can't start/pause in current state"));
+				break;
+		}
+	}
+}
+
+
 void loop() {
+	read_buttons();
+
 	switch (state) {
 		case STATE_INACTIVE:
 			start_info();
@@ -295,6 +338,11 @@ void loop() {
 			break;
 
 		case STATE_GAMEOVER:
+			break;
+
+		default:
+			Serial.print(F("E Unhandled game state in loop:"));
+			Serial.println(state);
 			break;
 	}
 }
