@@ -57,13 +57,13 @@ Types for controller:
     - 3 state (every x ms – e.g. in the middle of each second)
       [ X B B B  B B B B ]
           -------- - - -
-         time left ↓ ↓ #solved puzzle modules
+         time left ↓ ↓ #puzzle modules left
             #strikes #max strikes
 
     - 4-6 solved, timeout, strikeout
       [ X B B B  B B B B ]
           -------- - - -
-          end time ↓ ↓ #solved puzzle modules
+          end time ↓ ↓ #puzzle modules left
             #strikes #max strikes
 
     - 7 info start

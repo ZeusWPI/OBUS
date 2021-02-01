@@ -108,12 +108,12 @@ void empty_callback_info(uint8_t info_id, uint8_t infomessage[7]) {
 	(void)infomessage;
 }
 
-void empty_callback_state(uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved) {
+void empty_callback_state(uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_left) {
 	// Mark arguments as not used
 	(void)time_left;
 	(void)strikes;
 	(void)max_strikes;
-	(void)puzzle_modules_solved;
+	(void)puzzle_modules_left;
 }
 
 void blink_error(String message) {
@@ -127,7 +127,7 @@ void blink_error(String message) {
 	}
 }
 
-bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t puzzle_modules), void (*callback_game_stop)(), void (*callback_info)(uint8_t info_id, uint8_t infomessage[7]), void (*callback_state)(uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved)) {
+bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t puzzle_modules), void (*callback_game_stop)(), void (*callback_info)(uint8_t info_id, uint8_t infomessage[7]), void (*callback_state)(uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_left)) {
 	// TODO this can be more efficient by only enabling error interrupts and
 	//  reacting to the interrupt instead of checking if the flag is set in a loop
 	// We will need to fork our CAN library for this, because the needed functions are private.
@@ -150,8 +150,7 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 				case OBUS_MSGTYPE_C_GAMESTART:
 					active = true;
 					_setLed(COLOR_YELLOW);
-					// The field is named puzzle_modules_solved, but it actually contains the amount of puzzle modules
-					callback_game_start(message->gamestatus.puzzle_modules_solved);
+					callback_game_start(message->gamestatus.puzzle_modules_left);
 					break;
 				case OBUS_MSGTYPE_C_HELLO:
 					_resetState();
@@ -167,7 +166,7 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 				case OBUS_MSGTYPE_C_ACK:
 					break;
 				case OBUS_MSGTYPE_C_STATE:
-					callback_state(message->gamestatus.time_left, message->gamestatus.strikes, message->gamestatus.max_strikes, message->gamestatus.puzzle_modules_solved);
+					callback_state(message->gamestatus.time_left, message->gamestatus.strikes, message->gamestatus.max_strikes, message->gamestatus.puzzle_modules_left);
 					break;
 				default:
 					break;
@@ -184,7 +183,7 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 	return received_message;
 }
 
-bool loopNeedy(obus_can::message* message, void (*callback_game_start)(uint8_t puzzle_modules), void (*callback_game_stop)(), void (*callback_info)(uint8_t info_id, uint8_t infomessage[7]), void (*callback_state)(uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved)) {
+bool loopNeedy(obus_can::message* message, void (*callback_game_start)(uint8_t puzzle_modules), void (*callback_game_stop)(), void (*callback_info)(uint8_t info_id, uint8_t infomessage[7]), void (*callback_state)(uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_left)) {
 	// For now this is the same function
 	return loopPuzzle(message, callback_game_start, callback_game_stop, callback_info, callback_state);
 }

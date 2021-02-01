@@ -118,10 +118,10 @@ bool receive(struct message *msg) {
 				Serial.println(F("W Received illegal gamestatus msg: payload <8"));
 				return false;
 			}
-			msg->gamestatus.time_left             = unpack_4b_into_u32(&(receive_frame.data[1]));
-			msg->gamestatus.strikes               = receive_frame.data[5];
-			msg->gamestatus.max_strikes           = receive_frame.data[6];
-			msg->gamestatus.puzzle_modules_solved = receive_frame.data[7];
+			msg->gamestatus.time_left           = unpack_4b_into_u32(&(receive_frame.data[1]));
+			msg->gamestatus.strikes             = receive_frame.data[5];
+			msg->gamestatus.max_strikes         = receive_frame.data[6];
+			msg->gamestatus.puzzle_modules_left = receive_frame.data[7];
 			break;
 
 		case OBUS_PAYLDTYPE_COUNT:
@@ -187,7 +187,7 @@ void send(struct message *msg) {
 			pack_u32_into_4b(&(send_frame.data[1]), msg->gamestatus.time_left);
 			send_frame.data[5] = msg->gamestatus.strikes;
 			send_frame.data[6] = msg->gamestatus.max_strikes;
-			send_frame.data[7] = msg->gamestatus.puzzle_modules_solved;
+			send_frame.data[7] = msg->gamestatus.puzzle_modules_left;
 			length = 8;
 			break;
 

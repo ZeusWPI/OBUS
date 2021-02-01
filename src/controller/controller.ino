@@ -20,7 +20,7 @@
 #define OBUS_INFO_DURATION_MS ((uint32_t) OBUS_INFO_DURATION*1000)
 
 #define DIVIDE_CEIL(dividend, divisor) ((dividend + (divisor - 1)) / divisor)
-#define MAX_AMOUNT_PUZZLES 256 // The ID of a puzzle is uint8
+#define MAX_AMOUNT_PUZZLES (UINT8_MAX + 1) // The ID of a puzzle is a zero-based uint8
 
 
 // buttons contains a byte with values of button s8s7s6s5s4s3s2s1
