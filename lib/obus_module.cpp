@@ -1,8 +1,8 @@
 #include "obus_can.h"
 #include "obus_module.h"
 
-#define RED_LED 4
-#define GREEN_LED 7
+#define PIN_LED_RED 4
+#define PIN_LED_GREEN 7
 
 #define BLINK_DELAY_SLOW 1000
 #define BLINK_DELAY_FAST 300
@@ -36,8 +36,8 @@ void _setLed(struct color color) {
 	blink_delay = 0;
 	led_reset_time = 0;
 
-	digitalWrite(RED_LED, color.red ? HIGH : LOW);
-	digitalWrite(GREEN_LED, color.green ? HIGH : LOW);
+	digitalWrite(PIN_LED_RED, color.red ? HIGH : LOW);
+	digitalWrite(PIN_LED_GREEN, color.green ? HIGH : LOW);
 }
 
 void _ledLoop() {
@@ -55,11 +55,11 @@ void _ledLoop() {
 	if (blink_delay && millis() > blink_next_time) {
 		blink_led_lit = !blink_led_lit;
 		if (blink_led_lit) {
-			digitalWrite(RED_LED, led_color.red ? HIGH : LOW);
-			digitalWrite(GREEN_LED, led_color.green ? HIGH : LOW);
+			digitalWrite(PIN_LED_RED, led_color.red ? HIGH : LOW);
+			digitalWrite(PIN_LED_GREEN, led_color.green ? HIGH : LOW);
 		} else {
-			digitalWrite(RED_LED, false);
-			digitalWrite(GREEN_LED, false);
+			digitalWrite(PIN_LED_RED, false);
+			digitalWrite(PIN_LED_GREEN, false);
 		}
 
 		blink_next_time = millis() + blink_delay;
@@ -83,8 +83,8 @@ void _resetState() {
 	next_loop_call_deadline = 0;
 
 	if (this_module.type == OBUS_TYPE_PUZZLE || this_module.type == OBUS_TYPE_NEEDY) {
-		pinMode(RED_LED, OUTPUT);
-		pinMode(GREEN_LED, OUTPUT);
+		pinMode(PIN_LED_RED, OUTPUT);
+		pinMode(PIN_LED_GREEN, OUTPUT);
 
 		_setLedBlink(COLOR_GREEN, BLINK_DELAY_SLOW);
 	}
@@ -116,8 +116,8 @@ void empty_callback_state(uint32_t time_left, uint8_t strikes, uint8_t max_strik
 void blink_error(String message) {
 	bool blink = false;
 	while (true) {
-		digitalWrite(RED_LED, blink);
-		digitalWrite(GREEN_LED, blink);
+		digitalWrite(PIN_LED_RED, blink);
+		digitalWrite(PIN_LED_GREEN, blink);
 		blink = !blink;
 		delay(blink ? BLINK_DELAY_SLOW : BLINK_DELAY_FAST);
 		Serial.println(message);

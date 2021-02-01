@@ -4,9 +4,10 @@
 #include <obus_module.h>
 #include <ezButton.h>
 
-#define SPEAKER_PIN 10
+#define PIN_GREEN_BUTTON 6
+#define PIN_SPEAKER     10
 
-ezButton green_button(6);
+ezButton green_button(PIN_GREEN_BUTTON);
 
 void setup() {
 	Serial.begin(115200);
@@ -49,12 +50,12 @@ void loop() {
 
 	// Play the appropriate sound
 	if (trigger_time && millis() > trigger_time - 15000) {
-		tone(SPEAKER_PIN, 440);
+		tone(PIN_SPEAKER, 440);
 	}
 	else if (trigger_time) {
-		tone(SPEAKER_PIN, 449);
+		tone(PIN_SPEAKER, 449);
 	} else {
-		noTone(SPEAKER_PIN);
+		noTone(PIN_SPEAKER);
 	}
 }
 

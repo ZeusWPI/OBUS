@@ -2,16 +2,19 @@
 // See the LICENSE file for conditions for copying
 
 
-// A red button connected to pin 5
-// A green button connected to pin 6
-// A blue led (with 330 ohm resistor) connected to pin 9
+// A red button
+// A green button
+// A blue led (with 330 ohm resistor)
 
 #include <obus_module.h>
 #include <ezButton.h>
 
-#define BLUE_LED 9
-ezButton red_button(5);
-ezButton green_button(6);
+#define PIN_RED_BUTTON   5
+#define PIN_GREEN_BUTTON 6
+#define PIN_LED_BLUE     9
+
+ezButton red_button(PIN_RED_BUTTON);
+ezButton green_button(PIN_GREEN_BUTTON);
 
 bool blue_state = false;
 bool checking_input = false;

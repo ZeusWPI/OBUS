@@ -56,11 +56,11 @@ struct obus_can::module this_module = {
 
 
 // For the display/button chip
-#define  STROBE_TM 4
-#define  CLOCK_TM 6
-#define  DIO_TM 7
+#define  PIN_STROBE_TM 4
+#define  PIN_CLOCK_TM 6
+#define  PIN_DIO_TM 7
 #define  HI_FREQ false // If using a high freq CPU > ~100 MHZ set to true.
-TM1638plus tm(STROBE_TM, CLOCK_TM, DIO_TM, HI_FREQ);
+TM1638plus tm(PIN_STROBE_TM, PIN_CLOCK_TM, PIN_DIO_TM, HI_FREQ);
 
 Debounced startpauseButton;
 
