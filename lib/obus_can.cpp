@@ -42,6 +42,8 @@ uint8_t payload_type(uint8_t module_type, uint8_t module_id, uint8_t msg_type) {
 				return OBUS_PAYLDTYPE_EMPTY;
 
 			case OBUS_MSGTYPE_C_GAMESTART:
+				return OBUS_PAYLDTYPE_GAMESTART;
+
 			case OBUS_MSGTYPE_C_STATE:
 			case OBUS_MSGTYPE_C_SOLVED:
 			case OBUS_MSGTYPE_C_TIMEOUT:
@@ -113,6 +115,17 @@ bool receive(struct message *msg) {
 		case OBUS_PAYLDTYPE_EMPTY:
 			break;
 
+		case OBUS_PAYLDTYPE_GAMESTART:
+			if (receive_frame.can_dlc < 8) {
+				Serial.println(F("W Received illegal gamestatus msg: payload <8"));
+				return false;
+			}
+			msg->gamestart.time_left                = unpack_4b_into_u32(&(receive_frame.data[1]));
+			msg->gamestart.strikes                  = receive_frame.data[5];
+			msg->gamestart.max_strikes              = receive_frame.data[6];
+			msg->gamestart.puzzle_modules_connected = 1 + (uint16_t) receive_frame.data[7];
+			break;
+
 		case OBUS_PAYLDTYPE_GAMESTATUS:
 			if (receive_frame.can_dlc < 8) {
 				Serial.println(F("W Received illegal gamestatus msg: payload <8"));
@@ -181,6 +194,13 @@ void send(struct message *msg) {
 	uint8_t pyld_type = payload_type(msg->from.type, msg->from.id, msg->msg_type);
 	switch (pyld_type) {
 		case OBUS_PAYLDTYPE_EMPTY:
+			break;
+
+		case OBUS_PAYLDTYPE_GAMESTART:
+			pack_u32_into_4b(&(send_frame.data[1]), msg->gamestatus.time_left);
+			send_frame.data[5] = msg->gamestatus.strikes;
+			send_frame.data[6] = msg->gamestatus.max_strikes;
+			length = 7;
 			break;
 
 		case OBUS_PAYLDTYPE_GAMESTATUS:

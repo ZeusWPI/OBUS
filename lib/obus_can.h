@@ -36,6 +36,7 @@
 #define OBUS_PAYLDTYPE_COUNT      2
 #define OBUS_PAYLDTYPE_INFO       3
 #define OBUS_PAYLDTYPE_MODULEADDR 4
+#define OBUS_PAYLDTYPE_GAMESTART  5
 
 #define OBUS_PAYLD_INFO_MAXLEN (OBUS_MSG_LENGTH - 1)
 
@@ -47,6 +48,12 @@ struct module {
 };
 
 struct payld_empty {};
+struct payld_gamestart {
+	uint32_t time_left;
+	uint8_t strikes;
+	uint8_t max_strikes;
+	uint16_t puzzle_modules_connected; // uint16 because the range is 1 through 256 inclusive
+};
 struct payld_gamestatus {
 	uint32_t time_left;
 	uint8_t strikes;
@@ -65,6 +72,7 @@ struct message {
 	uint8_t msg_type;
 	union {
 		struct payld_empty empty;
+		struct payld_gamestart gamestart;
 		struct payld_gamestatus gamestatus;
 		uint8_t count;
 		struct payld_infomessage infomessage;
@@ -165,11 +173,17 @@ inline void send_c_hello(struct module from) {
  * Send a controller "game start" OBUS message
  */
 inline void send_c_gamestart(
-		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_solved) {
+		struct module from, uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint16_t puzzle_modules_connected) {
 
 	assert(from.type == OBUS_TYPE_CONTROLLER);
-	_send_payld_gamestatus(
-			from, false, OBUS_MSGTYPE_C_GAMESTART, time_left, strikes, max_strikes, puzzle_modules_solved);
+	assert(puzzle_modules_connected - 1 <= UINT8_MAX);
+
+	struct message msg = _msg(from, false, OBUS_MSGTYPE_C_GAMESTART);
+	msg.gamestart.time_left = time_left;
+	msg.gamestart.strikes = strikes;
+	msg.gamestart.max_strikes = max_strikes;
+	msg.gamestart.puzzle_modules_connected = (uint8_t) (puzzle_modules_connected - 1);
+	send(&msg);
 }
 
 /**
