@@ -36,6 +36,7 @@
 #define OBUS_PAYLDTYPE_COUNT      2
 #define OBUS_PAYLDTYPE_INFO       3
 #define OBUS_PAYLDTYPE_MODULEADDR 4
+#define OBUS_PAYLDTYPE_INFOSTART  5
 
 #define OBUS_PAYLD_INFO_MAXLEN (OBUS_MSG_LENGTH - 1)
 
@@ -57,6 +58,9 @@ struct payld_infomessage {
 	uint8_t len;
 	uint8_t data[OBUS_PAYLD_INFO_MAXLEN];
 };
+struct payld_infostart {
+	uint32_t seed;
+};
 
 
 struct message {
@@ -69,6 +73,7 @@ struct message {
 		uint8_t count;
 		struct payld_infomessage infomessage;
 		struct module payload_address;
+		struct payld_infostart infostart;
 	};
 };
 
@@ -208,9 +213,10 @@ inline void send_c_timeout(
 /**
  * Send a controller "info start" OBUS message
  */
-inline void send_c_infostart(struct module from) {
+inline void send_c_infostart(struct module from, uint32_t seed) {
 	assert(from.type == OBUS_TYPE_CONTROLLER);
 	struct message msg = _msg(from, false, OBUS_MSGTYPE_C_INFOSTART);
+	msg.infostart.seed = seed;
 	send(&msg);
 }
 

@@ -48,6 +48,9 @@ uint8_t payload_type(uint8_t module_type, uint8_t module_id, uint8_t msg_type) {
 			case OBUS_MSGTYPE_C_STRIKEOUT:
 				return OBUS_PAYLDTYPE_GAMESTATUS;
 
+			case OBUS_MSGTYPE_C_INFOSTART:
+				return OBUS_PAYLDTYPE_INFOSTART;
+
 			default:
 				return false;
 				break;
@@ -142,11 +145,20 @@ bool receive(struct message *msg) {
 		case OBUS_PAYLDTYPE_MODULEADDR:
 			{
 				if (receive_frame.can_dlc < 3) {
-					Serial.println(F("W Received illegal count msg: payload <3"));
+					Serial.println(F("W Received illegal moduleaddr msg: payload <3"));
 					return false;
 				}
 				msg->payload_address.type = receive_frame.data[1];
 				msg->payload_address.id = receive_frame.data[2];
+			}
+			break;
+		case OBUS_PAYLDTYPE_INFOSTART:
+			{
+				if (receive_frame.can_dlc < 5) {
+					Serial.println(F("W Received illegal infostart msg: payload <5"));
+					return false;
+				}
+				msg->infostart.seed = unpack_4b_into_u32(&(receive_frame.data[1]));
 			}
 			break;
 		default:
@@ -204,6 +216,11 @@ void send(struct message *msg) {
 		case OBUS_PAYLDTYPE_MODULEADDR:
 			send_frame.data[1] = msg->payload_address.type;
 			send_frame.data[2] = msg->payload_address.id;
+		break;
+
+		case OBUS_PAYLDTYPE_INFOSTART:
+			pack_u32_into_4b(&(send_frame.data[1]), msg->gamestatus.time_left);
+			length = 5;
 		break;
 
 		default:

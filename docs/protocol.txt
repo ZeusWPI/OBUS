@@ -68,8 +68,9 @@ Types for controller:
 
     - 7 info start
       [ X B B B  B B B B ]
-          --------------
-             reserved
+          -------- -----
+              ↓    reserved
+       random seed
 
     - 8-255 reserved
 
