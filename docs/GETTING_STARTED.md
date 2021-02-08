@@ -93,10 +93,19 @@ same effect as just resetting the microcontroller, so if your state is too hard 
 
 - The setup code, initializing your microcontroller and setting the type and id of the module with `obus_module::setup`
 - The main loop code. This should call the `loopPuzzle` function frequently so that all CAN packets can be handled.
-If you are using calls to `delay()`, try to replace them with a timer (a variable that keeps track of when something should happen). That way the loop can continue executing, without being stuck in the `delay()` function.
 - A call to the `obus_module::solve` function
 - A description for the expert of how to defuse the module in `doc/index.md` of your module folder
-- The `callback_game_start`, `callback_game_stop` and `callback_info` functions. These can be empty.
+- The `callback_game_start` and `callback_game_stop` functions. These can be empty.
+
+Some tips:
+
+- If you are using calls to `delay()`, try to replace them with a timer (a variable that keeps track of when something should happen).
+  That way the function that handles CAN messages (`loopPuzzle`) can continue executing, without the microcontroller being stuck in the `delay()` function.
+	The `loopPuzzle` function will automatically put itself into an error state if it has been too long since it has been called. This is meant to make
+	writing correct code easier: that way you discover your code needs to be rewritten easily instead of having to figure out that and why messages are dropped.
+- Every time you play the game, it should be different (otherwise the defuser could just memorize what to do, this would be no fun for the experts).
+  To accomplish this, you can use the `random()` function. You don't need to seed it (we recommend against it), because the OBUS framework already
+	seeds this for you every game. That way, we can replay games for debugging if needed.
 
 ## More advanced puzzle modules
 

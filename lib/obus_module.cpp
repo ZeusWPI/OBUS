@@ -165,6 +165,9 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 				case OBUS_MSGTYPE_C_STATE:
 					callback_state(message->gamestatus.time_left, message->gamestatus.strikes, message->gamestatus.max_strikes, message->gamestatus.puzzle_modules_left);
 					break;
+				case OBUS_MSGTYPE_C_INFOSTART:
+					randomSeed(message->infostart.seed);
+					break;
 				default:
 					break;
 			}
@@ -192,6 +195,7 @@ bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 			switch (message->msg_type) {
 				case OBUS_MSGTYPE_C_INFOSTART:
 					{
+						randomSeed(message->infostart.seed);
 						uint8_t info_message[OBUS_PAYLD_INFO_MAXLEN];
 						int len = info_generator(info_message);
 						obus_can::send_i_infomessage(this_module, info_message, len);

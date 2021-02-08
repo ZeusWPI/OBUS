@@ -19,6 +19,9 @@
 #define OBUS_GAME_DURATION_MS ((uint32_t) OBUS_GAME_DURATION*1000)
 #define OBUS_INFO_DURATION_MS ((uint32_t) OBUS_INFO_DURATION*1000)
 
+// This should be changed every run, but for development it's useful to pin this
+#define OBUS_RANDOM_SEED 42
+
 #define DIVIDE_CEIL(dividend, divisor) ((dividend + (divisor - 1)) / divisor)
 #define MAX_AMOUNT_PUZZLES (UINT8_MAX + 1) // The ID of a puzzle is a zero-based uint8
 
@@ -104,7 +107,7 @@ void solve_puzzle_in_bit_vector(uint8_t module_id) {
 void start_info() {
 	state = STATE_INFO;
 	info_round_start = millis();
-	obus_can::send_c_infostart(this_module);
+	obus_can::send_c_infostart(this_module, OBUS_RANDOM_SEED);
 	Serial.println(F("  Start of info round"));
 	tm.displayText("InFO    ");
 }
