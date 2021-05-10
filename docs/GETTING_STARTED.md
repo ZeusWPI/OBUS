@@ -117,7 +117,7 @@ broadcast to all modules. That way, you can spice up your puzzle, for example by
 making the defuser press a button when the countdown timer has a `1` in it, or by
 having the instructions in the manual vary based on the amount of strikes.
 
-See `docs/snippet.timeleft.cpp` for how to use the time remaining on the countdown
+See `docs/snippet_timeleft.cpp` for how to use the time remaining on the countdown
 timer in your module.
 
 ### Using info modules in your puzzle/needy modules
