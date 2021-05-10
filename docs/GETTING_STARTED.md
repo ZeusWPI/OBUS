@@ -70,10 +70,10 @@ and when debugging a game.
 This is a description of a sample game with only one module: the `puzzle_testmodule_buttons`. When reading this part, it's useful to have the `puzzle_testmodule_buttons.ino` file next to you as well.
 
 We'll start this story from the start: the puzzle module boots up.
-It calls the `obus_module::setup` function to register it's module type and ID. It then keeps calling the `obus_module::loopPuzzle` in a loop.
+It calls the `obus_module::setup` function to register its module type and ID. It then keeps calling the `obus_module::loopPuzzle` in a loop.
 It's important that the `loopPuzzle` function is executed very frequently without delays: if this doesn't happen enough, important CAN messages can get dropped.
 
-Then after a while, a button gets pressed on the controller and the controller starts preparing to start the game. It first asks all info modules to broadcast their information. After some time, it then asks all puzzle/needy module to register themselves. The controller then confirms that that module will be active in the next round. After some time, the controller broadcasts that the game has started and starts counting down.
+Then after a while, a button gets pressed on the controller and the controller starts preparing to start the game. It first asks all info modules to broadcast their information. After some time, it then asks all puzzle/needy module to register themselves. The controller then confirms that that module will be active in the next round with an ACK message. After some time, the controller broadcasts that the game has started and starts counting down.
 
 This broadcasts is received on the puzzle module and results in the `callback_game_start` function getting called the next time the
 `obus::loopPuzzle` is called. The `callback_game_start` function is responsible for setting up the module for a new game. Here, we
@@ -112,12 +112,13 @@ Some tips:
 ### Receiving game updates
 
 It's possible to use the current state of the game in your module: the amount of
-strikes (in microseconds), amount of allowed strikes and time left regularly get
+strikes, amount of allowed strikes and time left (in milliseconds) regularly get
 broadcast to all modules. That way, you can spice up your puzzle, for example by
-making the defuser press a button when the timer has a `1` in it, or by
+making the defuser press a button when the countdown timer has a `1` in it, or by
 having the instructions in the manual vary based on the amount of strikes.
 
-TODO how will we do this?
+See `docs/snippet.timeleft.cpp` for how to use the time remaining on the countdown
+timer in your module.
 
 ### Using info modules in your puzzle/needy modules
 
