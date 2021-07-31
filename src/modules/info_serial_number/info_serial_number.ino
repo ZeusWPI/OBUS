@@ -52,12 +52,23 @@ void loop() {
 }
 
 int info_generator(uint8_t* buffer) {
+	uint8_t location_of_digit = random(SERIAL_NUMBER_SIZE);
+	uint8_t location_of_letter = random(SERIAL_NUMBER_SIZE);
+	if (location_of_digit == location_of_letter) {
+		location_of_letter = (location_of_letter + 1) % SERIAL_NUMBER_SIZE;
+	}
 	for (int i = 0; i < SERIAL_NUMBER_SIZE; i++) {
-		uint8_t generated = random(26 + 10);
-		if (generated < 26)
-			serial_number[i] = 'A' + generated;
-    else
-		  serial_number[i] = '0' + (generated - 26);
+		if (i == location_of_digit) {
+			serial_number[i] = '0' + random(10);
+		} else if (i == location_of_letter) {
+			serial_number[i] = 'A' + random(26);
+		} else {
+			uint8_t generated = random(26 + 10);
+			if (generated < 26)
+				serial_number[i] = 'A' + generated;
+	    else
+			  serial_number[i] = '0' + (generated - 26);
+		}	
 	}
 	memcpy(buffer, serial_number, SERIAL_NUMBER_SIZE);
 	render_now = true;
