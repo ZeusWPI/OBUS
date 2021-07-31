@@ -76,6 +76,16 @@ void _setLedBlink(struct color color, uint16_t delay) {
 	_ledLoop();
 }
 
+void blink_error(String message) {
+	bool blink = false;
+	while (true) {
+		digitalWrite(PIN_LED_RED, blink);
+		digitalWrite(PIN_LED_GREEN, blink);
+		blink = !blink;
+		delay(blink ? BLINK_DELAY_SLOW : BLINK_DELAY_FAST);
+		Serial.println(message);
+	}
+}
 
 void _resetState() {
 	strike_count = 0;
@@ -93,10 +103,11 @@ void _resetState() {
 void setup(uint8_t type, uint8_t id) {
 	this_module.type = type;
 	this_module.id = id;
-
-	obus_can::init();
-
 	_resetState();
+
+	if (!obus_can::init()) {
+		blink_error(F("CAN init failed"));
+	}
 }
 
 void empty_callback_info(uint8_t info_id, uint8_t infomessage[7]) {
@@ -111,17 +122,6 @@ void empty_callback_state(uint32_t time_left, uint8_t strikes, uint8_t max_strik
 	(void)strikes;
 	(void)max_strikes;
 	(void)puzzle_modules_left;
-}
-
-void blink_error(String message) {
-	bool blink = false;
-	while (true) {
-		digitalWrite(PIN_LED_RED, blink);
-		digitalWrite(PIN_LED_GREEN, blink);
-		blink = !blink;
-		delay(blink ? BLINK_DELAY_SLOW : BLINK_DELAY_FAST);
-		Serial.println(message);
-	}
 }
 
 bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t puzzle_modules), void (*callback_game_stop)(), void (*callback_info)(uint8_t info_id, uint8_t infomessage[7]), void (*callback_state)(uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_left)) {

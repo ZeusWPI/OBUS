@@ -91,8 +91,10 @@ uint8_t payload_type(uint8_t module_type, uint8_t message_type);
 
 /**
  * Initialize the CAN controller for OBUS messaging
+ *
+ * @return true if initialization and self-test succeeded, false otherwise
  */
-void init();
+bool init();
 /**
  * Receive a message
  *

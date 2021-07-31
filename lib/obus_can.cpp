@@ -76,11 +76,24 @@ uint8_t payload_type(uint8_t module_type, uint8_t module_id, uint8_t msg_type) {
 }
 
 
-void init() {
+bool init() {
 	is_init = true;
 	mcp2515.reset();
 	mcp2515.setBitrate(CAN_50KBPS);
-	mcp2515.setNormalMode();
+	mcp2515.setLoopbackMode();
+	struct can_frame test_msg;
+	test_msg.can_id = 0x01;
+	test_msg.can_dlc = 1;
+	test_msg.data[0] = 0x23;
+	mcp2515.sendMessage(&test_msg);
+	struct can_frame recv_msg;
+	delay(50);
+	if (mcp2515.readMessage(&recv_msg) == MCP2515::ERROR_OK && recv_msg.can_id == 0x01 && recv_msg.can_dlc == 1 && recv_msg.data[0] == 0x23) {
+		mcp2515.setNormalMode();
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
