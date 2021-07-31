@@ -4,8 +4,8 @@ jobs:
   moduledocs:
     runs-on: ubuntu-latest
     steps:
-      - name: Install pandoc and python3
-        run: sudo apt-get install pandoc python3
+      - name: Install pandoc and python3 (and texlive)
+        run: sudo apt-get install pandoc python3 texlive-full
       - name: Check out repository code
         uses: actions/checkout@v2
       - name: Compile documentation
