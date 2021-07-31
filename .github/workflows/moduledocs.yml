@@ -4,10 +4,20 @@ jobs:
   moduledocs:
     runs-on: ubuntu-latest
     steps:
-      - name: Install pandoc and python3 (and texlive)
-        run: sudo apt-get install pandoc python3 texlive-full
       - name: Check out repository code
         uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        id: cache-id
+        with:
+          path: ${{ runner.temp }}/cache-docs
+          key: ${{ runner.os }}-cache-build-docs-key-v1.0
+      - uses: airvzxf/cache-anything-new-action@60f610a30a315bf6b4dca9d4c5c2abc501d95d65
+        with:
+          script: 'install_docs_deps.sh'
+          is_cached: ${{ steps.cache-id.outputs.cache-hit }}
+          cache: ${{ runner.temp }}/cache-docs
+          snapshot: '/'
+          exclude: '/boot /data /dev /mnt /proc /run /sys'
       - name: Compile documentation
         run: |
           cd ${{ github.workspace }}/docs
