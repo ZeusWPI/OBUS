@@ -1,0 +1,19 @@
+name: Module documentation
+on: [push, pull_request]
+jobs:
+  moduledocs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install pandoc and python3
+        run: sudo apt-get install pandoc python3
+      - name: Check out repository code
+        uses: actions/checkout@v2
+      - name: Compile documentation
+        run: |
+          cd ${{ github.workspace }}/docs
+          python3 build.py
+      - name: Archive documentation as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: moduledocs
+          path: ${{github.workspace}}/docs/docs.pdf
