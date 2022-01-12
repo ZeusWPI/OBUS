@@ -16,10 +16,8 @@ eps=0.0001;
 
 outer_radius=40; // outer radius of inner cylinder (the one with holes)
 wall_thickness=2;
-use <servo.scad>;
 use <gears.scad>;
-FUTABA_3F_SPLINE = [[5.92, 10, 1.1, 2.5], [25, 0.3, 0.7, 0.1]]; // spline of servo motor
-gear_height=5;
+gear_height=13;
 
 big_gear=30;
 small_gear=14;
@@ -75,8 +73,8 @@ module rotating_cylinder() {
 
 module small_gear_cylinder() {
 	spur_gear(modul=modul, tooth_number=small_gear, width=gear_height, bore=1, pressure_angle=20, helix_angle=0, optimized=false);
-	cylinder(r=5, h=gear_height+5);
-	mirror(v=[0, 0, 1]) cylinder(r=5, h=wall_thickness+distance_between_ports+2, $fn=6);
+	cylinder(r=5, h=gear_height+5, $fn=6);
+	mirror(v=[0, 0, 1]) cylinder(r=5-clearance/2, h=wall_thickness+distance_between_ports+2);
 }
 
 // http://sammy76.free.fr/conseils/electronique/arduino/SG90.php
@@ -153,8 +151,12 @@ module container() {
 
 module extragear() {
 	difference() {
-		spur_gear (modul=modul, tooth_number=big_gear, width=5, bore=1, pressure_angle=20, helix_angle=0, optimized=false);
-		servo_head(FUTABA_3F_SPLINE);
+		spur_gear (modul=modul, tooth_number=big_gear, width=gear_height, bore=0, pressure_angle=20, helix_angle=0, optimized=false);
+		union() {
+			translate([-10, -4, gear_height-4]) cube([20, 8, 100]);
+			translate([-6.325, 0, -1]) cylinder(r=0.5, h=100);
+			translate([6.325, 0, -1]) cylinder(r=0.5, h=100);
+		}
 	}
 
 }
@@ -231,12 +233,12 @@ translation_outer = -outer_radius - wall_thickness - clearance;
 
 
 
-rotating_cylinder();
+/* rotating_cylinder(); */
 
-translate([125, 0, 0]) container();
+/* translate([125, 0, 0]) container(); */
 
 translate([0, 130, 0]) extragear();
-translate([0, 170, 0]) small_gear_cylinder();
+/* translate([0, 170, 0]) small_gear_cylinder(); */
 
 
-translate([125 + translation_outer, 125, -wall_thickness]) container_bottom();
+/* translate([125 + translation_outer, 125, -wall_thickness]) container_bottom(); */
