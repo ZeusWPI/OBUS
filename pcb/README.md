@@ -39,3 +39,12 @@ the panel with `panel/build.sh`, then use KiCAD to plot the Gerber files.
 - 1 1x02 2.54mm pin socket
 - 1 common cathode 5mm RGB LED, pin order RCGB
 - 2 330 ohm through hole resistors
+
+## TODO for next board iteration
+
+There is still some space left over at the top and sides of the board, so use it:
+
+- Add extra connection holes for every Arduino pin where wires can be soldered semi permanently on the sides of the board
+- Add copper pads/holes to make a "perfboard" on the bottom of the board (with 2.54mm spacing, like a breadboard)
+
+
