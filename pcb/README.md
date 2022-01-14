@@ -46,5 +46,5 @@ There is still some space left over at the top and sides of the board, so use it
 
 - Add extra connection holes for every Arduino pin where wires can be soldered semi permanently on the sides of the board
 - Add copper pads/holes to make a "perfboard" on the bottom of the board (with 2.54mm spacing, like a breadboard)
-
+- Add holes to solder wires in for the status RGB LED in case we don't want this on the main PCB
 
