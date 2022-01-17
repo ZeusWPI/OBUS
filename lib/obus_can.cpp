@@ -229,6 +229,7 @@ void send(struct message *msg) {
 		case OBUS_PAYLDTYPE_MODULEADDR:
 			send_frame.data[1] = msg->payload_address.type;
 			send_frame.data[2] = msg->payload_address.id;
+			length = 3;
 		break;
 
 		case OBUS_PAYLDTYPE_INFOSTART:
