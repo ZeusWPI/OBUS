@@ -17,6 +17,7 @@ you're using other hardware, you might need to do some things differently.
 6. Edit the newly generated .ino file, either in the Arduino IDE or in your own editor.
 7. In the Arduino IDE, select the correct board (Arduino Nano) and processor (ATmega328P (Old Bootloader)). After that,
    flash your code to the Arduino and test it out.
+8. On some Linux distributions, you'll need to [disable BRLTTY](https://unix.stackexchange.com/questions/670636/unable-to-use-usb-dongle-based-on-usb-serial-converter-chip) (Braille keyboard, shipped with QEMU, that takes over the serial adapter)
 
 TODO insert picture here
 
