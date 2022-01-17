@@ -109,12 +109,14 @@ class Message:
 
 
 def serial_reader(shared_data):
-    with serial.Serial('/dev/ttyUSB0', 115200, timeout=10) as ser:
+    with serial.Serial('/dev/ttyUSB0', 115200, timeout=0.05) as ser:
         while True:
-            line = ser.readline()
+            line = ser.read(12)
+            if not line:
+                continue
             print(line)
             if len(line) == 12:
-                if line == b'BEGIN START\n':
+                if line == b'BEGIN START\n' or line[0] > 0b111:
                     continue
                 sender = (int(line[0]) << 8) + int(line[1])
                 size = int(line[2])
