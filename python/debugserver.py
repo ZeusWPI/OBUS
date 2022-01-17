@@ -128,7 +128,7 @@ def serial_reader(shared_data):
 
 @app.route('/')
 def index():
-    return send_file('static/index.html')
+    return send_file('static/debugger.html')
 
 @app.route('/<last_received>/api.json')
 def api(last_received):
