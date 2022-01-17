@@ -6,6 +6,7 @@ from datetime import datetime
 import serial
 import uuid
 from collections import deque
+import sys
 
 app = Flask(__name__)
 
@@ -108,16 +109,16 @@ class Message:
 
 
 def serial_reader(shared_data):
-    with serial.Serial('/dev/ttyACM0', 115200, timeout=10) as ser:
+    with serial.Serial('/dev/ttyUSB0', 115200, timeout=10) as ser:
         while True:
             line = ser.readline()
-            print(line.decode('ascii'))
-            if line.startswith(b"message"):
-                line = line.decode('ascii')
-                line = line.strip()
-                parts = line.split(' ')
-                sender = int(parts[1])
-                message = bytes(int(p) for p in parts[2:])
+            print(line)
+            if len(line) == 12:
+                if line == b'BEGIN START\n':
+                    continue
+                sender = int(line[0] << 8 + line[1])
+                size = int(line[2])
+                message = line[3:3+size]
                 received = Message(message, sender, datetime.now(), len(shared_data.messages))
                 shared_data.messages.append(received.serialize())
                 shared_data.last_message_index += 1
