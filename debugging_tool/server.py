@@ -116,7 +116,7 @@ def serial_reader(shared_data):
             if len(line) == 12:
                 if line == b'BEGIN START\n':
                     continue
-                sender = int(line[0] << 8 + line[1])
+                sender = (int(line[0]) << 8) + int(line[1])
                 size = int(line[2])
                 message = line[3:3+size]
                 received = Message(message, sender, datetime.now(), len(shared_data.messages))
