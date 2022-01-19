@@ -1,3 +1,11 @@
+/*
+WARNING: the controller no longer runs on a microcontroller, see python/controller.py
+
+this source code is just kept for future reference in case we want to run a more simple
+standalone controller on a microcontroller
+*/
+
+
 #include <obus_can.h>
 #include <obus_util.h>
 #include <TM1638plus.h>
