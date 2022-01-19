@@ -52,6 +52,9 @@ void loop() {
 			}
 		}
 	}
+	// Button state is cleared regardless of if this game is running, this is done
+	// to prevent presses accumulating when game is not running and then all getting
+	// read at once as soon as the game starts
 	red_button.resetCount();
 	green_button.resetCount();
 
