@@ -1,5 +1,31 @@
 from dataclasses import dataclass
 from datetime import datetime
+import struct
+import enum
+from typing import NamedTuple
+
+
+@enum.unique
+class ControllerMessageType(enum.Enum):
+    ACK = 0
+    HELLO = 1
+    GAMESTART = 2
+    STATE = 3
+    SOLVED = 4
+    TIMEOUT = 5
+    STRIKEOUT = 6
+    INFOSTART = 7
+
+
+class ModuleAddress(NamedTuple):
+    module_type: int
+    identifier: int
+
+    def is_puzzle(self):
+        return self.module_type == 1
+
+    def as_binary(self):
+        return (self.module_type << 8) | self.identifier
 
 
 @dataclass
@@ -7,6 +33,67 @@ class Message:
     payload: bytes
     received_from: int
     received_at: datetime
+
+    @classmethod
+    def create_controller_message(cls, controller_message_type, content):
+        return cls(bytes([controller_message_type.value]) + content, 0, datetime.now())
+
+    @classmethod
+    def create_controller_infostart(cls, seed):
+        assert 0 <= seed <= 0xFFFFFFFF
+        return cls.create_controller_message(ControllerMessageType.INFOSTART, struct.pack('>L', seed))
+
+    @classmethod
+    def create_controller_ack(cls, module_address):
+        return cls.create_controller_message(ControllerMessageType.ACK, struct.pack('>H', module_address.as_binary()))
+
+    @classmethod
+    def create_controller_hello(cls):
+        return cls.create_controller_message(ControllerMessageType.HELLO, b'')
+
+    @classmethod
+    def create_controller_generic_stateupdate(cls, controller_message_type, timeleft, current_strikes, max_strikes, amount_puzzle_modules_left):
+        time_left_ms = int(timeleft.total_seconds() * 1000)
+        assert 0 <= time_left_ms <= 0xFFFFFFFF
+        return cls.create_controller_message(controller_message_type, struct.pack('>LBBB', time_left_ms, current_strikes, max_strikes, amount_puzzle_modules_left))
+
+    @classmethod
+    def create_controller_gamestart(cls, *args):
+        return cls.create_controller_generic_stateupdate(ControllerMessageType.GAMESTART, *args)
+
+    @classmethod
+    def create_controller_state(cls, *args):
+        return cls.create_controller_generic_stateupdate(ControllerMessageType.STATE, *args)
+
+    @classmethod
+    def create_controller_solved(cls, *args):
+        return cls.create_controller_generic_stateupdate(ControllerMessageType.SOLVED, *args)
+
+    @classmethod
+    def create_controller_timeout(cls, *args):
+        return cls.create_controller_generic_stateupdate(ControllerMessageType.TIMEOUT, *args)
+
+    @classmethod
+    def create_controller_strikeout(cls, *args):
+        return cls.create_controller_generic_stateupdate(ControllerMessageType.STRIKEOUT, *args)
+
+    def get_puzzle_register(self):
+        '''Returns the address of the puzzle if this is a register puzzle message, None otherwise'''
+        if self.sender_type() == 1 and self.payload[0] == 0:
+            return self.module_address()
+        return None
+
+    def get_puzzle_strike_details(self):
+        '''Returns the address and amount of strikes of the puzzle if this is a puzzle strike message, None otherwise'''
+        if self.sender_type() == 1 and self.payload[0] == 1:
+            return (self.module_address(), self.payload[1])
+        return None
+
+    def get_puzzle_solved(self):
+        '''Returns the address of the puzzle if this is a solved puzzle message, None otherwise'''
+        if self.sender_type() == 1 and self.payload[0] == 2:
+            return self.module_address()
+        return None
 
     def readable_time(self):
         return self.received_at.strftime('%H:%M:%S')
@@ -19,6 +106,9 @@ class Message:
 
     def sender_id(self):
         return (self.received_from >> 0) & 0b1111_1111
+
+    def module_address(self):
+        return ModuleAddress(self.sender_type(), self.sender_id())
 
     @staticmethod
     def human_readable_type(sender_type, sender_id):

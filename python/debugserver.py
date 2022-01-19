@@ -24,8 +24,8 @@ max_message_cache = 200
 shared_data = SharedData(deque(maxlen=max_message_cache), -1)
 
 
-def serial_reader(shared_data):
-    with serial.Serial('/dev/ttyUSB0', 115200, timeout=0.05) as ser:
+def serial_reader(serialport, shared_data):
+    with serial.Serial(serialport, 115200, timeout=0.05) as ser:
         while True:
             line = ser.read(12)
             if not line:
@@ -55,6 +55,9 @@ def api(last_received):
         return jsonify({"server_id": server_id, "newest_msg": shared_data.last_message_index, "messages": list(shared_data.messages)[len(shared_data.messages) - (shared_data.last_message_index - last_received):]})
 
 if __name__ == '__main__':
-    thread = Thread(target=serial_reader, args=(shared_data, ))
+    if len(sys.argv) != 2:
+        print("Usage: python3 debugserver.py [serial port]")
+        sys.exit()
+    thread = Thread(target=serial_reader, args=(sys.argv[1], shared_data, ))
     thread.start()
     app.run(debug=False, host='0.0.0.0')
