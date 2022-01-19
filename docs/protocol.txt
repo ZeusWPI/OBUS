@@ -36,7 +36,7 @@ Payload:
 
 Types for controller:
 
-    - 0 acknowledge valid message
+    - 0 acknowledge register message
       [ X B B B  B B B B ]
           - - ----------
           | ↓  reserved
@@ -51,13 +51,13 @@ Types for controller:
     - 2 game start
       [ X B B B  B B B B ]
           -------- - - -
-         time left ↓ ↓ #puzzle modules
+   time left in ms ↓ ↓ #puzzle modules
             #strikes #max strikes
 
     - 3 state (every x ms – e.g. in the middle of each second)
       [ X B B B  B B B B ]
           -------- - - -
-         time left ↓ ↓ #puzzle modules left
+   time left in ms ↓ ↓ #puzzle modules left
             #strikes #max strikes
 
     - 4-6 solved, timeout, strikeout
