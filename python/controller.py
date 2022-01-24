@@ -39,7 +39,7 @@ class PuzzleState:
 class SharedWebToSerial:
     game_duration: timedelta = timedelta(seconds=60)
     max_allowed_strikes: int = 3
-    seed: int = 0
+    seed: int = 1
     blocked_modules: list[ModuleAddress] = field(default_factory=list)
     start_game: bool = False
     restart_game: bool = False
@@ -171,21 +171,23 @@ def serial_controller(serialport, web_to_serial, serial_to_web):
 @app.route('/status.json')
 def status():
     status_dict = {
-        'gamestate': serial_to_web.gamestate.name
+        'gamestate': serial_to_web.gamestate.name,
+        'server_id': server_id
     }
     if serial_to_web.gamestate == Gamestate.GAME:
         # Send the time left to avoid time syncronisation issues between server and client
         # Client can then extrapolate if it wants to
-        status_dict['timeleft'] = (datetime.now() - serial_to_web.game_start).total_seconds()
+        status_dict['timeleft'] = (web_to_serial.game_duration - (datetime.now() - serial_to_web.game_start)).total_seconds()
     elif serial_to_web.gamestate == Gamestate.GAMEOVER:
         status_dict['timeleft'] = (serial_to_web.game_stop - serial_to_web.game_start).total_seconds()
 
     if serial_to_web.gamestate in (Gamestate.DISCOVER, Gamestate.GAME, Gamestate.GAMEOVER):
         status_dict['puzzles'] = [
-            {'address': address.to_binary(), 'solved': state.solved if address.is_puzzle() else None, 'strikes': state.strike_amount}
+            {'address': address.as_binary(), 'solved': state.solved if address.is_puzzle() else None, 'strikes': state.strike_amount}
             for address, state
             in serial_to_web.registered_modules.items()
         ]
+    print(status_dict)
     return jsonify(status_dict)
 
 @app.route('/start')
@@ -211,6 +213,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print("Usage: python3 controller.py [serial port]")
         sys.exit()
-    thread = Thread(target=serial_controller, args=(sys.argv[1], web_to_serial, serial_to_web))
-    thread.start()
+    if sys.argv[1] != 'mock':
+        thread = Thread(target=serial_controller, args=(sys.argv[1], web_to_serial, serial_to_web))
+        thread.start()
     app.run(debug=False, host='0.0.0.0', port=8080)
