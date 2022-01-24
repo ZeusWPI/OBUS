@@ -166,9 +166,14 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 					callback_state(message->gamestatus.time_left, message->gamestatus.strikes, message->gamestatus.max_strikes, message->gamestatus.puzzle_modules_left);
 					break;
 				case OBUS_MSGTYPE_C_INFOSTART:
-				  // randomSeed has no effect when called with 0 as seed, so we use
+					// Add module type and id to seed, to remove correlation in randomness between modules
+					uinst32_t seed = message->infostart.seed + ((uint32_t) this_module.type << 8) + ((uint32_t) this_module.id);
+					// randomSeed has no effect when called with 0 as seed, so we use
 					//  a fallback value that is unlikely to collide with other frequently used seeds
-					randomSeed(message->infostart.seed ? message->infostart.seed : 0xFFFFFFFF);
+					if (seed == 0) {
+						seed--;
+					}
+					randomSeed(seed);
 					break;
 				default:
 					break;
