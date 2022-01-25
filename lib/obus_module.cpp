@@ -19,6 +19,7 @@ namespace obus_module {
 struct obus_can::module this_module;
 uint8_t strike_count;
 bool active;
+bool acked_after_last_hello = false;
 uint32_t next_loop_call_deadline;
 
 // Current LED status
@@ -91,6 +92,7 @@ void _resetState() {
 	strike_count = 0;
 	active = false;
 	next_loop_call_deadline = 0;
+	acked_after_last_hello = false;
 
 	if (this_module.type == OBUS_TYPE_PUZZLE || this_module.type == OBUS_TYPE_NEEDY) {
 		pinMode(PIN_LED_RED, OUTPUT);
@@ -145,9 +147,11 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 		if (is_from_controller(message->from)) {
 			switch (message->msg_type) {
 				case OBUS_MSGTYPE_C_GAMESTART:
-					active = true;
-					_setLed(COLOR_YELLOW);
-					callback_game_start(message->gamestatus.puzzle_modules_left);
+					if (acked_after_last_hello) {
+						active = true;
+						_setLed(COLOR_YELLOW);
+						callback_game_start(message->gamestatus.puzzle_modules_left);
+					}
 					break;
 				case OBUS_MSGTYPE_C_HELLO:
 					_resetState();
@@ -156,18 +160,23 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 				case OBUS_MSGTYPE_C_SOLVED:
 				case OBUS_MSGTYPE_C_TIMEOUT:
 				case OBUS_MSGTYPE_C_STRIKEOUT:
-					active = false;
-					_setLed(COLOR_OFF);
-					callback_game_stop();
+					if (acked_after_last_hello) {
+						active = false;
+						_setLed(COLOR_OFF);
+						callback_game_stop();
+					}
 					break;
 				case OBUS_MSGTYPE_C_ACK:
+					if (message->payload_address.type == this_module.type && message->payload_address.id == this_module.id) {
+						acked_after_last_hello = true;
+					}
 					break;
 				case OBUS_MSGTYPE_C_STATE:
 					callback_state(message->gamestatus.time_left, message->gamestatus.strikes, message->gamestatus.max_strikes, message->gamestatus.puzzle_modules_left);
 					break;
 				case OBUS_MSGTYPE_C_INFOSTART:
 					// Add module type and id to seed, to remove correlation in randomness between modules
-					uinst32_t seed = message->infostart.seed + ((uint32_t) this_module.type << 8) + ((uint32_t) this_module.id);
+					uint32_t seed = message->infostart.seed + ((uint32_t) this_module.type << 8) + ((uint32_t) this_module.id);
 					// randomSeed has no effect when called with 0 as seed, so we use
 					//  a fallback value that is unlikely to collide with other frequently used seeds
 					if (seed == 0) {
