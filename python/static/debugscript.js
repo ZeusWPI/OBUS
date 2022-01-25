@@ -87,7 +87,7 @@ function updateMessages() {
 
 				// delete children if there are too many :O
 				// -1 so we don't delete the header :)
-				for (let i = 0; i < messageTable.children.length - max_messages - 1; i++) {
+				while (messageTable.children.length - 1 > max_messages) {
 					messageTable.removeChild(messageTable.lastChild);
 				}
 				newest_message_index = data.newest_msg;
@@ -106,6 +106,12 @@ function toggle_logging() {
 		paused = true;
 		document.getElementById("toggle_button").innerHTML = "Start";
 		clearInterval(updaterID);
+	}
+}
+
+function clear_log() {
+	while (messageTable.children.length > 1) {
+		messageTable.removeChild(messageTable.lastChild);
 	}
 }
 
