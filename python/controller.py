@@ -185,7 +185,7 @@ def status():
         status_dict['puzzles'] = [
             {'address': address.as_binary(), 'solved': state.solved if address.is_puzzle() else None, 'strikes': state.strike_amount}
             for address, state
-            in serial_to_web.registered_modules.items()
+            in sorted(serial_to_web.registered_modules.items(), key=(lambda kv: kv[0].as_binary()))
         ]
     print(status_dict)
     return jsonify(status_dict)

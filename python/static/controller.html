@@ -4,18 +4,20 @@
 <head>
 	<meta charset="utf-8">
 	<title>OBUS controller</title>
-	<link rel="stylesheet" href="/static/7sgd.css">
+	<link rel="stylesheet" href="/static/controller.css">
 </head>
 
-<body style="background: #222; color: #888">
-	<p>Timer: <div id="timeleft"></div></p>
-	<p>Game state: <div id="gamestate"></div></p>
+<body>
+	<p>Game state: <span id="gamestate"></span></p>
 
 	<button onclick="startbutton()">START</button>
 	<button onclick="restartbutton()">RESTART</button>
 	<script src="static/controller.js"></script>
 
-	<canvas id="display" width="700">Timer should be here</canvas>
+	<div class="center">
+		<canvas id="display" width="1000" height="500">Timer should be here</canvas>
+	</div>
 	<script type="text/javascript" src="/static/segment-display.js"></script>
+	<div id="modules" class="center"></div>
 </body>
 </html>
