@@ -179,7 +179,7 @@ def status():
         # Client can then extrapolate if it wants to
         status_dict['timeleft'] = (web_to_serial.game_duration - (datetime.now() - serial_to_web.game_start)).total_seconds()
     elif serial_to_web.gamestate == Gamestate.GAMEOVER:
-        status_dict['timeleft'] = (serial_to_web.game_stop - serial_to_web.game_start).total_seconds()
+        status_dict['timeleft'] = max(0, (web_to_serial.game_duration - (serial_to_web.game_stop - serial_to_web.game_start)).total_seconds())
 
     if serial_to_web.gamestate in (Gamestate.DISCOVER, Gamestate.GAME, Gamestate.GAMEOVER):
         status_dict['puzzles'] = [
