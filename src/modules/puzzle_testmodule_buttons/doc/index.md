@@ -1,6 +1,3 @@
-## Testmodule buttons
+# Testmodule knoppen
 
-If the blue LED is lit, press the green button, otherwise press the red button.
-
-### Credits
-Module developed by redfast00.
+Als de LED aan is, druk op de groene knop, anders op de rode knop.

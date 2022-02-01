@@ -1,0 +1,11 @@
+---
+title: OBUS handleiding
+author: Zeus WPI
+papersize: a4
+documentclass: scrartcl
+geometry: "left=2cm,right=2cm,top=2cm,bottom=3cm"
+fontsize: 14pt
+---
+
+\graphicspath{ {./images/} }
+\newpage{}

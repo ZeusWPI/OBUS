@@ -1,6 +1,3 @@
-## Testmodule needy buttons
+# Testmodule needy buttons
 
-If the module starts making a sound, press the button.
-
-### Credits
-Module developed by redfast00.
+Als de module geluid maakt, druk op de knop.
