@@ -26,12 +26,6 @@ By default, the INT pin on the CAN module is not connected to the Arduino in ord
 save pins. If you want to connect the INT pin to pin D2 on the Arduino, you can bridge
 the jumper on the top right of the board with some solder.
 
-## Getting this board manufactured
-
-I order to get this board manufactured cheaper, we panelized it (by putting two OBUS PCBs per ordered "board"). If you want to manufacture this board, there's a file `panel/can_arduino_mini_pcb_panel/fabricate/handin.zip` containing all the
-Gerber files needed for production. If you modify the original PCB, you can generate
-the panel with `panel/build.sh`, then use KiCAD to plot the Gerber files.
-
 ### Component list per board
 
 - 2 1x15 2.54mm pin sockets, we recommend 4 sockets so you can socket the Arduino as well
@@ -47,4 +41,3 @@ There is still some space left over at the top and sides of the board, so use it
 - Add extra connection holes for every Arduino pin where wires can be soldered semi permanently on the sides of the board
 - Add copper pads/holes to make a "perfboard" on the bottom of the board (with 2.54mm spacing, like a breadboard)
 - Add holes to solder wires in for the status RGB LED in case we don't want this on the main PCB
-
