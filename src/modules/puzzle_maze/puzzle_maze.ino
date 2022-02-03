@@ -8,6 +8,12 @@
 #define LED_CLK_PIN 2
 #define LED_CS_PIN 5
 
+// yellow = up A0
+// blue = down A1
+// orange = left A2
+// green = right A3
+#define
+
 LedControl lc = LedControl(LED_DIN_PIN, LED_CLK_PIN, LED_CS_PIN, 1);
 
 void setup() {

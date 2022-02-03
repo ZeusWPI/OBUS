@@ -111,7 +111,34 @@ module back_panel() {
 	}
 }
 
+module under_panel() {
+	difference() {
+		union() {
+			ccube([front_panel_height, front_panel_width, 40+container_wall_thickness], center=[0, 1, 0]);
+		}
+		union() {
+			translate([container_wall_thickness, 0, container_wall_thickness]) ccube([front_panel_height-2*container_wall_thickness, front_panel_width-2*container_wall_thickness, cut], center=[0, 1, 0]);
+			translate([front_panel_height/2, 0, -1]) cylinder(d=10, h=cut);
+			translate([container_wall_thickness+1, 0, container_wall_thickness+7]) rotate([0, -90, 0]) cylinder(d=12, h=cut);
+			// Holes for M3 bolts
+			translate([0, 0, -1]) {
+				translate([container_wall_thickness + 10, -front_panel_width/2 + container_wall_thickness + 5]) cylinder(d=3.5, h=cut);
+				translate([container_wall_thickness + 10, front_panel_width/2 - container_wall_thickness - 5]) cylinder(d=3.5, h=cut);
+				translate([front_panel_height-container_wall_thickness-10, -front_panel_width/2 + container_wall_thickness + 5]) cylinder(d=3.5, h=cut);
+				translate([front_panel_height-container_wall_thickness-10, front_panel_width/2 - container_wall_thickness - 5]) cylinder(d=3.5, h=cut);
+			}
+		}
+	}
+	translate([0, 0, 0]) {
+		translate([container_wall_thickness, -front_panel_width/2 + container_wall_thickness]) cube([4.5, 4.5, 45]);
+		translate([container_wall_thickness, front_panel_width/2 - container_wall_thickness - 5 + 0.5]) cube([4.5, 4.5, 45]);
+		translate([front_panel_height-container_wall_thickness-5 + 0.5, -front_panel_width/2 + container_wall_thickness]) cube([4.5, 4.5, 45]);
+		translate([front_panel_height-container_wall_thickness-5 + 0.5, front_panel_width/2 - container_wall_thickness - 5 + 0.5]) cube([4.5, 4.5, 45]);
+	}
+}
+
 
 // front_panel();
 // button();
-translate([0, 0, -13-container_wall_thickness]) back_panel();
+/* translate([0, 0, -13-container_wall_thickness]) back_panel(); */
+translate([0, 0, -13 - 40 - 2*container_wall_thickness]) under_panel();
