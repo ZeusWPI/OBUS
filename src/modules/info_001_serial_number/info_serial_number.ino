@@ -1,6 +1,20 @@
 // (c) 2020, redfast00
 // See the LICENSE file for conditions for copying
 
+/* Format of the info message
+
+length = 7 bytes
+id = 1
+
+message:
+X X X X X X X
+------------- > the serial number (consisting of 7 ascii characters), not null-terminated
+
+The serial number consists of capital letters and numbers, and is guaranteed to contain
+at least one capital letter and one number.
+*/
+
+
 #include <obus_module.h>
 #include <LiquidCrystal.h>
 
@@ -68,7 +82,7 @@ int info_generator(uint8_t* buffer) {
 				serial_number[i] = 'A' + generated;
 	    else
 			  serial_number[i] = '0' + (generated - 26);
-		}	
+		}
 	}
 	memcpy(buffer, serial_number, SERIAL_NUMBER_SIZE);
 	render_now = true;
