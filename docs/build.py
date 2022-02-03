@@ -20,7 +20,8 @@ with open(outfilename, 'w') as outfile:
 		with open(filepath) as infile:
 			outfile.write(infile.read())
 			outfile.write("\n\\newpage{}\n")
-	outfile.write("\n\\part{Appendix}\\newpage\n")
+	# outfile.write("\n\\part{Appendix}\\newpage\n")
+	outfile.write("\n\\newpage{}\n")
 	for filepath in only_info:
 		with open(filepath) as infile:
 			outfile.write(infile.read())
