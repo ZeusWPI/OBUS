@@ -1,23 +1,33 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<title>OBUS controller</title>
-	<link rel="stylesheet" href="/static/controller.css">
-</head>
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="/static/css/controller.css" />
 
-<body>
-	<p>Game state: <span id="gamestate"></span></p>
+		<title>OBUS controller</title>
+	</head>
 
-	<button onclick="startbutton()">START</button>
-	<button onclick="restartbutton()">RESTART</button>
-	<script src="static/controller.js"></script>
+	<body>
+		<!-- State -->
+		<div class="state">
+			<p>Game state: <span id="gamestate"></span></p>
 
-	<div class="center">
-		<canvas id="display" width="1000" height="500">Timer should be here</canvas>
-	</div>
-	<script type="text/javascript" src="/static/segment-display.js"></script>
-	<div id="modules" class="center"></div>
-</body>
+			<button onclick="onStartButtonClick()">START</button>
+			<button onclick="onRestartButtonClick()">RESTART</button>
+		</div>
+
+		<!-- Timer -->
+		<div class="center">
+			<canvas id="display" width="1000" height="500">
+				Timer should be here
+			</canvas>
+		</div>
+
+		<!-- Modules -->
+		<div id="modules" class="center"></div>
+
+		<!-- Scripts -->
+		<script src="/static/js/controller.js"></script>
+		<script type="text/javascript" src="/static/js/segment-display.js"></script>
+	</body>
 </html>
