@@ -18,6 +18,7 @@ you're using other hardware, you might need to do some things differently.
 7. In the Arduino IDE, select the correct board (Arduino Nano) and processor (ATmega328P (Old Bootloader)). After that,
    flash your code to the Arduino and test it out.
 8. On some Linux distributions, you'll need to prevent BRLTTY from taking over the serial adapter because BRLTTY thinks it's a Braille keyboard. You can do this by uninstalling it (`pacman -R brltty`) or by [disabling it and then rebooting](https://unix.stackexchange.com/questions/670636/unable-to-use-usb-dongle-based-on-usb-serial-converter-chip).
+9. If you get permission errors, try adding yourself to the dialout or uucp (Arch Linux) group
 
 TODO insert picture here
 
