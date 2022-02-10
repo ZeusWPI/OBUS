@@ -8,23 +8,38 @@
 	</head>
 
 	<body>
-		<!-- State -->
-		<div class="state">
-			<p>Game state: <span id="gamestate"></span></p>
+		<!-- Hud -->
+		<div class="hud">
+			<!-- State -->
+			<div>
+				<div>Game state: <span id="gamestate"></span></div>
+			</div>
 
-			<button onclick="onStartButtonClick()">START</button>
-			<button onclick="onRestartButtonClick()">RESTART</button>
+			<!-- Actions -->
+			<div>
+				<button id="buttonStart" onclick="onStartButtonClick()">START</button>
+				<button id="buttonRestart" onclick="onRestartButtonClick()">
+					RESTART
+				</button>
+			</div>
 		</div>
 
-		<!-- Timer -->
-		<div class="center">
-			<canvas id="display" width="1000" height="500">
-				Timer should be here
-			</canvas>
-		</div>
+		<!-- Content -->
+		<div class="content">
+			<!-- Timer -->
+			<div class="box center">
+				<canvas id="display" width="1000" height="400">
+					Timer should be here
+				</canvas>
+			</div>
 
-		<!-- Modules -->
-		<div id="modules" class="center"></div>
+			<!-- Modules -->
+			<div class="box center" style="margin-top: 2rem">
+				<div class="box-header">Modules</div>
+
+				<div id="modules"></div>
+			</div>
+		</div>
 
 		<!-- Scripts -->
 		<script src="/static/js/controller.js"></script>

@@ -3,6 +3,7 @@
  */
 const sounds = {
 	strike: new Audio("/static/sounds/strike.mp3"),
+	alarm: new Audio("/static/sounds/alarm.mp3"),
 };
 
 /**
@@ -20,6 +21,9 @@ const state = {
 
 	// Amount of strikes (wrong answers) the player has made.
 	strikes: 0,
+
+	// If the alarm has been played already
+	alarmPlayed: false,
 };
 
 /**
@@ -93,6 +97,7 @@ function updateGameState() {
 			// Reset the strike amount if the game is not running anymore.
 			if (state.gamestate != "GAME") {
 				state.strikeAmount = 0;
+				state.alarmPlayed = false;
 			}
 
 			if (state.gamestate === "GAME") {
@@ -111,9 +116,21 @@ function updateGameState() {
 					playSound(sounds.strike);
 				}
 
+				// Play a "alarm" sound when the time is at 10 seconds.
+				if (data.timeleft <= 20 && data.timeleft > 19 && !state.alarmPlayed) {
+					playSound(sounds.alarm);
+					state.alarmPlayed = true;
+				}
+
 				// Update the total amount of strikes
 				state.strikes = newStrikes;
 			}
+
+			// Update the start/restart button visibility.
+			const startButton = document.querySelector("#buttonStart");
+			const restartButton = document.querySelector("#buttonRestart");
+			startButton.disabled = state.gamestate !== "DISCOVER";
+			restartButton.disabled = state.gamestate !== "GAMEOVER";
 
 			// Update the modules
 			updateModules(data.puzzles);
@@ -148,8 +165,8 @@ function initializeSegmentDisplay() {
 	display.segmentDistance = display.digitHeight / 100;
 	display.segmentCount = 7;
 	display.cornerType = 1;
-	display.colorOn = "#24dd22";
-	display.colorOff = "#1b4105";
+	display.colorOn = "#ff0000";
+	display.colorOff = "#ff000022";
 	display.draw();
 
 	// Update the segment
