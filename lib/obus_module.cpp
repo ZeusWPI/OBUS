@@ -145,6 +145,7 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 	if (obus_can::receive(message)) {
 		received_message = true;
 		if (is_from_controller(message->from)) {
+			uint32_t seed;
 			switch (message->msg_type) {
 				case OBUS_MSGTYPE_C_GAMESTART:
 					if (acked_after_last_hello) {
@@ -176,7 +177,7 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 					break;
 				case OBUS_MSGTYPE_C_INFOSTART:
 					// Add module type and id to seed, to remove correlation in randomness between modules
-					uint32_t seed = message->infostart.seed + ((uint32_t) this_module.type << 8) + ((uint32_t) this_module.id);
+					seed = message->infostart.seed + ((uint32_t) this_module.type << 8) + ((uint32_t) this_module.id);
 					// randomSeed has no effect when called with 0 as seed, so we use
 					//  a fallback value that is unlikely to collide with other frequently used seeds
 					if (seed == 0) {
