@@ -1,6 +1,6 @@
 @font-face {
 	font-family: "digital";
-	src: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/38273/digital-webfont.woff");
+	src: url("/static/fonts/digital-webfont.woff");
 	font-weight: normal;
 	font-style: normal;
 }

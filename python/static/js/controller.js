@@ -106,7 +106,7 @@ function updateGameState() {
 					new Date().getTime() + data.timeleft * 1000
 				);
 
-				// Calculate the ew total amount of strikes for all puzzles.
+				// Calculate the total amount of strikes for all puzzles.
 				const newStrikes = data.puzzles
 					.map((p) => p.strikes)
 					.reduce((a, b) => a + b, 0);
@@ -206,9 +206,6 @@ function updateSegmentDisplay() {
  * When the window is loaded.
  */
 window.addEventListener("load", () => {
-	// Initiliaz the game state.
 	initializeGameState();
-
-	// Initialize the segment display.
 	initializeSegmentDisplay();
 });
