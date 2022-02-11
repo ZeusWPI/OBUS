@@ -42,3 +42,6 @@ There is still some space left over at the top and sides of the board, so use it
 - Add copper pads/holes to make a "perfboard" on the bottom of the board (with 2.54mm spacing, like a breadboard)
 - Add holes to solder wires in for the status RGB LED in case we don't want this on the main PCB
 - Add silkscreen with pin names on back of PCB
+- Add SMD footprints for LED resistors
+- Add holes for M3 bolts
+- Add logo on back
