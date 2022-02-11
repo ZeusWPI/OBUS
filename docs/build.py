@@ -11,6 +11,9 @@ if len(sys.argv) >= 2:
 
 outfilename = '/tmp/out.md'
 with open(outfilename, 'w') as outfile:
+	with open('prefix.md') as infile:
+		outfile.write(infile.read())
+		outfile.write("\n\\newpage{}\n")
 	all_modules = sorted(glob.glob('../src/modules/*/doc/index.md'))
 	if remove_testmodules:
 		all_modules = [p for p in all_modules if 'testmodule_' not in p]
