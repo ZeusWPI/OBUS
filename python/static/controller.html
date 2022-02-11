@@ -1,23 +1,48 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<title>OBUS controller</title>
-	<link rel="stylesheet" href="/static/controller.css">
-</head>
+	<head>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" href="/static/css/controller.css" />
 
-<body>
-	<p>Game state: <span id="gamestate"></span></p>
+		<title>OBUS controller</title>
+	</head>
 
-	<button onclick="startbutton()">START</button>
-	<button onclick="restartbutton()">RESTART</button>
-	<script src="static/controller.js"></script>
+	<body>
+		<!-- Hud -->
+		<div class="hud">
+			<!-- State -->
+			<div>
+				<div>Game state: <span id="gamestate"></span></div>
+			</div>
 
-	<div class="center">
-		<canvas id="display" width="1000" height="500">Timer should be here</canvas>
-	</div>
-	<script type="text/javascript" src="/static/segment-display.js"></script>
-	<div id="modules" class="center"></div>
-</body>
+			<!-- Actions -->
+			<div>
+				<button id="buttonStart" onclick="onStartButtonClick()">START</button>
+				<button id="buttonRestart" onclick="onRestartButtonClick()">
+					RESTART
+				</button>
+			</div>
+		</div>
+
+		<!-- Content -->
+		<div class="content">
+			<!-- Timer -->
+			<div class="box center">
+				<canvas id="display" width="1000" height="400">
+					Timer should be here
+				</canvas>
+			</div>
+
+			<!-- Modules -->
+			<div class="box center" style="margin-top: 2rem">
+				<div class="box-header">Modules</div>
+
+				<div id="modules"></div>
+			</div>
+		</div>
+
+		<!-- Scripts -->
+		<script src="/static/js/controller.js"></script>
+		<script type="text/javascript" src="/static/js/segment-display.js"></script>
+	</body>
 </html>
