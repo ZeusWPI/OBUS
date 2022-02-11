@@ -94,6 +94,27 @@ button:disabled {
 	margin: 8px;
 }
 
+#strikeContainer {
+	text-align: center;
+  height: 4em;
+}
+
+#strikeContainer .strikeIndicator {
+	padding: 20px;
+	font-family: sans-serif;
+	font-weight: 900
+}
+
+#strikeContainer .inactive {
+	color: #ff000033;
+}
+
+#strikeContainer .active {
+	color: #ff0000;
+}
+
+
+
 .solved {
 	background-color: green !important;
 	color: white !important;

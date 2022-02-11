@@ -187,6 +187,8 @@ def status():
             for address, state
             in sorted(serial_to_web.registered_modules.items(), key=(lambda kv: kv[0].as_binary()))
         ]
+    status_dict['max_allowed_strikes'] = web_to_serial.max_allowed_strikes
+    status_dict['game_duration'] = web_to_serial.game_duration.total_seconds()
     print(status_dict)
     return jsonify(status_dict)
 

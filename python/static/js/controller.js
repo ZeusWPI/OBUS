@@ -24,6 +24,12 @@ const state = {
 
 	// If the alarm has been played already
 	alarmPlayed: false,
+
+	// Number of mistakes allowed without exploding the bomb
+	maxAllowedStrikes: 0,
+
+	// Time on the timer at the beginning of a game
+	gameDuration: 0
 };
 
 /**
@@ -75,6 +81,22 @@ function updateModules(puzzles) {
 	modulesElement.replaceChildren(...modules);
 }
 
+function updateStrikes() {
+	const indicators = [];
+	for (let idx = 0; idx < state.maxAllowedStrikes; idx++) {
+		let indicator = document.createElement("span");
+		indicator.classList.add('strikeIndicator');
+		indicator.textContent = '!';
+		if (idx < state.strikes) {
+			indicator.classList.add('active');
+		} else {
+			indicator.classList.add('inactive');
+		}
+		indicators.push(indicator);
+	}
+	document.getElementById("strikeIndicatorContainer").replaceChildren(...indicators);
+}
+
 /**
  * Initialize the game state.
  */
@@ -92,11 +114,13 @@ function updateGameState() {
 		.then((data) => {
 			// Update the game state
 			state.gamestate = data.gamestate;
+			state.gameDuration = data.game_duration;
+			state.maxAllowedStrikes = data.max_allowed_strikes;
 			document.getElementById("gamestate").innerHTML = state.gamestate;
 
 			// Reset the strike amount if the game is not running anymore.
-			if (state.gamestate != "GAME") {
-				state.strikeAmount = 0;
+			if (state.gamestate === "INACTIVE") {
+				state.strikes = 0;
 				state.alarmPlayed = false;
 			}
 
@@ -111,19 +135,17 @@ function updateGameState() {
 					.map((p) => p.strikes)
 					.reduce((a, b) => a + b, 0);
 
-				// Play a "buzzer" sound when a strike is made.
+				// Play a "buzzer" sound when a strike is made and update total amount of strikes.
 				if (state.strikes < newStrikes) {
 					playSound(sounds.strike);
+					state.strikes = newStrikes;
 				}
 
-				// Play a "alarm" sound when the time is at 10 seconds.
+				// Play a "alarm" sound when the time is at 20 seconds.
 				if (data.timeleft <= 20 && data.timeleft > 19 && !state.alarmPlayed) {
 					playSound(sounds.alarm);
 					state.alarmPlayed = true;
 				}
-
-				// Update the total amount of strikes
-				state.strikes = newStrikes;
 			}
 
 			// Update the start/restart button visibility.
@@ -134,6 +156,7 @@ function updateGameState() {
 
 			// Update the modules
 			updateModules(data.puzzles);
+			updateStrikes();
 		});
 }
 
@@ -173,23 +196,12 @@ function initializeSegmentDisplay() {
 	setInterval(updateSegmentDisplay, 100);
 }
 
-/**
- * Update the segment display with the latest game data.
- */
-function updateSegmentDisplay() {
-	// Do not update the timer when the game is not running.
-	if (state.gamestate != "GAME" || !state.estimatedTimeout) {
-		return;
-	}
-
-	const timeLeft = (state.estimatedTimeout - new Date()) / 1000;
-
+function setTimeleft(timeLeft) {
 	// Set the display to 0 when there is no time left.
-	if (timeLeft <= 0) {
+	if (isNaN(timeLeft) || timeLeft <= 0) {
 		display.setValue("00:00.0");
 		return;
 	}
-
 	const integral = Math.floor(timeLeft);
 	const fractional = timeLeft - integral;
 	const minutes = Math.floor(integral / 60);
@@ -200,6 +212,22 @@ function updateSegmentDisplay() {
 	const fractionalStr = String(Math.floor(fractional * 10)).padStart(1, "0");
 
 	display.setValue(`${minutesStr}:${secondsStr}.${fractionalStr}`);
+}
+
+/**
+ * Update the segment display with the latest game data.
+ */
+function updateSegmentDisplay() {
+	console.log(state.gamestate);
+	if (state.gamestate === "INACTIVE" || state.gamestate === "INFO" || state.gamestate === "DISCOVER") {
+		setTimeleft(state.gameDuration);
+	}
+	// Do not update the timer when the game is not running.
+	else if (state.gamestate != "GAME" || !state.estimatedTimeout) {
+		return;
+	} else {
+		setTimeleft((state.estimatedTimeout - new Date()) / 1000);
+	}
 }
 
 /**
