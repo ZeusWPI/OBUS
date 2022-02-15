@@ -19,4 +19,4 @@ verwezen worden naar de pagina in de appendix die over die infomodule gaat.
 ## Fouten
 
 Wanneer fouten gemaakt worden tijdens het ontmantelen van de bom, zal dit aangegeven worden op
-het scherm van de bom. Zijn er te veel fouten gemaakt, dan ontploft de bom.
+het scherm van de bom: per fout zal er een uitroepteken bovenaan rood worden. Zijn er te veel fouten gemaakt, dan ontploft de bom.
