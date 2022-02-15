@@ -12,7 +12,6 @@
 // blue = down A1
 // orange = left A2
 // green = right A3
-#define
 
 LedControl lc = LedControl(LED_DIN_PIN, LED_CLK_PIN, LED_CS_PIN, 1);
 
@@ -37,7 +36,7 @@ void loop() {
   }
 }
 
-void callback_game_start() {
+void callback_game_start(uint8_t puzzle_modules) {
 
 }
 

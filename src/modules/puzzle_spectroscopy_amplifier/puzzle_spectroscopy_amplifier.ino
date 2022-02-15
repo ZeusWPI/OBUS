@@ -66,7 +66,7 @@ void loop() {
 	digitalWrite(DISC_LED, disc_value);
 }
 
-void callback_game_start() {
+void callback_game_start(uint8_t puzzle_modules) {
 	// just instantly solve
 	obus_module::solve();
 }
