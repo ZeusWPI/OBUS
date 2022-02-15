@@ -29,4 +29,4 @@ with open(outfilename, 'w') as outfile:
 		with open(filepath) as infile:
 			outfile.write(infile.read())
 			outfile.write("\n\\newpage{}\n")
-os.system(f"pandoc --from=markdown --template=template.tex --output=docs.pdf prefix.yaml {outfilename} --highlight-style=espresso")
+exit(os.system(f"pandoc --from=markdown --template=template.tex --output=docs.pdf prefix.yaml {outfilename} --highlight-style=espresso"))
