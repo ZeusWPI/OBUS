@@ -20,7 +20,7 @@ void loop() {
 	// bool is_message_valid = obus_module::loopNeedy(&message, callback_game_start, callback_game_stop);
 }
 
-void callback_game_start() {
+void callback_game_start(uint8_t puzzle_modules) {
 
 }
 
