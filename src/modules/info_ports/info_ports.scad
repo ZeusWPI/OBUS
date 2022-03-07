@@ -10,6 +10,7 @@ ports = len(port_sizes);
 distance_between_ports=5;
 
 cutout_radius=100; // not a physical dimension
+cut=cutout_radius;
 safe_angle=1;
 
 eps=0.0001;
@@ -71,14 +72,23 @@ module rotating_cylinder() {
 	}
 }
 
-module small_gear_cylinder() {
-	spur_gear(modul=modul, tooth_number=small_gear, width=gear_height, bore=1, pressure_angle=20, helix_angle=0, optimized=false);
-	cylinder(r=5, h=gear_height+5, $fn=6);
-	mirror(v=[0, 0, 1]) cylinder(r=5-clearance/2, h=wall_thickness+distance_between_ports+2);
-}
-
 // http://sammy76.free.fr/conseils/electronique/arduino/SG90.php
 clearance=0.5;
+
+// Print upside-down
+module small_gear_cylinder() {
+	b_diam=5;
+	difference() {
+		union() {
+			cylinder(h=gear_height, r=7);
+			translate([0, 0, b_diam/2]) rotate([0, 90, 0]) cylinder(d=b_diam, h=25);
+			cylinder(d=10-clearance, h=gear_height+5, $fn=6);
+			mirror(v=[0, 0, 1]) cylinder(r=5-clearance/2, h=wall_thickness+distance_between_ports+2-5);
+		}
+		mirror(v=[0, 0, 1]) cube([3, 5, 12], center=true);
+	}
+	
+}
 
 ignore_height=4;
 ignore_diameter=11.8;
@@ -149,18 +159,6 @@ module container() {
 	}
 }
 
-module extragear() {
-	difference() {
-		spur_gear (modul=modul, tooth_number=big_gear, width=gear_height, bore=0, pressure_angle=20, helix_angle=0, optimized=false);
-		union() {
-			translate([-10, -4, gear_height-4]) cube([20, 8, 100]);
-			translate([-6.325, 0, -1]) cylinder(r=0.5, h=100);
-			translate([6.325, 0, -1]) cylinder(r=0.5, h=100);
-		}
-	}
-
-}
-
 module prism(l, w, h){
 	polyhedron(
 	  points=[[0,0,0], [l,0,0], [l,w,0], [0,w,0], [0,w,h], [l,w,h]],
@@ -227,6 +225,27 @@ module container_bottom() {
 	}
 }
 
+module ccube(size = [1,1,1], center = false)
+{
+  sz = (len(size) == 3)?size:[size,size,size];
+  if (len(center) == 1)
+    cube(size, center);
+  else
+    translate([center[0]?-sz[0]/2:0,center[1]?-sz[1]/2:0,center[2]?-sz[2]/2:0])
+    cube(size);
+}
+
+
+module keycap() {
+	difference() {
+		scale([12, 7, 15]) sphere(d=1);
+		union() {
+			ccube([cut, cut, cut], center=[true, true, false]); 
+		}
+	}
+	translate([-5.8/2, 0, 0]) ccube([1, 2.5, 3], center=[1, 1, 0]);
+	translate([5.8/2, 0, 0]) ccube([1, 2.5, 3], center=[1, 1, 0]);
+}
 
 /* color([1, 1, 0]) */
 translation_outer = -outer_radius - wall_thickness - clearance;
@@ -237,8 +256,9 @@ translation_outer = -outer_radius - wall_thickness - clearance;
 
 /* translate([125, 0, 0]) container(); */
 
-translate([0, 130, 0]) extragear();
-/* translate([0, 170, 0]) small_gear_cylinder(); */
+small_gear_cylinder();
 
 
 /* translate([125 + translation_outer, 125, -wall_thickness]) container_bottom(); */
+
+// keycap();
