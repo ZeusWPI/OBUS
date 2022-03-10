@@ -1,30 +1,73 @@
-/* Example sketch to control a 28BYJ-48 stepper motor with ULN2003 driver board and Arduino UNO. More info: https://www.makerguides.com */
-// Include the Arduino Stepper.h library:
 #include <Stepper.h>
-// Define number of steps per rotation:
-const int stepsPerRevolution = 2048;
-// Wiring:
-// Pin 8 to IN1 on the ULN2003 driver
-// Pin 9 to IN2 on the ULN2003 driver
-// Pin 10 to IN3 on the ULN2003 driver
-// Pin 11 to IN4 on the ULN2003 driver
-// Create stepper object called 'myStepper', note the pin order:
-Stepper myStepper = Stepper(stepsPerRevolution, 8, 10, 9, 11);
-void setup() {
-  // Set the speed to 5 rpm:
-  myStepper.setSpeed(5);
-  
-  // Begin Serial communication at a baud rate of 9600:
-  Serial.begin(9600);
+#include <obus_module.h>
+
+const int stepsPerRevolution = 2038;
+
+#define IN_ONE 2
+#define IN_TWO 3
+#define IN_THREE 5
+#define IN_FOUR 6
+
+Stepper stepper = Stepper(stepsPerRevolution, IN_ONE, IN_THREE, IN_TWO, IN_FOUR);
+
+#define LIMIT_SWITCH_PIN 9
+
+bool needs_calibration = false;
+int calib_steps_to_do = 0;
+int steps_to_do = 0;
+
+void updatemotor() {
+  if (calib_steps_to_do > 0) {
+    stepper.step(1);
+    calib_steps_to_do--;
+  }
+  else if (needs_calibration) {
+    if (digitalRead(LIMIT_SWITCH_PIN)) {
+      // Button not pushed down
+      stepper.step(1);
+    } else {
+      // Button pushed down for first time, will be at 0 within stepsPerRevolution/64
+      needs_calibration = false;
+    }
+  } else {
+    if (steps_to_do > 0) {
+      stepper.step(1);
+      steps_to_do--;
+    } else {
+      digitalWrite(IN_ONE, LOW);
+      digitalWrite(IN_TWO, LOW);
+      digitalWrite(IN_THREE, LOW);
+      digitalWrite(IN_FOUR, LOW);
+    }
+  }
 }
+
+void setPosition(uint8_t index) {
+  needs_calibration = true;
+  int slotsToTurn = (16 - index) % 16;
+  steps_to_do = stepsPerRevolution/64 + (slotsToTurn*(stepsPerRevolution/16));
+  if (!digitalRead(LIMIT_SWITCH_PIN)) {
+    calib_steps_to_do = stepsPerRevolution / 16;
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  stepper.setSpeed(5);
+  pinMode(LIMIT_SWITCH_PIN, INPUT_PULLUP);
+  obus_module::setup(OBUS_TYPE_INFO, 3);
+}
+
+uint8_t port_position = 0;
+obus_can::message message;
 void loop() {
-  // Step one revolution in one direction:
-  Serial.println("clockwise");
-  myStepper.step(stepsPerRevolution);
-  delay(500);
-  
-  // Step one revolution in the other direction:
-  Serial.println("counterclockwise");
-  myStepper.step(-stepsPerRevolution);
-  delay(500);
+  obus_module::loopInfo(&message, info_generator);
+  updatemotor();
+}
+
+int info_generator(uint8_t* buffer) {
+	uint8_t location = random(16);
+  buffer[0] = location;
+  setPosition(location);
+	return 1;
 }

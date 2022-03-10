@@ -17,7 +17,6 @@ eps=0.0001;
 
 outer_radius=40; // outer radius of inner cylinder (the one with holes)
 wall_thickness=2;
-use <gears.scad>;
 gear_height=13;
 
 big_gear=30;
@@ -74,6 +73,8 @@ module rotating_cylinder() {
 
 // http://sammy76.free.fr/conseils/electronique/arduino/SG90.php
 clearance=0.5;
+size_outer = 2*(outer_radius+wall_thickness+clearance);
+
 
 // Print upside-down
 module small_gear_cylinder() {
@@ -97,7 +98,6 @@ distance_to_mount=22.7 - 15.9 - 2.5;
 
 module container() {
 	translation_outer = -outer_radius - wall_thickness - clearance;
-	size_outer = 2*(outer_radius+wall_thickness+clearance);
 	module clip_hole() {
 		cube([clip_thickness+clearance, 100, 10+1]);
 		translate([0, -clip_depth-clearance, 10]) cube([clip_thickness+clearance, 100, 10+clearance]);
@@ -174,8 +174,6 @@ module clip(thickness=5, clip_depth=1) {
 }
 
 module container_bottom() {
-
-	size_outer = 2*(outer_radius+wall_thickness+clearance);
 	translate([0, -size_outer/2, 0]) {
 		cube([size_outer, size_outer, wall_thickness]);
 	}
@@ -237,12 +235,13 @@ module ccube(size = [1,1,1], center = false)
 
 
 module keycap() {
-	difference() {
+	translate([0, 0, -1]) difference() {
 		scale([12, 7, 15]) sphere(d=1);
 		union() {
 			ccube([cut, cut, cut], center=[true, true, false]); 
 		}
 	}
+	rotate([0, 180, 0]) ccube([12, 7, 1], center=[1, 1, 0]);
 	translate([-5.8/2, 0, 0]) ccube([1, 2.5, 3], center=[1, 1, 0]);
 	translate([5.8/2, 0, 0]) ccube([1, 2.5, 3], center=[1, 1, 0]);
 }
@@ -251,14 +250,25 @@ module keycap() {
 translation_outer = -outer_radius - wall_thickness - clearance;
 
 
+module extracase() {
+	difference() {
+		ccube([size_outer, size_outer, 61.5], center=[1, 1, 0]);
+		translate([0, 0, 1.5]) ccube([size_outer-3, size_outer-3, cut], center=[1, 1, 0]);
+		translate([0, 0, -1]) cylinder(d=15, h=cut);
+	}
+	
+}
+
 
 /* rotating_cylinder(); */
 
 /* translate([125, 0, 0]) container(); */
 
-small_gear_cylinder();
+// small_gear_cylinder();
 
 
 /* translate([125 + translation_outer, 125, -wall_thickness]) container_bottom(); */
 
 // keycap();
+
+extracase();
