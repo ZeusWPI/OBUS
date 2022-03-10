@@ -1,3 +1,25 @@
+/* Format of the info message
+
+length = 1 byte
+id = 3
+
+message:
+X
+-> binary value
+
+There are 4 bits in the value that indicate 
+
+VGA:      8-bit
+Serial:   4-bit
+MIDI:     2-bit
+Parallel: 1-bit
+
+If a bit is 0, this means the port is shown, if it is 1, the port is hidden.
+
+For example, if the value is 7 (in binary: 0111), that means that only the VGA port is visible.
+*/
+
+
 #include <Stepper.h>
 #include <obus_module.h>
 
@@ -66,7 +88,7 @@ void loop() {
 }
 
 int info_generator(uint8_t* buffer) {
-	uint8_t location = random(16);
+	uint8_t location = random(0), 15);
   buffer[0] = location;
   setPosition(location);
 	return 1;
