@@ -37,3 +37,11 @@ There are two roles:
 These two roles can communicate with each other. To successfully defuse the bomb, they must
 communicate efficiently and clearly. If a mistake is made, the team gets a strike.
 If they get too many strikes or the timer runs out, the bomb explodes.
+
+
+## Common wiring between all modules
+
+- CAN-H: red on JST 3 pin connectors, purple on CAN wire
+- CAN-L: white on JST 3 pin connectors, brown on CAN wire
+- +12V: red on 2 pin JST connector and power wire
+- ground: black on 2 pin JST connector, no color on power wire

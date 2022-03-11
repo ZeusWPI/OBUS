@@ -7,14 +7,14 @@ message:
 X
 -> binary value
 
-There are 4 bits in the value that indicate 
+There are 4 bits in the value that indicate if a port is visible or not:
 
 VGA:      8-bit
 Serial:   4-bit
 MIDI:     2-bit
 Parallel: 1-bit
 
-If a bit is 0, this means the port is shown, if it is 1, the port is hidden.
+If a bit is 0, this means the port is **shown**, if it is 1, the port is **hidden**.
 
 For example, if the value is 7 (in binary: 0111), that means that only the VGA port is visible.
 */
@@ -25,6 +25,7 @@ For example, if the value is 7 (in binary: 0111), that means that only the VGA p
 
 const int stepsPerRevolution = 2038;
 
+// Connected to motor driver
 #define IN_ONE 2
 #define IN_TWO 3
 #define IN_THREE 5
