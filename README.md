@@ -7,7 +7,7 @@ You see an armed time bomb but don't know how to disarm it. Your friends found a
 These are the instructions for building your own OBUS module with an Arduino Nano v3 and the custom PCB. If
 you're using other hardware, you might need to do some things differently.
 
-0. Read the "[Getting started guide](docs/GETTING_STARTED.md)" to get a general idea of how OBUS works.
+0. (Read the "[Getting started guide](docs/GETTING_STARTED.md)" to get a general idea of how OBUS works.)
 1. [Install](https://www.arduino.cc/en/Guide/#install-the-arduino-desktop-ide) the Arduino IDE.
 2. Clone this repository with Git in a permanent location on your drive.
 3. Symlink the library: `ln -s /ABSOLUTE/PATH/TO/REPO/lib /PATH/TO/Arduino/libraries/obus`
@@ -37,14 +37,3 @@ There are two roles:
 These two roles can communicate with each other. To successfully defuse the bomb, they must
 communicate efficiently and clearly. If a mistake is made, the team gets a strike.
 If they get too many strikes or the timer runs out, the bomb explodes.
-
-### Implementation goals
-
-- It should be easy to add new modules, both hardware- and software-wise
-- It should be easy to build your own module and get it working with the rest of the game
-- Every run of the game should be different
-- It should be possible for multiple people at the same time to develop a new module
-
-The idea is to have one bomb controller that keeps track of the timer, the amount of strikes and of whether
-the bomb has been successfully disarmed, and to have multiple modules that have one or more challenges on them
-that need to be solved.
