@@ -108,6 +108,16 @@ float coarse = gCoarseGainValues[gCoarseGainExpected];
   if(freq >= 3999 or floatEq(shaping, 6)){ gPurExpected = false;}
 }
 
+void gen_strike(){
+
+	gRateBeginState = digitalRead(RESTORER_RATE_PIN);
+	gModeBeginState = digitalRead(RESTORER_MODE_PIN);
+	gThresholdBeginState = digitalRead(THRESHOLD_PIN);
+	gPurBeginState = digitalRead(PUR_PIN);
+
+	obus_module::strike();
+}
+
 void setup() {
 	Serial.begin(115200);
 	obus_module::setup(OBUS_TYPE_PUZZLE, 1);
@@ -160,24 +170,24 @@ void loop() {
 
 	bool var_value = (gInputPolarityExpected == digitalRead(INPUT_POLARITY_PIN) and get_resistor_network_pin_index(COARSE_GAIN_NETWORK_PIN) == gCoarseGainExpected and get_resistor_network_pin_index(SHAPING_TIME_NETWORK_PIN) == gShapingTimeExpected);
 	if(!gSecondStage){
+// 		if second stage switches are flipped
+		if (gRateBeginState != rateState or gModeBeginState != modeState or gThresholdBeginState != thresholdState or gPurBeginState != purState){
+			gen_strike();
+		}
 		if(var_value) {
 			gSecondStage = true;
 			digitalWrite(VAR_LED, true);
-// 			if second stage switches are flipped
-			if (gRateBeginState != rateState or gModeBeginState != modeState or gThresholdBeginState != thresholdState or gPurBeginState != purState){
-				obus_module::strike();
-			}
 		}
 	}else{
 // 	if switch is flipped to wrong position
-		if ((gRateBeginState != rateState and rateState != gRateExpected)
-		or (gModeBeginState != modeState and modeState != gModeExpected)
-		or (gThresholdBeginState != thresholdState and thresholdState != gThresholdExpected)
-		or (gPurBeginState != purState and purState != gPurExpected)
-// 		or if first stage knobs are changed
-		or !var_value){
-			obus_module::strike();
-		}
+// 		if ((gRateBeginState != rateState and rateState != gRateExpected)
+// 		or (gModeBeginState != modeState and modeState != gModeExpected)
+// 		or (gThresholdBeginState != thresholdState and thresholdState != gThresholdExpected)
+// 		or (gPurBeginState != purState and purState != gPurExpected)
+// // 		or if first stage knobs are changed
+// 		or !var_value){
+// 			obus_module::strike();
+// 		}
 
 		bool correct = gRateExpected == rateState and gModeExpected == modeState and gThresholdExpected == thresholdState and gPurExpected == purState;
 		if (correct){
