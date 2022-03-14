@@ -35,6 +35,11 @@ uint8_t get_resistor_network_pin_index(uint8_t pin) {
 int gCoarseGainExpected;
 int gShapingTimeExpected;
 
+bool gRateExpected;
+bool gModeExpected;
+bool gThresholdExpected;
+bool gPurExpected;
+
 void setup() {
 	Serial.begin(115200);
 	obus_module::setup(OBUS_TYPE_PUZZLE, 1);
@@ -59,6 +64,7 @@ void setup() {
   Serial.print(gCoarseGainExpected);
   Serial.print(gShapingTimeExpected);
 }
+
 
 
 
