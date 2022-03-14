@@ -114,7 +114,7 @@ void gen_strike(){
 	gModeBeginState = digitalRead(RESTORER_MODE_PIN);
 	gThresholdBeginState = digitalRead(THRESHOLD_PIN);
 	gPurBeginState = digitalRead(PUR_PIN);
-
+  digitalWrite(VAR_LED, true);
 	obus_module::strike();
 }
 
@@ -160,7 +160,7 @@ bool gSecondStage = false;
 void loop() {
 	obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
 	if (!gGameStarted){
-		return;
+		//return;
 	}
 	bool rateState = digitalRead(RESTORER_RATE_PIN);
 	bool modeState = digitalRead(RESTORER_MODE_PIN);
@@ -171,8 +171,10 @@ void loop() {
 	bool var_value = (gInputPolarityExpected == digitalRead(INPUT_POLARITY_PIN) and get_resistor_network_pin_index(COARSE_GAIN_NETWORK_PIN) == gCoarseGainExpected and get_resistor_network_pin_index(SHAPING_TIME_NETWORK_PIN) == gShapingTimeExpected);
 	if(!gSecondStage){
 // 		if second stage switches are flipped
+  
 		if (gRateBeginState != rateState or gModeBeginState != modeState or gThresholdBeginState != thresholdState or gPurBeginState != purState){
 			gen_strike();
+     Serial.write("1stg strike\n");
 		}
 		if(var_value) {
 			gSecondStage = true;
@@ -180,14 +182,15 @@ void loop() {
 		}
 	}else{
 // 	if switch is flipped to wrong position
-// 		if ((gRateBeginState != rateState and rateState != gRateExpected)
-// 		or (gModeBeginState != modeState and modeState != gModeExpected)
-// 		or (gThresholdBeginState != thresholdState and thresholdState != gThresholdExpected)
-// 		or (gPurBeginState != purState and purState != gPurExpected)
-// // 		or if first stage knobs are changed
-// 		or !var_value){
-// 			obus_module::strike();
-// 		}
+ 		if ((gRateBeginState != rateState and rateState != gRateExpected)
+ 		or (gModeBeginState != modeState and modeState != gModeExpected)
+ 		or (gThresholdBeginState != thresholdState and thresholdState != gThresholdExpected)
+ 		or (gPurBeginState != purState and purState != gPurExpected)
+ // 		or if first stage knobs are changed
+ 		){
+ 			gen_strike();
+      Serial.write("2stg strike\n");
+ 		}
 
 		bool correct = gRateExpected == rateState and gModeExpected == modeState and gThresholdExpected == thresholdState and gPurExpected == purState;
 		if (correct){
