@@ -150,12 +150,12 @@ bool gSecondStage = false;
 void loop() {
 	obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
 	if (!gGameStarted){
-		return
+		return;
 	}
-	bool rateState = digitalRead(RESTORER_RATE_PIN)
-	bool modeState = digitalRead(RESTORER_MODE_PIN)
-	bool thresholdState = digitalRead(THRESHOLD_PIN)
-	bool purState = digitalRead(PUR_PIN)
+	bool rateState = digitalRead(RESTORER_RATE_PIN);
+	bool modeState = digitalRead(RESTORER_MODE_PIN);
+	bool thresholdState = digitalRead(THRESHOLD_PIN);
+	bool purState = digitalRead(PUR_PIN);
 
 
 	bool var_value = (gInputPolarityExpected == digitalRead(INPUT_POLARITY_PIN) and get_resistor_network_pin_index(COARSE_GAIN_NETWORK_PIN) == gCoarseGainExpected and get_resistor_network_pin_index(SHAPING_TIME_NETWORK_PIN) == gShapingTimeExpected);
@@ -168,8 +168,6 @@ void loop() {
 				obus_module::strike();
 			}
 		}
-	}
-
 	}else{
 // 	if switch is flipped to wrong position
 		if ((gRateBeginState != rateState and rateState != gRateExpected)
@@ -190,7 +188,7 @@ void loop() {
 }
 
 void callback_game_start(uint8_t puzzle_modules) {
-	gGameStarted = true
+	gGameStarted = true;
 }
 
 void callback_game_stop() {
