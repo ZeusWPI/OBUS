@@ -34,11 +34,77 @@ uint8_t get_resistor_network_pin_index(uint8_t pin) {
 
 int gCoarseGainExpected;
 int gShapingTimeExpected;
+bool gInputPolarityExpected;
+float gCoarseGainValues[] = {10,30,100,300,1000,3000};
+float gShapingTimeValues[] = {0.25,1,1.5,4,5,6};
 
 bool gRateExpected;
 bool gModeExpected;
 bool gThresholdExpected;
 bool gPurExpected;
+
+bool gRateBeginState;
+bool gModeBeginState;
+bool gThresholdBeginState;
+bool gPurBeginState;
+
+float magicFrequency(){
+  int sign = -1;
+  if(gInputPolarityExpected) { sign = 1; }
+  return sign * gCoarseGainValues[gCoarseGainExpected] * gShapingTimeValues[gShapingTimeExpected];
+}
+
+int firstDigit(int x){
+  int y = abs(x);
+  while(y>9) {
+    y /= 10;
+  }
+  return y;
+}
+
+bool floatEq(float x, float desired){
+  return x >= desired -1 and x <= desired + 1;
+}
+
+void setExpectedButtons(){
+  
+  // default is all off
+  gRateExpected = false;
+gModeExpected = false;
+gThresholdExpected = false;
+gPurExpected = false;
+
+float freq = magicFrequency();
+if( freq >=59 and freq <= 351) { 
+  if(gCoarseGainValues[gCoarseGainExpected] <=301) {
+    gRateExpected = true;  
+  }else{
+    gPurExpected = true;
+  }
+  }
+
+float coarse = gCoarseGainValues[gCoarseGainExpected];
+  if((freq >= -144 and freq <= 4751) or floatEq(coarse,300)) {
+    gModeExpected = false;
+  }else{
+    gModeExpected = true;
+  }
+
+  if(freq <= -3001 or freq >= 0) {
+    gThresholdExpected = false;
+  }
+
+  int closestInt = freq;
+  float shaping = gShapingTimeValues[gShapingTimeExpected];
+  if(firstDigit(closestInt) % 2 == 0){
+    if(floatEq(shaping, 1) or floatEq(shaping, 4) or floatEq(shaping, 6)){
+      gPurExpected = true;     
+    }
+  }
+  
+  // at bottom, cause irregardles of other rules
+  if(freq >= 3999 or floatEq(shaping, 6)){ gPurExpected = false;}
+}
 
 void setup() {
 	Serial.begin(115200);
@@ -61,8 +127,12 @@ void setup() {
   randomSeed(12);
   gCoarseGainExpected = random(0, 6);
   gShapingTimeExpected = random(0, 6);
-  Serial.print(gCoarseGainExpected);
-  Serial.print(gShapingTimeExpected);
+
+  setExpectedButtons();
+  gRateBeginState = digitalRead(RESTORER_RATE_PIN);
+  gModeBeginState = digitalRead(RESTORER_MODE_PIN);
+  gThresholdBeginState = digitalRead(THRESHOLD_PIN);
+  gPurBeginState = digitalRead(PUR_PIN);
 }
 
 
@@ -70,17 +140,22 @@ void setup() {
 
 obus_can::message message;
 
-
+bool gSecondStage = false;
 
 void loop() {
 	obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
-   
-	// Some demo code to show everything works
-	bool var_value = false; //digitalRead(INPUT_POLARITY_PIN) ^ digitalRead(RESTORER_MODE_PIN) ^ digitalRead(RESTORER_RATE_PIN) ^ digitalRead(THRESHOLD_PIN);
-	bool disc_value = (get_resistor_network_pin_index(COARSE_GAIN_NETWORK_PIN) == gCoarseGainExpected and get_resistor_network_pin_index(SHAPING_TIME_NETWORK_PIN) == gShapingTimeExpected); //(get_resistor_network_pin_index(COARSE_GAIN_NETWORK_PIN) % 2) ^ (get_resistor_network_pin_index(SHAPING_TIME_NETWORK_PIN) % 2) ^ digitalRead(PUR_PIN);
-	digitalWrite(VAR_LED, var_value);
-	digitalWrite(DISC_LED, disc_value);
-  
+  if(!gSecondStage){
+	bool var_value = (gInputPolarityExpected == digitalRead(INPUT_POLARITY_PIN) and get_resistor_network_pin_index(COARSE_GAIN_NETWORK_PIN) == gCoarseGainExpected and get_resistor_network_pin_index(SHAPING_TIME_NETWORK_PIN) == gShapingTimeExpected);
+  if(var_value) { 
+    gSecondStage = true;
+  }
+  digitalWrite(VAR_LED, var_value);
+  digitalWrite(DISC_LED, false);
+  }else{
+    bool correct = gRateExpected == digitalRead(RESTORER_RATE_PIN) and gModeExpected == digitalRead(RESTORER_MODE_PIN) and gThresholdExpected == digitalRead(THRESHOLD_PIN) and gPurExpected == digitalRead(PUR_PIN);
+    digitalWrite(VAR_LED, true);
+  digitalWrite(DISC_LED, correct);
+  }
 }
 
 void callback_game_start(uint8_t puzzle_modules) {
