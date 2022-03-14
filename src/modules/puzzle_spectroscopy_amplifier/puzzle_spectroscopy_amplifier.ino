@@ -32,6 +32,9 @@ uint8_t get_resistor_network_pin_index(uint8_t pin) {
 	return best_candidate;
 }
 
+int gCoarseGainExpected;
+int gShapingTimeExpected;
+
 void setup() {
 	Serial.begin(115200);
 	obus_module::setup(OBUS_TYPE_PUZZLE, 1);
@@ -50,20 +53,28 @@ void setup() {
 	// resistor networks
 	pinMode(COARSE_GAIN_NETWORK_PIN, INPUT);
 	pinMode(SHAPING_TIME_NETWORK_PIN, INPUT);
+  randomSeed(12);
+  gCoarseGainExpected = random(0, 6);
+  gShapingTimeExpected = random(0, 6);
+  Serial.print(gCoarseGainExpected);
+  Serial.print(gShapingTimeExpected);
 }
 
 
 
 obus_can::message message;
 
+
+
 void loop() {
 	obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
-
+   
 	// Some demo code to show everything works
-	bool var_value = digitalRead(INPUT_POLARITY_PIN) ^ digitalRead(RESTORER_MODE_PIN) ^ digitalRead(RESTORER_RATE_PIN) ^ digitalRead(THRESHOLD_PIN);
-	bool disc_value = (get_resistor_network_pin_index(COARSE_GAIN_NETWORK_PIN) % 2) ^ (get_resistor_network_pin_index(SHAPING_TIME_NETWORK_PIN) % 2) ^ digitalRead(PUR_PIN);
+	bool var_value = false; //digitalRead(INPUT_POLARITY_PIN) ^ digitalRead(RESTORER_MODE_PIN) ^ digitalRead(RESTORER_RATE_PIN) ^ digitalRead(THRESHOLD_PIN);
+	bool disc_value = (get_resistor_network_pin_index(COARSE_GAIN_NETWORK_PIN) == gCoarseGainExpected and get_resistor_network_pin_index(SHAPING_TIME_NETWORK_PIN) == gShapingTimeExpected); //(get_resistor_network_pin_index(COARSE_GAIN_NETWORK_PIN) % 2) ^ (get_resistor_network_pin_index(SHAPING_TIME_NETWORK_PIN) % 2) ^ digitalRead(PUR_PIN);
 	digitalWrite(VAR_LED, var_value);
 	digitalWrite(DISC_LED, disc_value);
+  
 }
 
 void callback_game_start(uint8_t puzzle_modules) {
