@@ -48,6 +48,8 @@ bool gModeBeginState;
 bool gThresholdBeginState;
 bool gPurBeginState;
 
+bool gGameStarted;
+
 float magicFrequency(){
   int sign = -1;
   if(gInputPolarityExpected) { sign = 1; }
@@ -69,10 +71,10 @@ bool floatEq(float x, float desired){
 void setExpectedButtons(){
   
   // default is all off
-  gRateExpected = false;
-gModeExpected = false;
-gThresholdExpected = false;
-gPurExpected = false;
+	gRateExpected = false;
+	gModeExpected = false;
+	gThresholdExpected = false;
+	gPurExpected = false;
 
 float freq = magicFrequency();
 if( freq >=59 and freq <= 351) { 
@@ -81,7 +83,7 @@ if( freq >=59 and freq <= 351) {
   }else{
     gPurExpected = true;
   }
-  }
+}
 
 float coarse = gCoarseGainValues[gCoarseGainExpected];
   if((freq >= -144 and freq <= 4751) or floatEq(coarse,300)) {
@@ -124,17 +126,20 @@ void setup() {
 	// resistor networks
 	pinMode(COARSE_GAIN_NETWORK_PIN, INPUT);
 	pinMode(SHAPING_TIME_NETWORK_PIN, INPUT);
-  randomSeed(12);
-  gCoarseGainExpected = random(0, 6);
-  gShapingTimeExpected = random(0, 6);
+ 	randomSeed(12);
+ 	gCoarseGainExpected = random(0, 6);
+ 	gShapingTimeExpected = random(0, 6);
+ 	setExpectedButtons();
+ 	gRateBeginState = digitalRead(RESTORER_RATE_PIN);
+ 	gModeBeginState = digitalRead(RESTORER_MODE_PIN);
+ 	gThresholdBeginState = digitalRead(THRESHOLD_PIN);
+ 	gPurBeginState = digitalRead(PUR_PIN);
 
-  setExpectedButtons();
-  gRateBeginState = digitalRead(RESTORER_RATE_PIN);
-  gModeBeginState = digitalRead(RESTORER_MODE_PIN);
-  gThresholdBeginState = digitalRead(THRESHOLD_PIN);
-  gPurBeginState = digitalRead(PUR_PIN);
+	digitalWrite(DISC_LED, false);
+	digitalWrite(VAR_LED, false);
+
+	gGameStarted = false;
 }
-
 
 
 
@@ -144,23 +149,48 @@ bool gSecondStage = false;
 
 void loop() {
 	obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
-  if(!gSecondStage){
+	if (!gGameStarted){
+		return
+	}
+	bool rateState = digitalRead(RESTORER_RATE_PIN)
+	bool modeState = digitalRead(RESTORER_MODE_PIN)
+	bool thresholdState = digitalRead(THRESHOLD_PIN)
+	bool purState = digitalRead(PUR_PIN)
+
+
 	bool var_value = (gInputPolarityExpected == digitalRead(INPUT_POLARITY_PIN) and get_resistor_network_pin_index(COARSE_GAIN_NETWORK_PIN) == gCoarseGainExpected and get_resistor_network_pin_index(SHAPING_TIME_NETWORK_PIN) == gShapingTimeExpected);
-  if(var_value) { 
-    gSecondStage = true;
-  }
-  digitalWrite(VAR_LED, var_value);
-  digitalWrite(DISC_LED, false);
-  }else{
-    bool correct = gRateExpected == digitalRead(RESTORER_RATE_PIN) and gModeExpected == digitalRead(RESTORER_MODE_PIN) and gThresholdExpected == digitalRead(THRESHOLD_PIN) and gPurExpected == digitalRead(PUR_PIN);
-    digitalWrite(VAR_LED, true);
-  digitalWrite(DISC_LED, correct);
-  }
+	if(!gSecondStage){
+		if(var_value) {
+			gSecondStage = true;
+			digitalWrite(VAR_LED, true);
+// 			if second stage switches are flipped
+			if (gRateBeginState != rateState or gModeBeginState != modeState or gThresholdBeginState != thresholdState or gPurBeginState != purState){
+				obus_module::strike();
+			}
+		}
+	}
+
+	}else{
+// 	if switch is flipped to wrong position
+		if ((gRateBeginState != rateState and rateState != gRateExpected)
+		or (gModeBeginState != modeState and modeState != gModeExpected)
+		or (gThresholdBeginState != thresholdState and thresholdState != gThresholdExpected)
+		or (gPurBeginState != purState and purState != gPurExpected)
+// 		or if first stage knobs are changed
+		or !var_value){
+			obus_module::strike();
+		}
+
+		bool correct = gRateExpected == rateState and gModeExpected == modeState and gThresholdExpected == thresholdState and gPurExpected == purState;
+		if (correct){
+			digitalWrite(DISC_LED, true);
+			obus_module::solve();
+		}
+	}
 }
 
 void callback_game_start(uint8_t puzzle_modules) {
-	// just instantly solve
-	obus_module::solve();
+	gGameStarted = true
 }
 
 void callback_game_stop() {
