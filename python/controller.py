@@ -1,3 +1,4 @@
+from distutils.log import debug
 from threading import Thread
 from flask import Flask, jsonify, send_file
 from time import sleep
@@ -55,6 +56,14 @@ class SharedSerialToWeb:
     last_state_update: datetime = None
     registered_modules: dict[ModuleAddress, PuzzleState] = field(default_factory=dict)
 
+@dataclass
+class DebugShared:
+    messages: deque
+    last_message_index: int
+
+# Keep this the same as max_messages on the client!
+max_message_cache = 200
+debug_shared = DebugShared(deque(maxlen=max_message_cache), -1)
 
 app = Flask(__name__)
 
@@ -65,7 +74,7 @@ web_to_serial = SharedWebToSerial()
 serial_to_web = SharedSerialToWeb()
 
 
-def parse_can_line(ser) -> Message:
+def parse_can_line(ser, debug_shared) -> Message:
     if not ser.in_waiting:
         return None
     line = ser.read(12)
@@ -75,11 +84,15 @@ def parse_can_line(ser) -> Message:
         sender = (int(line[0]) << 8) + int(line[1])
         size = int(line[2])
         message = line[3:3+size]
-        return Message(message, sender, datetime.now())
+        obj = Message(message, sender, datetime.now())
+        debug_shared.messages.append(obj)
+        debug_shared.last_message_index += 1
     return None
 
 
-def send_message(ser, msg) -> None:
+def send_message(ser, msg, debug_shared) -> None:
+    debug_shared.messages.append(msg)
+    debug_shared.last_message_index += 1
     # we send the payload padded with null-bytes, but these don't actually get sent
     packed = struct.pack('>HB8s', msg.module_address().as_binary(), len(msg.payload), msg.payload)
     ser.write(packed + b'\n')
@@ -90,7 +103,7 @@ def calculate_puzzle_modules_left(serial_to_web) -> int:
 def calculate_strikes(serial_to_web) -> int:
     return sum(state.strike_amount for state in serial_to_web.registered_modules.values())
 
-def serial_controller(serialport, web_to_serial, serial_to_web):
+def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
     with serial.Serial(serialport, 115200, timeout=0.05) as ser:
         serial_to_web.gamestate = Gamestate.INACTIVE
         # TODO send message here to get all modules to stop talking and reset
@@ -103,7 +116,7 @@ def serial_controller(serialport, web_to_serial, serial_to_web):
                 serial_to_web.info_round_start = datetime.now()
                 serial_to_web.registered_modules = {}
             elif serial_to_web.gamestate == Gamestate.INFO:
-                parse_can_line(ser) # throw away, TODO keep this and display it
+                parse_can_line(ser, debug_shared) # throw away, TODO keep this and display it
                 if datetime.now() - serial_to_web.info_round_start > INFO_ROUND_DURATION:
                     serial_to_web.gamestate = Gamestate.DISCOVER
                     send_message(ser, Message.create_controller_hello())
@@ -114,7 +127,7 @@ def serial_controller(serialport, web_to_serial, serial_to_web):
                     serial_to_web.last_state_update = datetime.now()
                     serial_to_web.gamestate = Gamestate.GAME
                     send_message(ser, Message.create_controller_gamestart(web_to_serial.game_duration, 0, web_to_serial.max_allowed_strikes, len(serial_to_web.registered_modules)))
-                msg = parse_can_line(ser)
+                msg = parse_can_line(ser, debug_shared)
                 if msg is None:
                     continue
                 puzzle_address = msg.get_puzzle_register()
@@ -128,7 +141,7 @@ def serial_controller(serialport, web_to_serial, serial_to_web):
 
             elif serial_to_web.gamestate == Gamestate.GAME:
                 # React to puzzle strike / solve
-                msg = parse_can_line(ser)
+                msg = parse_can_line(ser, debug_shared)
                 if msg is None:
                     pass
                 elif (strike_details := msg.get_puzzle_strike_details()):
@@ -206,16 +219,28 @@ def restart():
         return 'OK'
     return 'Wrong gamestage'
 
+@app.route('/<last_received>/api.json')
+def api(last_received):
+    last_received = int(last_received)
+    if last_received < debug_shared.last_message_index - len(debug_shared.messages):
+        return jsonify({"server_id": server_id, "newest_msg": debug_shared.last_message_index, "messages": list(debug_shared.messages)})
+    else:
+        return jsonify({"server_id": server_id, "newest_msg": debug_shared.last_message_index, "messages": list(debug_shared.messages)[len(debug_shared.messages) - (debug_shared.last_message_index - last_received):]})
+
 
 @app.route('/')
 def index():
     return send_file('static/controller.html')
+
+@app.route('/debugger')
+def debugger():
+    return send_file('static/debugger.html')
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         print("Usage: python3 controller.py [serial port]")
         sys.exit()
     if sys.argv[1] != 'mock':
-        thread = Thread(target=serial_controller, args=(sys.argv[1], web_to_serial, serial_to_web))
+        thread = Thread(target=serial_controller, args=(sys.argv[1], web_to_serial, serial_to_web, debug_shared))
         thread.start()
     app.run(debug=False, host='0.0.0.0', port=8080)
