@@ -87,6 +87,7 @@ def parse_can_line(ser, debug_shared) -> Message:
         obj = Message(message, sender, datetime.now())
         debug_shared.messages.append(obj)
         debug_shared.last_message_index += 1
+        return obj
     return None
 
 
@@ -111,7 +112,7 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
         time.sleep(5)
         while True:
             if serial_to_web.gamestate == Gamestate.INACTIVE:
-                send_message(ser, Message.create_controller_infostart(web_to_serial.seed))
+                send_message(ser, Message.create_controller_infostart(web_to_serial.seed),debug_shared)
                 serial_to_web.gamestate = Gamestate.INFO
                 serial_to_web.info_round_start = datetime.now()
                 serial_to_web.registered_modules = {}
@@ -119,14 +120,14 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
                 parse_can_line(ser, debug_shared) # throw away, TODO keep this and display it
                 if datetime.now() - serial_to_web.info_round_start > INFO_ROUND_DURATION:
                     serial_to_web.gamestate = Gamestate.DISCOVER
-                    send_message(ser, Message.create_controller_hello())
+                    send_message(ser, Message.create_controller_hello(),debug_shared)
             elif serial_to_web.gamestate == Gamestate.DISCOVER:
                 if web_to_serial.start_game:
                     web_to_serial.start_game = False
                     serial_to_web.game_start = datetime.now()
                     serial_to_web.last_state_update = datetime.now()
                     serial_to_web.gamestate = Gamestate.GAME
-                    send_message(ser, Message.create_controller_gamestart(web_to_serial.game_duration, 0, web_to_serial.max_allowed_strikes, len(serial_to_web.registered_modules)))
+                    send_message(ser, Message.create_controller_gamestart(web_to_serial.game_duration, 0, web_to_serial.max_allowed_strikes, len(serial_to_web.registered_modules)),debug_shared)
                 msg = parse_can_line(ser, debug_shared)
                 if msg is None:
                     continue
@@ -137,7 +138,7 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
                     # this is blocked puzzle module, don't ack it
                     continue
                 serial_to_web.registered_modules[puzzle_address] = PuzzleState()
-                send_message(ser, Message.create_controller_ack(msg.module_address()))
+                send_message(ser, Message.create_controller_ack(msg.module_address()),debug_shared)
 
             elif serial_to_web.gamestate == Gamestate.GAME:
                 # React to puzzle strike / solve
@@ -157,13 +158,13 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
                 if time_left.total_seconds() <= 0:
                     # Pass zero timedelta, because time left can't be negative in the CAN protocol
                     # Timeout case is also handled first, so that in other cases we know there's time left
-                    send_message(ser, Message.create_controller_timeout(timedelta(), puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left))
+                    send_message(ser, Message.create_controller_timeout(timedelta(), puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left),debug_shared)
                     serial_to_web.gamestate = Gamestate.GAMEOVER
                 elif total_strikes > web_to_serial.max_allowed_strikes:
-                    send_message(ser, Message.create_controller_strikeout(time_left, puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left))
+                    send_message(ser, Message.create_controller_strikeout(time_left, puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left),debug_shared)
                     serial_to_web.gamestate = Gamestate.GAMEOVER
                 elif puzzle_modules_left == 0:
-                    send_message(ser, Message.create_controller_solved(time_left, puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left))
+                    send_message(ser, Message.create_controller_solved(time_left, puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left),debug_shared)
                     serial_to_web.gamestate = Gamestate.GAMEOVER
                 if serial_to_web.gamestate == Gamestate.GAMEOVER:
                     serial_to_web.game_stop = datetime.now()
@@ -172,7 +173,7 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
                 if datetime.now() - serial_to_web.last_state_update > GAMESTATE_UPDATE_INTERVAL:
                     serial_to_web.last_state_update = datetime.now()
                     # Send state update with known-good checked values
-                    send_message(ser, Message.create_controller_state(time_left, total_strikes, web_to_serial.max_allowed_strikes, puzzle_modules_left))
+                    send_message(ser, Message.create_controller_state(time_left, total_strikes, web_to_serial.max_allowed_strikes, puzzle_modules_left),debug_shared)
 
             elif serial_to_web.gamestate == Gamestate.GAMEOVER:
                 if web_to_serial.restart_game:
@@ -222,10 +223,12 @@ def restart():
 @app.route('/<last_received>/api.json')
 def api(last_received):
     last_received = int(last_received)
-    if last_received < debug_shared.last_message_index - len(debug_shared.messages):
-        return jsonify({"server_id": server_id, "newest_msg": debug_shared.last_message_index, "messages": list(debug_shared.messages)})
-    else:
-        return jsonify({"server_id": server_id, "newest_msg": debug_shared.last_message_index, "messages": list(debug_shared.messages)[len(debug_shared.messages) - (debug_shared.last_message_index - last_received):]})
+    messages = list(m.serialize() for m in debug_shared.messages)
+
+    if last_received >= debug_shared.last_message_index - len(debug_shared.messages):
+        messages = messages[len(debug_shared.messages) - (debug_shared.last_message_index - last_received):]
+
+    return jsonify({"server_id": server_id, "newest_msg": debug_shared.last_message_index, "messages": messages})
 
 
 @app.route('/')
