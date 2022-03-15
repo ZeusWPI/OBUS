@@ -190,6 +190,10 @@ bool is_error_condition() {
 	return mcp2515.getInterrupts() & MCP2515::CANINTF_ERRIF;
 }
 
+uint8_t get_error_flags() {
+	return mcp2515.getErrorFlags();
+}
+
 void send(struct message *msg) {
 	if (!is_init) {
 		Serial.println(F("E Call init first"));

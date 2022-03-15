@@ -113,6 +113,7 @@ void send(struct message *msg);
 
 bool is_error_condition();
 
+uint8_t get_error_flags();
 
 /**
  * For internal use only

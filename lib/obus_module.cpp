@@ -6,6 +6,7 @@
 
 #define BLINK_DELAY_SLOW 1000
 #define BLINK_DELAY_FAST 300
+#define BLINK_DELAY_VERY_FAST 100
 
 #define MAX_TIME_BETWEEN_CALLS 100
 
@@ -79,11 +80,11 @@ void _setLedBlink(struct color color, uint16_t delay) {
 
 void blink_error(String message) {
 	bool blink = false;
+	digitalWrite(PIN_LED_GREEN, LOW);
 	while (true) {
 		digitalWrite(PIN_LED_RED, blink);
-		digitalWrite(PIN_LED_GREEN, blink);
 		blink = !blink;
-		delay(blink ? BLINK_DELAY_SLOW : BLINK_DELAY_FAST);
+		delay(BLINK_DELAY_VERY_FAST);
 		Serial.println(message);
 	}
 }
@@ -132,7 +133,8 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 	// We will need to fork our CAN library for this, because the needed functions are private.
 	// Also, we can't do this by default, because the INT pin is normally not connected to the board
 	if (obus_can::is_error_condition()) {
-		blink_error(F("E CAN error"));
+
+		blink_error("E CAN error " + String(obus_can::get_error_flags(), BIN));
 	}
 
 	// Force the user of the library to periodically call loop
