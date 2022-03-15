@@ -1,4 +1,4 @@
-// (c) 2022, redfast00
+// (c) 2022, redfast00, jasper_janin, robbe7730
 // See the LICENSE file for conditions for copying
 
 #include <obus_module.h>
