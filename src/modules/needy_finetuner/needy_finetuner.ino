@@ -25,7 +25,7 @@ void setup() {
 	Serial.begin(115200);
 	Serial.println("Needy finetuner by Midgard");
 
-	/*obus_module::setup(OBUS_TYPE_NEEDY, OBUS_NEEDY_ID_DEVELOPMENT);*/
+	obus_module::setup(OBUS_TYPE_NEEDY, 0);
 
 	pinMode(PIN_GAUGE, OUTPUT);
 	pinMode(PIN_LED, OUTPUT);
@@ -72,7 +72,7 @@ int ledPattern(int32_t timeLeft, int16_t target, int16_t sliderValue) {
 int ledCycle = 0;
 
 void loop() {
-	/*bool is_message_valid = obus_module::loopNeedy(&message, callback_game_start, callback_game_stop);*/
+	bool is_message_valid = obus_module::loopNeedy(&message, callback_game_start, callback_game_stop);
 
 	int16_t sliderValue = (getSliderValue() + previousSliderValue) / 2;
 	previousSliderValue = getSliderValue();
