@@ -40,9 +40,9 @@ uint16_t stops[] { 0, 18, 147, 526, 900, 1008, 1024 };
 uint16_t getSliderValue() {
 	uint16_t value = analogRead(PIN_SLIDER) + 1;
 	for (int i = 1; i < ARRAY_LENGTH(stops); i++) {
-		if (value <= stops[i]) return (value - stops[i - 1]) * 170 / (stops[i] - stops[i-1]) + (i-1)*170 - 1;
+		if (value <= stops[i]) return 1023 - ((value - stops[i - 1]) * 170 / (stops[i] - stops[i-1]) + (i-1)*170 - 1);
 	}
-	return 0;
+	return 1023;
 }
 
 void gauge(unsigned char value) {
@@ -74,9 +74,17 @@ int ledCycle = 0;
 void loop() {
 	bool is_message_valid = obus_module::loopNeedy(&message, callback_game_start, callback_game_stop);
 
+	if (!obus_module::is_active()) {
+		gauge(127);
+		delay(50);
+		digitalWrite(PIN_LED, 0);
+		return;
+	}
+
 	int16_t sliderValue = (getSliderValue() + previousSliderValue) / 2;
 	previousSliderValue = getSliderValue();
 	int16_t gaugeValue = previousTarget - sliderValue;
+
 
 	int32_t timeLeft = deadline - millis();
 	if (timeLeft <= ADJUSTMENT_PERIOD_MS) {
