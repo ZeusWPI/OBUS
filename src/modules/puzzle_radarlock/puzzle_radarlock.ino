@@ -17,8 +17,12 @@ const int angles[2] = {45,135};
 bool user_solved[2] = {false, false};
 //----------------
 
+bool start = false;
 bool solved = false;
 bool pressed = false;
+
+long lastDebounceTime = 0;  // the last time the output pin was toggled
+long debounceDelay = 200;    // the debounce time; increase if the output flickers
 
 int distance_bias;
 
@@ -53,8 +57,7 @@ void loop() {
 	bool is_message_valid = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
 	// bool is_message_valid = obus_module::loopNeedy(&message, callback_game_start, callback_game_stop);
 
-  // 5-175 degrees
-  if (solved) {
+  if (solved || not start) {
     return;
   }
   
@@ -98,10 +101,12 @@ void timermil(long duration){
   long start =  millis();
   while (millis() - start < duration){
         bool is_message_valid = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
-        if (digitalRead(submit_button) == 0){
+        if (digitalRead(submit_button) == 0 and 
+            (millis() - lastDebounceTime) > debounceDelay){
           if(!pressed){
             submitPress();
           }
+          lastDebounceTime = millis(); //set the current time
           pressed = true;
         } else {
           pressed = false;
@@ -140,10 +145,9 @@ int calculateDistance(){
 
 
 void callback_game_start(uint8_t puzzle_modules) {
-
+  start = true;
 }
 
 void callback_game_stop() {
-
+     ((void (*)(void))0)();
 }
-

@@ -1,20 +1,21 @@
 # radarlock
 
-Schrijf de handleiding voor je module hier. Kijk gerust naar de handleiding
-voor de "Doolhof"-module (`src/modules/puzzle_maze/doc/index.md`)
+## Principe
 
+Radarlock werkt als een vergrendelingssysteem dat kan worden ontgrendeld door objecten onder de juiste hoek 
+en op de juiste afstand verwijderd van de sensor te plaatsen.
 
-Hieronder wat voorbeelden van markup die je kan gebruiken. Daarnaast kan je ook LaTeX
-gebruiken (zie bijvoorbeeld de "Doolhof"-module)
+De 'n' richtingen kunnen worden vergeleken met een wachtwoord van 'n' karakters lang.
 
-Use drawings! Create the docs/images/your_module directory, put your image there and include them like this:
+En de afstanden binnen deze richtingen kunnen worden vergeleken met de mogelijke karakters die kunnen ingevuld worden.
 
-![](./your_module/filename.png)
+De radarsensor controleert drie richtingen(hoeken) voor voorwerpen binnen een bepaald bereik van de sensor. 
+Als er een voorwerp binnen dit bereik is, zal er worden gecontroleerd of deze afstand overeenkomt met de vereiste afstand voor deze richting. 
+Zodra de afstand voor elke richting gelijk is aan de afstand die vereist is voor de corresponderende richting, 
+zal de puzzel als opgelost worden beschouwd wanneer de gebruiker op de verzendknop drukt. 
 
-Use tables! Write them like this:
+Als de gebruiker op de verzendknop drukt terwijl een van de afstanden ongeldig is, dan krijgt de gebruiker een strike.
 
-| Symbol                         | Action to take |
-|--------------------------------|----------------|
-| ![](./your_module/symbol1.png) | Do nothing     |
-| ![](./your_module/symbol2.png) | Press the red button |
-| ![](./your_module/symbol3.png) | Press the yellow button |
+## Taak van de helper:
+
+De helper zal de afstanden met de corresponderende richting aan de gebruiker moeten doorgeven.
