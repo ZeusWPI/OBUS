@@ -76,7 +76,7 @@ uint8_t payload_type(uint8_t module_type, uint8_t module_id, uint8_t msg_type) {
 }
 
 
-bool init() {
+bool init(bool filter_messages) {
 	is_init = true;
 	mcp2515.reset();
 	mcp2515.setBitrate(CAN_50KBPS);
@@ -90,10 +90,17 @@ bool init() {
 	delay(50);
 	if (mcp2515.readMessage(&recv_msg) == MCP2515::ERROR_OK && recv_msg.can_id == 0x01 && recv_msg.can_dlc == 1 && recv_msg.data[0] == 0x23) {
 		mcp2515.setNormalMode();
-		return true;
 	} else {
 		return false;
 	}
+	if (filter_messages) {
+		mcp2515.setFilterMask(MCP2515::MASK0, false, 0b011UL << 29);
+		mcp2515.setFilterMask(MCP2515::MASK1, false, 0b011UL << 29);
+		mcp2515.setFilter(MCP2515::RXF0, false, 0);
+		mcp2515.setFilter(MCP2515::RXF2, false, 0);
+	}
+
+	return true;
 }
 
 

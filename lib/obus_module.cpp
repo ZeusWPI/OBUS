@@ -107,8 +107,7 @@ void setup(uint8_t type, uint8_t id) {
 	this_module.type = type;
 	this_module.id = id;
 	_resetState();
-
-	if (!obus_can::init()) {
+	if (!obus_can::init(!is_from_controller(this_module))) {
 		blink_error(F("CAN init failed"));
 	}
 }
