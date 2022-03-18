@@ -28,6 +28,7 @@ class Debounced {
 
 		bool loop(bool currently_down);
 		uint16_t get_press_count();
+		void reset_press_count();
 };
 
 #endif /* end of include guard: OBUS_UTIL_H */

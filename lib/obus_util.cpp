@@ -50,3 +50,7 @@ bool Debounced::loop(bool currently_down) {
 uint16_t Debounced::get_press_count() {
 	return press_count;
 }
+
+void Debounced::reset_press_count() {
+	press_count = 0;
+}
