@@ -15,7 +15,7 @@ Als de gebruiker op de verzendknop drukt terwijl een van de afstanden ongeldig i
 De helper zal de afstanden met de corresponderende richting aan de gebruiker moeten doorgeven.   
 
 Aan de hand van de onderstaande *puzzelachtige* afbeeldingen moet de helper in staat zijn de **juiste** afstanden te geven onder de **juiste** hoek 
-+ onder welke omstandigheden de ledjes branden.
+en onder welke omstandigheden de ledjes branden.
 
 
 |   |   |
