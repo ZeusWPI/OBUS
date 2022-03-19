@@ -10,11 +10,11 @@ const int servoPin = PD2; // Pin for Servo
 const int submit_button = PD6; 
 
 // ------Length of arrays should be consistent
-const int ledPins[2] = {14,15}; // Led Pins
+const int ledPins[3] = {14,16,18}; // Led Pins
 
-const int distances[2] = {10,10}; //test distances
-const int angles[2] = {45,135};
-bool user_solved[2] = {false, false};
+const int distances[3] = {10,44,28}; //test distances
+const int angles[3] = {135,90,45};
+bool user_solved[3] = {false, false,false};
 //----------------
 
 bool start = false;
@@ -22,7 +22,7 @@ bool solved = false;
 bool pressed = false;
 
 long lastDebounceTime = 0;  // the last time the output pin was toggled
-long debounceDelay = 200;    // the debounce time; increase if the output flickers
+long debounceDelay = 2000;    // the debounce time; increase if the output flickers
 
 int distance_bias;
 
@@ -57,15 +57,20 @@ void loop() {
 	bool is_message_valid = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
 	// bool is_message_valid = obus_module::loopNeedy(&message, callback_game_start, callback_game_stop);
 
-  if (solved || not start) {
+  if (solved || start) {
     return;
   }
   
   for(int ix = 0; ix < number_of_distances; ix++){
-    distance_bias = 0.5 * distances[ix]; // room for error marge in distance
-    
+    distance_bias = 0.3 * distances[ix]; // room for error marge in distance
+    bool is_message_valid = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
+
+    if (solved || not start){
+      return;
+    }
+
     servo.write(angles[ix]);
-    timermil(30);
+    timermil(500);
     int distance = calculateDistance();
     Serial.print(angles[ix]);
     Serial.print(":");
@@ -73,7 +78,7 @@ void loop() {
     Serial.println();
 
     // turn led on if object is at least detected in range 
-    if (distance < 80) {
+    if (distance < 80 and distance > 5) {
       digitalWrite(ledPins[ix], HIGH);
     } else { // else turn led off
       digitalWrite(ledPins[ix], LOW);
@@ -93,7 +98,8 @@ void loop() {
 // delay in microseconds for Ultrasonic sensor
 void timermicro(long duration){
   long start =  micros();
-  while (micros() - start < duration){}
+  while (micros() - start < duration){
+    }
 }
 
 // delay in milliseconds
@@ -121,6 +127,9 @@ void submitPress(){
       // you only get here if every angle is solved and submit button is pressed
       solved = true;
       Serial.println("SOLVED (= ");
+      for (int i = 0; i < number_of_distances; i++){
+        digitalWrite(ledPins[i],LOW);
+      }
       obus_module::solve();
     } else{
       Serial.println("WRONG )= ");
@@ -132,16 +141,21 @@ void submitPress(){
 // calculate the distance measured by the Ultrasonic sensor
 int calculateDistance(){ 
   digitalWrite(trigPin, LOW);   
-  timermicro(2);
+  delayMicroseconds(2);
   // Sets the trigPin on HIGH state for 10 micro seconds
   digitalWrite(trigPin, HIGH); 
-  timermicro(10);
+  //timermicro(1022);
+  delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  int duration = pulseIn(echoPin, HIGH); // Reads the echoPin, returns the sound wave travel time in microseconds
+  long start = millis();
+  int duration = pulseIn(echoPin, HIGH,7000); // Reads the echoPin, returns the sound wave travel time in microseconds
+  Serial.println(millis() - start);
   int distance = duration / 29 / 2; // convert to cm 
   return distance;
 }
+
+
 
 
 void callback_game_start(uint8_t puzzle_modules) {
