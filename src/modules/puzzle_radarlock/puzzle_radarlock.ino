@@ -148,9 +148,7 @@ int calculateDistance(){
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
 
-  long start = millis();
   int duration = pulseIn(echoPin, HIGH,7000); // Reads the echoPin, returns the sound wave travel time in microseconds
-  Serial.println(millis() - start);
   int distance = duration / 29 / 2; // convert to cm 
   return distance;
 }
