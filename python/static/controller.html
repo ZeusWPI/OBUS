@@ -8,8 +8,11 @@
 	</head>
 
 	<body>
+		<video playsinline muted id="explosion-video">
+			<source src="/static/video/explosion.mp4" type="video/mp4">
+		</video>
 		<!-- Hud -->
-		<div class="hud">
+		<div class="hud hide-on-explosion">
 			<!-- State -->
 			<div>
 				<div>Game state: <span id="gamestate"></span></div>
@@ -27,11 +30,14 @@
 				<button id="buttonRestart" onclick="onRestartButtonClick()">
 					RESTART
 				</button>
+				<button id="buttonStop" onclick="onStopButtonClick()">
+					STOP
+				</button>
 			</div>
 		</div>
 
 		<!-- Content -->
-		<div class="content">
+		<div class="content hide-on-explosion">
 			<!-- Timer -->
 			<div class="box center">
 				<canvas id="display" width="1000" height="400">

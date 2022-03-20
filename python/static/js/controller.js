@@ -4,6 +4,8 @@
 const sounds = {
 	strike: new Audio("/static/sounds/strike.mp3"),
 	alarm: new Audio("/static/sounds/alarm.mp3"),
+	explosion: new Audio("/static/sounds/explosion.mp3"),
+	victory: new Audio("/static/sounds/victory.mp3"),
 };
 
 /**
@@ -24,6 +26,9 @@ const state = {
 
 	// If the alarm has been played already
 	alarmPlayed: false,
+
+	// If the end-of-game animation/sound has been started already
+	endOfGameAnimationPlayed: false,
 
 	// Number of mistakes allowed without exploding the bomb
 	maxAllowedStrikes: 0,
@@ -119,9 +124,10 @@ function updateGameState() {
 			document.getElementById("gamestate").innerHTML = state.gamestate;
 
 			// Reset the strike amount if the game is not running anymore.
-			if (state.gamestate === "INACTIVE") {
+			if (state.gamestate === "INFO") {
 				state.strikes = 0;
 				state.alarmPlayed = false;
+				state.endOfGameAnimationPlayed = false;
 			}
 
 			if (state.gamestate === "GAME") {
@@ -146,13 +152,38 @@ function updateGameState() {
 					playSound(sounds.alarm);
 					state.alarmPlayed = true;
 				}
+			} else if (state.gamestate == "GAMEOVER") {
+				if (!state.endOfGameAnimationPlayed) {
+					switch (data.cause) {
+						case 'STRIKEOUT':
+						case 'TIMEOUT':
+							document.getElementById("explosion-video").play();
+							playSound(sounds.explosion);
+							for (const elem of document.getElementsByClassName('hide-on-explosion')) {
+								elem.style.display = 'none';
+							}
+							setTimeout(() => {
+								// Make UI visible again after animation has stopped playing
+								for (const elem of document.getElementsByClassName('hide-on-explosion')) {
+									elem.style.display = '';
+								}
+							}, 4000);
+							break;
+						case 'VICTORY':
+							playSound(sounds.victory);
+							break;
+					}
+					state.endOfGameAnimationPlayed = true;
+				}
 			}
 
 			// Update the start/restart button visibility.
 			const startButton = document.querySelector("#buttonStart");
 			const restartButton = document.querySelector("#buttonRestart");
+			const stopButton = document.querySelector("#buttonStop");
 			startButton.disabled = state.gamestate !== "DISCOVER";
 			restartButton.disabled = state.gamestate !== "GAMEOVER";
+			stopButton.disabled = state.gamestate !== "GAME";
 
 			// Update the modules
 			updateModules(data.puzzles);
@@ -172,6 +203,13 @@ function onStartButtonClick() {
  */
 function onRestartButtonClick() {
 	fetch("/restart");
+}
+
+/**
+ * When the stop button is clicked.
+ */
+ function onStopButtonClick() {
+	fetch("/stop");
 }
 
 /**

@@ -1,7 +1,5 @@
-from distutils.log import debug
 from threading import Thread
 from flask import Flask, jsonify, send_file
-from time import sleep
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import serial
@@ -11,6 +9,7 @@ import sys
 import enum
 import struct
 import time
+import random
 
 from obus import Message, ModuleAddress
 
@@ -44,6 +43,7 @@ class SharedWebToSerial:
     blocked_modules: list[ModuleAddress] = field(default_factory=list)
     start_game: bool = False
     restart_game: bool = False
+    want_game_stop: bool = False
 
 
 @dataclass
@@ -55,6 +55,7 @@ class SharedSerialToWeb:
     game_stop: datetime = None
     last_state_update: datetime = None
     registered_modules: dict[ModuleAddress, PuzzleState] = field(default_factory=dict)
+    game_stop_cause: str = None
 
 @dataclass
 class DebugShared:
@@ -160,12 +161,20 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
                     # Timeout case is also handled first, so that in other cases we know there's time left
                     send_message(ser, Message.create_controller_timeout(timedelta(), puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left),debug_shared)
                     serial_to_web.gamestate = Gamestate.GAMEOVER
+                    serial_to_web.game_stop_cause = "TIMEOUT"
                 elif total_strikes > web_to_serial.max_allowed_strikes:
                     send_message(ser, Message.create_controller_strikeout(time_left, puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left),debug_shared)
                     serial_to_web.gamestate = Gamestate.GAMEOVER
+                    serial_to_web.game_stop_cause = "STRIKEOUT"
                 elif puzzle_modules_left == 0:
                     send_message(ser, Message.create_controller_solved(time_left, puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left),debug_shared)
                     serial_to_web.gamestate = Gamestate.GAMEOVER
+                    serial_to_web.game_stop_cause = "VICTORY"
+                elif web_to_serial.want_game_stop:
+                    web_to_serial.want_game_stop = False
+                    send_message(ser, Message.create_controller_strikeout(time_left, puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left), debug_shared)
+                    serial_to_web.gamestate = Gamestate.GAMEOVER
+                    serial_to_web.game_stop_cause = "STRIKEOUT"
                 if serial_to_web.gamestate == Gamestate.GAMEOVER:
                     serial_to_web.game_stop = datetime.now()
                     continue
@@ -194,7 +203,7 @@ def status():
         status_dict['timeleft'] = (web_to_serial.game_duration - (datetime.now() - serial_to_web.game_start)).total_seconds()
     elif serial_to_web.gamestate == Gamestate.GAMEOVER:
         status_dict['timeleft'] = max(0, (web_to_serial.game_duration - (serial_to_web.game_stop - serial_to_web.game_start)).total_seconds())
-
+        status_dict['cause'] = serial_to_web.game_stop_cause
     if serial_to_web.gamestate in (Gamestate.DISCOVER, Gamestate.GAME, Gamestate.GAMEOVER):
         status_dict['puzzles'] = [
             {'address': address.as_binary(), 'solved': state.solved if address.is_puzzle() else None, 'strikes': state.strike_amount}
@@ -213,10 +222,20 @@ def start():
         return 'OK'
     return 'Wrong gamestage'
 
+@app.route('/stop')
+def stop():
+    if serial_to_web.gamestate == Gamestate.GAME:
+        web_to_serial.want_game_stop = True
+        return 'OK'
+    return 'Wrong gamestage'
+
 @app.route('/restart')
 def restart():
     if serial_to_web.gamestate == Gamestate.GAMEOVER:
         web_to_serial.restart_game = True
+        # don't include 0 as possible seed value
+        # TODO add input field to set/display
+        web_to_serial.seed = random.randrange(1, 2**32)
         return 'OK'
     return 'Wrong gamestage'
 
