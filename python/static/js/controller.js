@@ -124,7 +124,7 @@ function updateGameState() {
 			document.getElementById("gamestate").innerHTML = state.gamestate;
 
 			// Reset the strike amount if the game is not running anymore.
-			if (state.gamestate === "INACTIVE") {
+			if (state.gamestate === "INFO") {
 				state.strikes = 0;
 				state.alarmPlayed = false;
 				state.endOfGameAnimationPlayed = false;
@@ -180,8 +180,10 @@ function updateGameState() {
 			// Update the start/restart button visibility.
 			const startButton = document.querySelector("#buttonStart");
 			const restartButton = document.querySelector("#buttonRestart");
+			const stopButton = document.querySelector("#buttonStop");
 			startButton.disabled = state.gamestate !== "DISCOVER";
 			restartButton.disabled = state.gamestate !== "GAMEOVER";
+			stopButton.disabled = state.gamestate !== "GAME";
 
 			// Update the modules
 			updateModules(data.puzzles);
@@ -201,6 +203,13 @@ function onStartButtonClick() {
  */
 function onRestartButtonClick() {
 	fetch("/restart");
+}
+
+/**
+ * When the stop button is clicked.
+ */
+ function onStopButtonClick() {
+	fetch("/stop");
 }
 
 /**

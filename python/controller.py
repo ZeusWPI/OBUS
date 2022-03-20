@@ -43,6 +43,7 @@ class SharedWebToSerial:
     blocked_modules: list[ModuleAddress] = field(default_factory=list)
     start_game: bool = False
     restart_game: bool = False
+    want_game_stop: bool = False
 
 
 @dataclass
@@ -169,6 +170,11 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
                     send_message(ser, Message.create_controller_solved(time_left, puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left),debug_shared)
                     serial_to_web.gamestate = Gamestate.GAMEOVER
                     serial_to_web.game_stop_cause = "VICTORY"
+                elif web_to_serial.want_game_stop:
+                    web_to_serial.want_game_stop = False
+                    send_message(ser, Message.create_controller_strikeout(time_left, puzzle_modules_left, web_to_serial.max_allowed_strikes, puzzle_modules_left), debug_shared)
+                    serial_to_web.gamestate = Gamestate.GAMEOVER
+                    serial_to_web.game_stop_cause = "STRIKEOUT"
                 if serial_to_web.gamestate == Gamestate.GAMEOVER:
                     serial_to_web.game_stop = datetime.now()
                     continue
@@ -213,6 +219,13 @@ def status():
 def start():
     if serial_to_web.gamestate == Gamestate.DISCOVER:
         web_to_serial.start_game = True
+        return 'OK'
+    return 'Wrong gamestage'
+
+@app.route('/stop')
+def stop():
+    if serial_to_web.gamestate == Gamestate.GAME:
+        web_to_serial.want_game_stop = True
         return 'OK'
     return 'Wrong gamestage'
 
