@@ -45,6 +45,7 @@ bool playing = true;
 
 // From bottom to top
 uint8_t mazes[MAZE_SIZE*NUM_MAZES] = {
+  // MAZE 1
   0b1111, 0b1111, 0b1111, 0b1111, 0b1111, 0b1111, 0b1111, 0b1111,
   0b1111, 0b0011, 0b1110, 0b0111, 0b1011, 0b0010, 0b0110, 0b1111,
   0b1111, 0b0001, 0b0010, 0b1100, 0b0011, 0b0100, 0b1101, 0b1111,
@@ -53,6 +54,15 @@ uint8_t mazes[MAZE_SIZE*NUM_MAZES] = {
   0b1111, 0b1101, 0b0101, 0b1011, 0b1010, 0b0000, 0b0110, 0b1111,
   0b1111, 0b1011, 0b1000, 0b1110, 0b1011, 0b1100, 0b1101, 0b1111,
   0b1111, 0b1111, 0b1111, 0b1111, 0b1111, 0b1111, 0b1111, 0b1111
+};
+
+// Position of the 3 lights on the edge, packed into one uint8
+// 0bxxxxyyyy
+uint8_t edge_points[NUM_MAZES * 3] = {
+  // MAZE 1
+  0b01100111, // (6, 7)
+  0b00010000, // (1, 0)
+  0b01100000, // (6, 0)
 };
 
 LedControl lc = LedControl(LED_DIN_PIN, LED_CLK_PIN, LED_CS_PIN, 1);
@@ -66,20 +76,11 @@ void setup() {
 	Serial.begin(115200);
 	obus_module::setup(OBUS_TYPE_PUZZLE, 0);
 
-  selected_maze = random(NUM_MAZES);
-
-  current_x = random(1, 7);
-  current_y = random(1, 7);
-
-  target_x = current_x;
-  while (abs(target_x - current_x) <= 2) {
-    target_x = random(1, 7);
-  }
-
-  target_y = current_y;
-  while (abs(target_y - current_y) <= 2) {
-    target_y = random(1, 7);
-  }
+  selected_maze = 0;
+  current_x = 1;
+  current_y = 1;
+  target_x = 6;
+  target_y = 6;
 
   pinMode(UP_BUTTON, INPUT_PULLUP);
   pinMode(DOWN_BUTTON, INPUT_PULLUP);
@@ -149,6 +150,24 @@ void buttonLoop() {
   }
 }
 
+void clear_screen() {
+  for (int x = 0; x < 8; x++) {
+    for (int y = 0; y < 8; y++) {
+      lc.setLed(0, x, y, false);
+    }
+  }
+}
+
+void draw_edges() {
+  for (int i = 0; i < 3; i++) {
+    uint8_t pos = edge_points[selected_maze * 3 + i];
+    uint8_t x = pos >> 4;
+    uint8_t y = pos & 0xf;
+
+    lc.setLed(0, x, y, true);
+  }
+}
+
 obus_can::message message;
 
 void loop() {
@@ -171,9 +190,26 @@ void loop() {
 }
 
 void callback_game_start(uint8_t puzzle_modules) {
+  selected_maze = random(NUM_MAZES);
 
+  current_x = random(1, 7);
+  current_y = random(1, 7);
+
+  target_x = current_x;
+  while (abs(target_x - current_x) <= 2) {
+    target_x = random(1, 7);
+  }
+
+  target_y = current_y;
+  while (abs(target_y - current_y) <= 2) {
+    target_y = random(1, 7);
+  }
+
+  clear_screen();
+
+  draw_edges();
 }
 
 void callback_game_stop() {
-
+    ((void (*)(void))0)();
 }
