@@ -1,4 +1,4 @@
-// (c) 2022, redfast00, jasper_janin, robbe7730
+// (c) 2022, redfast00, jasper_janin, robbe7730, Pietervdvn
 // See the LICENSE file for conditions for copying
 
 #include <obus_module.h>
@@ -16,7 +16,7 @@
 #define RIGHT_BUTTON A3
 
 #define BLINK_INTERVAL 250
-
+#define GOL_STATES 4
 // yellow = up A0
 Debounced upButton = Debounced();
 // blue = down A1
@@ -38,7 +38,7 @@ int selected_maze;
 
 bool led_state = true;
 
-bool playing = true;
+bool playing = false;
 
 #define NUM_MAZES 1
 #define MAZE_SIZE 64
@@ -66,6 +66,19 @@ uint8_t edge_points[NUM_MAZES * 3] = {
 };
 
 LedControl lc = LedControl(LED_DIN_PIN, LED_CLK_PIN, LED_CS_PIN, 1);
+
+
+uint8_t game_of_life_a[8];
+uint32_t gol_previous_states[GOL_STATES];
+// Time to live: will decrease every GOL-generation
+uint32_t gol_auto_reset = 1024;
+
+/**
+* 0 = spiral
+* 1 = GOL
+*/
+uint8_t idle_state = 0;  
+uint32_t gol_generation = 0;
 
 void(* crash) (void) = 0;
 
@@ -168,28 +181,183 @@ void draw_edges() {
   }
 }
 
+void draw_spiral(uint32_t i) {
+
+  int direction_x = 0;
+  int direction_y = -1; // immediately will become direction_x = + 1
+
+  int x = 0;
+  int y = 0;
+
+  int drawn = 0;
+
+  while(drawn < i){
+
+
+    if(x == y){
+        direction_x = -direction_y;
+        direction_y = 0;
+
+    }else if(x == 7 - y) {
+      direction_y = direction_x;
+      direction_x = 0;
+    }
+
+
+    if(drawn != 0 && x == y && x < 4){
+      y++;
+      x++;
+    }
+
+    lc.setLed(0, x, y, true);
+    drawn ++;
+    x += direction_x;
+    y += direction_y;
+
+
+  }
+
+}
+
+int getCell(int x, int y){
+  if(x < 0){
+    x = 8 + x;
+  }
+  if(y < 0) {
+    y = 8 + y; 
+  }
+  x = x % 8;
+  y = y % 8;
+  return (game_of_life_a[x] & (1 << y)) >> y;
+}
+
+bool getNextState(int x, int y){
+  int sum = getCell(x - 1, y - 1) + getCell(x , y -1) + getCell(x + 1, y - 1)+ 
+  getCell(x - 1, y)+ getCell(x + 1, y )+
+  getCell(x - 1, y + 1)+getCell(x , y + 1)+getCell(x + 1, y + 1);
+  if(getCell(x, y)){
+    return sum == 2 || sum == 3;
+  }
+  return sum == 3;
+}
+
+void show_GOL_state() {
+  for(int x = 0; x < 8; x++) {
+    for(int y = 0; y < 8; y++){
+      if(getCell(x, y)){
+        Serial.print("O");
+      }else{
+        Serial.print(" ");
+      }
+      lc.setLed(0, x, y, getCell(x,y));
+    }
+    Serial.print("\n");
+  }
+  Serial.print("\n\n");
+}
+
+void game_of_life(int generation){
+  show_GOL_state();
+
+
+  uint8_t game_of_life_b[8] = {0,0,0,0,0,0,0,0};
+  for(int x = 0; x < 8; x++) {
+    uint8_t bitset = 0;
+    for(int y = 0; y < 8; y++){
+      if(getNextState(x, y)){
+        bitset = bitset | (1 << y);
+      }
+    }
+    game_of_life_b[x] = bitset;
+  }
+  int sum = 0;
+  for(int x = 0; x < 8; x++) {
+    game_of_life_a[x] = game_of_life_b[x];
+    sum += game_of_life_b[x];
+  }
+  
+  if(sum == 0 && gol_auto_reset > 5){
+    gol_auto_reset = 5;
+  }
+  for(int i = 0; i < GOL_STATES; i++){
+    if(gol_previous_states[i] == sum && gol_auto_reset > 25){
+      gol_auto_reset =  25;
+    }
+  }
+  gol_auto_reset--;
+  if(gol_auto_reset <= 0){
+    seed_random();
+  }
+  gol_previous_states[ generation % GOL_STATES  ] = sum;
+
+}
+
+void seed_random(){
+  Serial.print("SEEDING GOL\n");
+ for(int x = 0; x < 8; x++) {
+      game_of_life_a[x] = random(0, 255) & random(0, 255) & random(0, 255);
+    }
+}
+
+void seed_glider(){
+  Serial.print("SEEDING GOL with glider\n");
+      game_of_life_a[0] = 0b01000000;
+      game_of_life_a[1] = 0b00100000;
+      game_of_life_a[2] = 0b11100000;
+    
+}
+
+
+void draw_animation(size_t m) {
+  uint32_t time = (m / 200);
+  if(idle_state == 0){
+    draw_spiral(time  % 65);
+    if(time == 64) {
+      clear_screen();
+      idle_state = 1;
+    }
+    gol_generation = time;
+    seed_random();
+  }else {
+    if(gol_generation == time){
+      return;
+    }
+    Serial.print(gol_generation);
+    Serial.print(" GOL generation\n");
+    gol_generation = time;
+    game_of_life(gol_generation);
+  }
+
+}
+
 obus_can::message message;
 
 void loop() {
 	bool is_message_valid = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
 
-  buttonLoop();
-
   size_t m = millis();
-  blink_timeout -= m - last_time;
-  last_time = m;
+  
+  if (playing) {
+    buttonLoop();
 
-  if (blink_timeout <= 0) {
-    led_state = !led_state;
-    blink_timeout = BLINK_INTERVAL;
+    blink_timeout -= m - last_time;
+    last_time = m;
+
+    if (blink_timeout <= 0) {
+      led_state = !led_state;
+      blink_timeout = BLINK_INTERVAL;
+    }
+
+    lc.setLed(0, target_x, target_y, led_state);
+
+    lc.setLed(0, current_x, current_y, true);
+  } else {
+    draw_animation(m);
   }
-
-  lc.setLed(0, target_x, target_y, led_state);
-
-  lc.setLed(0, current_x, current_y, true);
 }
 
 void callback_game_start(uint8_t puzzle_modules) {
+  playing = true;
   selected_maze = random(NUM_MAZES);
 
   current_x = random(1, 7);
