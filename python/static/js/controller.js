@@ -256,7 +256,6 @@ function setTimeleft(timeLeft) {
  * Update the segment display with the latest game data.
  */
 function updateSegmentDisplay() {
-	console.log(state.gamestate);
 	if (state.gamestate === "INACTIVE" || state.gamestate === "INFO" || state.gamestate === "DISCOVER") {
 		setTimeleft(state.gameDuration);
 	}
