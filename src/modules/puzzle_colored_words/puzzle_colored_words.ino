@@ -326,7 +326,7 @@ uint32_t next_screen_update = 0;
 bool solved = false;
 
 void loop() {
-	bool is_message_valid = obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
+	obus_module::loopPuzzle(&message, callback_game_start, callback_game_stop);
 	update_screen();
 	if (obus_module::is_active()) {
 		yes_button.loop(digitalRead(YES_BUTTON) == LOW);
@@ -362,12 +362,12 @@ void update_screen() {
 	if (obus_module::is_active()) {
 		if (millis() > next_screen_update) {
 			tft.fillScreen(0); // make screen black
+			current_color_index = (current_color_index + 1) % (PUZZLE_SIZE + 1);
 			if (current_color_index < PUZZLE_SIZE) {
 				tft.setCursor(10, 25);
 				tft.setTextColor(from_rgb(colors[puzzle_colors[current_color_index]]));
 				tft.print(words[puzzle_words[current_color_index]]);
 			}
-			current_color_index = (current_color_index + 1) % (PUZZLE_SIZE + 1);
 			next_screen_update = millis() + 1000;
 		}
 	} else {
