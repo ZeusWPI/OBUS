@@ -174,12 +174,14 @@ void loop()
 	stop_button.resetCount();
 	int group = 0;
 
-	if (start_button.getCount() > 0){
+	if (start_button.getCount() > 0) {
+		bool all_correct = true;
 		for(int i = 0; i < 6; i += 1) {
 			int valueState = 0;
 			if(dial_readout[5-i] == generatedSolutionNumber[i]){
 				valueState = CORRECT_VALUE_CORRECT_POSITION;
 			} else {
+				all_correct = false;
 				size_t index = 0;
 				while(index < 6 && dial_readout[5-i] != generatedSolutionNumber[index]) {
 					index += 1;
@@ -191,7 +193,10 @@ void loop()
 				}
 			}
 
-		display_value[i+1] = valueState;
+			display_value[i+1] = valueState;
+		}
+		if (all_correct) {
+			obus_module::solve();
 		}
 
 		// Serial.println("Entry:");
@@ -224,7 +229,7 @@ void callback_game_start(uint8_t puzzle_modules) {
 }
 
 void callback_game_stop() {
-
+	((void (*)(void))0)();
 }
 
 void callback_game_info(uint8_t info_id, uint8_t infomessage[7]){
