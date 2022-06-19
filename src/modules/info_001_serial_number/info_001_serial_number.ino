@@ -21,7 +21,7 @@ at least one capital letter and one number.
 #define SERIAL_NUMBER_SIZE 7
 LiquidCrystal_I2C lcd(0x27, 16, 2); // I2C address 0x27, 16 column and 2 rows
 
-uint8_t serial_number[SERIAL_NUMBER_SIZE] = {'A', '0', '0', '0', '0', '0',' 0'};
+uint8_t serial_number[SERIAL_NUMBER_SIZE] = {'A', '0', '0', '0', '0', '0', '0'};
 
 // true when we need to update the LCD display
 bool render_now = true;
