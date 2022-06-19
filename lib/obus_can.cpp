@@ -80,6 +80,17 @@ bool init() {
 	is_init = true;
 	mcp2515.reset();
 	mcp2515.setBitrate(CAN_50KBPS);
+
+	// filter mask is 0x300 because we only want modules with type 0 (controller & puzzle modules)
+	mcp2515.setFilterMask(MCP2515::MASK0, false, 0x300);
+	mcp2515.setFilter(MCP2515::RXF0, false, 0);
+	mcp2515.setFilter(MCP2515::RXF1, false, 0);
+	mcp2515.setFilterMask(MCP2515::MASK1, false, 0x300);
+	mcp2515.setFilter(MCP2515::RXF2, false, 0);
+	mcp2515.setFilter(MCP2515::RXF3, false, 0);
+	mcp2515.setFilter(MCP2515::RXF4, false, 0);
+	mcp2515.setFilter(MCP2515::RXF5, false, 0);
+
 	mcp2515.setLoopbackMode();
 	struct can_frame test_msg;
 	test_msg.can_id = 0x01;

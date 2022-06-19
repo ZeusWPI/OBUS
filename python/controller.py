@@ -14,7 +14,7 @@ import random
 from obus import Message, ModuleAddress
 
 
-INFO_ROUND_DURATION = timedelta(seconds=3)
+INFO_ROUND_DURATION = timedelta(seconds=5)
 GAMESTATE_UPDATE_INTERVAL = timedelta(seconds=0.5)
 
 
