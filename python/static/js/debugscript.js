@@ -61,7 +61,7 @@ function updateMessages() {
 						sender_id.innerHTML = current['sender_id'];
 						sender_id.classList.add('sender_id');
 						let parsed = row.insertCell(-1)
-						if (current['parsed'].startsWith("PARSE ERROR")) {
+						if (current['parsed'].startsWith("PARSE ERROR") || current['parsed'].startsWith("CAN ERROR")) {
 							parsed.classList.add("error");
 						} else if (current['parsed'].startsWith("STATE")) {
 							row.classList.add("staterow");
