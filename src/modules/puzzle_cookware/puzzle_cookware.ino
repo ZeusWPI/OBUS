@@ -104,35 +104,64 @@ struct recipe {
   const int8_t type;
 };
 
+const int8_t mushroom_terrine[] PROGMEM = {20, 22, 25, 26};
+const int8_t scallop_poele[] PROGMEM = {5, 48};
+const int8_t ratatouille[] PROGMEM = {13, 15, 16, 18, 31};
+const int8_t lobster_mousse[] PROGMEM = {5, 6, 33};
+const int8_t caprese_salad[] PROGMEM = {53, 15, 44, 32};
+const int8_t consomme[] PROGMEM = {28, 19, 14};
+const int8_t pumpkin_veloute[] PROGMEM = {12, 24};
+const int8_t carrot_potage[] PROGMEM = {17, 14, 50, 47};
+const int8_t crab_bisque[] PROGMEM = {4, 15, 17, 19, 48};
+const int8_t cold_tomato_soup[] PROGMEM = {58, 15, 33};
+const int8_t sole_meuniere[] PROGMEM = {7, 46};
+const int8_t eel_matelote[] PROGMEM = {8, 31, 34};
+const int8_t bouillabaisse[] PROGMEM = {10, 6, 11, 18, 35};
+const int8_t sea_bass_en_papillote[] PROGMEM = {9, 32, 30, 48};
+const int8_t seafood_tartare[] PROGMEM = {54, 6, 9, 48};
+const int8_t sea_bass_poele[] PROGMEM = {56, 9, 13, 22, 34};
+const int8_t sweetbread_poele[] PROGMEM = {0, 38, 21};
+const int8_t beef_saute[] PROGMEM = {49, 16, 13, 1};
+const int8_t beef_bourguignon[] PROGMEM = {29, 31, 30, 18, 1};
+const int8_t stuffed_quail[] PROGMEM = {23, 50, 21, 27, 34, 2};
+const int8_t filet_mignon_poele[] PROGMEM = {52, 47, 24, 29, 28, 3};
+const int8_t chocolate_mousse[] PROGMEM = {45, 38, 47};
+const int8_t fresh_fruit_compote[] PROGMEM = {41, 43, 36};
+const int8_t crepes_suzette[] PROGMEM = {39, 51, 47};
+const int8_t berries_au_fromage[] PROGMEM = {44, 38, 37, 40, 42};
+const int8_t warm_banana_souffle[] PROGMEM = {55, 47, 51};
+const int8_t fruit_gelee[] PROGMEM = {57, 41, 37};
+const int8_t tarte_aux_fruits[] PROGMEM = {52, 53, 54, 55, 56, 57, 58};
+
 const recipe recipes[] = {
-  { (int8_t[]) {20, 22, 25, 26}, 4, 5, 0}, // Mushroom Terrine
-  { (int8_t[]) {5, 48}, 2, 2, 0}, // Scallop Poêlé
-  { (int8_t[]) {13, 15, 16, 18, 31}, 5, 4, 0}, // Ratatouille
-  { (int8_t[]) {5, 6, 33}, 3, 5, 0}, // Lobster Mousse
-  { (int8_t[]) {53, 15, 44, 32}, 4, 3, 0}, // Caprese Salad
-  { (int8_t[]) {28, 19, 14}, 3, 4, 1}, // Consommé
-  { (int8_t[]) {12, 24}, 2, 5, 1}, // Pumpkin Velouté
-  { (int8_t[]) {17, 14, 50, 47}, 4, 3, 1}, // Carrot Potage
-  { (int8_t[]) {4, 15, 17, 19, 48}, 5, 2, 1}, // Crab Bisque
-  { (int8_t[]) {58, 15, 33}, 3, 3, 1}, // Crab Bisque
-  { (int8_t[]) {7, 46}, 2, 4, 2}, // Sole Meunière
-  { (int8_t[]) {8, 31, 34}, 3, 2, 2}, // Eel Matelote
-  { (int8_t[]) {10, 6, 11, 18, 35}, 5, 3, 2}, // Bouillabaisse
-  { (int8_t[]) {9, 32, 30, 48}, 4, 3, 2}, // Sea Bass en Papillote
-  { (int8_t[]) {54, 6, 9, 48}, 4, 3, 2}, // Seafood Tartare
-  { (int8_t[]) {56, 9, 13, 22, 34}, 5, 2, 2}, // Sea Bass Poêlé
-  { (int8_t[]) {0, 38, 21}, 3, 2, 3}, // Sweetbread Poêlé
-  { (int8_t[]) {49, 16, 13, 1}, 4, 3, 3}, // Beef Sauté
-  { (int8_t[]) {29, 31, 30, 18, 1}, 5, 3, 3}, // Beef Bourguignon
-  { (int8_t[]) {23, 50, 21, 27, 34, 2}, 6, 4, 3}, // Stuffed Quail
-  { (int8_t[]) {52, 47, 24, 29, 28, 3}, 6, 2, 3}, // Filet Mignon Poêlé
-  { (int8_t[]) {45, 38, 47}, 3, 5, 4}, // Chocolate Mousse
-  { (int8_t[]) {41, 43, 36}, 3, 3, 4}, // Fresh Fruit Compote
-  { (int8_t[]) {39, 51, 47}, 3, 2, 4}, // Crêpes Suzette
-  { (int8_t[]) {44, 38, 37, 40, 42}, 5, 5, 4}, // Berries au Fromage
-  { (int8_t[]) {55, 47, 51}, 3, 5, 4}, // Warm Banana Soufflé
-  { (int8_t[]) {57, 41, 37}, 3, 4, 4}, // Fruit Gelée
-  { (int8_t[]) {52, 53, 54, 55, 56, 57, 58}, 7, 5, 4}, // Tarte aux Fruits
+  { mushroom_terrine, 4, 5, 0},
+  { scallop_poele, 2, 2, 0},
+  { ratatouille, 5, 4, 0},
+  { lobster_mousse, 3, 5, 0},
+  { caprese_salad, 4, 3, 0},
+  { consomme, 3, 4, 1},
+  { pumpkin_veloute, 2, 5, 1},
+  { carrot_potage, 4, 3, 1},
+  { crab_bisque, 5, 2, 1},
+  { cold_tomato_soup, 3, 3, 1},
+  { sole_meuniere, 2, 4, 2},
+  { eel_matelote, 3, 2, 2},
+  { bouillabaisse, 5, 3, 2},
+  { sea_bass_en_papillote, 4, 3, 2},
+  { seafood_tartare, 4, 3, 2},
+  { sea_bass_poele, 5, 2, 2},
+  { sweetbread_poele, 3, 2, 3},
+  { beef_saute, 4, 3, 3},
+  { beef_bourguignon, 5, 3, 3},
+  { stuffed_quail, 6, 4, 3},
+  { filet_mignon_poele, 6, 2, 3},
+  { chocolate_mousse, 3, 5, 4},
+  { fresh_fruit_compote, 3, 3, 4},
+  { crepes_suzette, 3, 2, 4},
+  { berries_au_fromage, 5, 5, 4},
+  { warm_banana_souffle, 3, 5, 4},
+  { fruit_gelee, 3, 4, 4},
+  { tarte_aux_fruits, 7, 5, 4},
 };
 
 #define NUM_RECIPES 28
@@ -200,9 +229,10 @@ void loop() {
 
 void callback_game_start(uint8_t puzzle_modules) {
   selectedRecipe = random(0, NUM_RECIPES);
+  int8_t* recipe_ingredients = (int8_t*) pgm_read_word(&(recipes[selectedRecipe].ingredients));
   int8_t numAvailable = 0;
   for (int8_t i = 0; i < recipes[selectedRecipe].numIngredients; i++) {
-    available_ingredients[numAvailable++] = recipes[selectedRecipe].ingredients[i];
+    available_ingredients[numAvailable++] = recipe_ingredients[i];
   }
 
   while (numAvailable < SHOWN_INGREDIENTS) {
@@ -214,7 +244,7 @@ void callback_game_start(uint8_t puzzle_modules) {
   }
 
   shuffle(available_ingredients, numAvailable);
-  
+
   ingredientIndex = 0;
   showCurrentIngredient();
 }
@@ -270,7 +300,8 @@ int8_t matchingRecipes(int8_t ingredientCount) {
   for (int8_t i = 0; i < NUM_RECIPES; i++) {
     recipe current = recipes[i];
     int8_t j = 0;
-    while (j < current.numIngredients && contains(available_ingredients, ingredientCount, current.ingredients[j])) {
+    int8_t* recipe_ingredients = (int8_t *) pgm_read_word(&(current.ingredients));
+    while (j < current.numIngredients && contains(available_ingredients, ingredientCount, recipe_ingredients[j])) {
       j++;
     }
     if (j == current.numIngredients) {
@@ -292,8 +323,9 @@ void shuffle(int8_t * arr, int8_t size) {
 int8_t selectedIngredientsMatch() {
   int8_t count = 0;
   recipe r = recipes[selectedRecipe];
+  int8_t* recipe_ingredients = (int8_t *) pgm_read_word(&(r.ingredients));
   for (int8_t i = 0; i < SHOWN_INGREDIENTS; i++) {
-    if (selected_ingredients[i] != contains(r.ingredients, r.numIngredients, available_ingredients[i])) {
+    if (selected_ingredients[i] != contains(recipe_ingredients, r.numIngredients, available_ingredients[i])) {
       return false;
     }
   }
