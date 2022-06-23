@@ -221,14 +221,7 @@ void loop() {
 
   for (int8_t i = 2; i < 6; i++) {
     if (all_buttons[i].getCount() > 0) {
-      Serial.println(i);
-      Serial.flush();
       uint8_t digit = lastTimeDigit();
-      Serial.println(selectedRecipe);
-      Serial.println(digit);
-      Serial.println(selectedIngredientsMatch());
-      Serial.println(i);
-      Serial.flush();
       if (selectedRecipeVal.technique == i && selectedIngredientsMatch() && digitCorrect(digit)) {
         obus_module::solve();
       } else {
@@ -245,12 +238,9 @@ void loop() {
 void callback_game_start(uint8_t puzzle_modules) {
   selectedRecipe = random(0, NUM_RECIPES);
   memcpy_P(&selectedRecipeVal, recipes + selectedRecipe, sizeof(recipe));
-  Serial.println(selectedRecipe);
-  Serial.println(digits[selectedRecipeVal.type * 4 + selectedRecipeVal.technique - 2]);
   int8_t numAvailable = 0;
   for (int8_t i = 0; i < selectedRecipeVal.numIngredients; i++) {
     available_ingredients[numAvailable++] = pgm_read_byte(selectedRecipeVal.ingredients + i);
-    Serial.println(available_ingredients[numAvailable - 1]);
   }
 
   while (numAvailable < SHOWN_INGREDIENTS) {
@@ -340,16 +330,12 @@ void shuffle(int8_t * arr, int8_t size) {
 
 int8_t selectedIngredientsMatch() {
   int8_t count = 0;
-  Serial.println("Started matching ingredients");
-  Serial.flush();
   memcpy_P(buf, selectedRecipeVal.ingredients, selectedRecipeVal.numIngredients);
   for (int8_t i = 0; i < SHOWN_INGREDIENTS; i++) {
     if (selected_ingredients[i] != contains(buf, selectedRecipeVal.numIngredients, available_ingredients[i])) {
       return false;
     }
   }
-  Serial.println("Matched ingredients");
-  Serial.flush();
   return true;
 }
 
