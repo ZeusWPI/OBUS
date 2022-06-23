@@ -14,6 +14,18 @@ void setup() {
 }
 
 void loop() {
+	if ((mcp2515.getInterrupts() & MCP2515::CANINTF_ERRIF)) {
+		while (true) {
+			Serial.write((byte) 0);
+			Serial.write((byte) 0);
+			Serial.write((byte) 255);
+			Serial.print("ERROR  ");
+			Serial.write(mcp2515.getErrorFlags());
+			Serial.write('\n');
+			delay(500);
+		}
+	}
+
 	struct can_frame receive_frame;
 	if (mcp2515.readMessage(&receive_frame) == MCP2515::ERROR_OK) {
 		Serial.write((byte) (receive_frame.can_id >> 8));

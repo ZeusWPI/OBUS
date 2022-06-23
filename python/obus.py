@@ -3,6 +3,7 @@ from datetime import datetime
 import struct
 import enum
 from typing import NamedTuple
+import sys
 
 
 @enum.unique
@@ -33,6 +34,7 @@ class Message:
     payload: bytes
     received_from: int
     received_at: datetime
+    is_error: bool = False
 
     @classmethod
     def create_controller_message(cls, controller_message_type, content):
@@ -126,6 +128,8 @@ class Message:
         sender_type = self.sender_type()
         message_type = self.payload[0]
         try:
+            if self.is_error:
+                return f'CAN ERROR {self.payload[7]:02X}'
             if sender_type == 0b00 and self.sender_id() == 0:  # controller
                 if message_type == 0:
                     return f"ACK {Message.human_readable_type(self.payload[1], self.payload[2])} {self.payload[2]}"

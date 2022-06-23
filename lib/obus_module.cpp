@@ -207,6 +207,8 @@ bool loopNeedy(obus_can::message* message, void (*callback_game_start)(uint8_t p
 	return loopPuzzle(message, callback_game_start, callback_game_stop, callback_info, callback_state);
 }
 
+uint32_t info_message_timer = 0;
+
 bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 	bool interesting_message = false;
 	if (obus_can::receive(message)) {
@@ -215,9 +217,18 @@ bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 				case OBUS_MSGTYPE_C_INFOSTART:
 					{
 						randomSeed(message->infostart.seed);
-						uint8_t info_message[OBUS_PAYLD_INFO_MAXLEN];
-						int len = info_generator(info_message);
-						obus_can::send_i_infomessage(this_module, info_message, len);
+						// wait a bit before sending this message
+						// so we don't send all the infomessages at the same time
+						// assuming 50kbps and 4 seconds of info round (there are 5, but we want to keep a margin)
+						// and a message is 112 bits long (maximum length of total frame), we can send
+						// about 14000 messages. There are only 255 possible info module ID's
+						// we want to spread them as good as possible in the 4 seconds of transmit time
+						// However, just linearly spreading the IDs to the transmit time is suboptimal:
+						// the higher IDs will probably never be used
+						// We first spread the messages in 8 slots based on the 3 least significant bits,
+						// then spread the messages in those slots based on the other 5 bits
+						// !! Important assumption: the info_generator() module function should return very quickly
+						info_message_timer = millis() + 500 * (this_module.id & 0b111) + 16 * (this_module.id >> 3);
 					}
 					break;
 				case OBUS_MSGTYPE_C_STATE:
@@ -228,6 +239,14 @@ bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 			}
 		}
 	}
+
+	if (info_message_timer != 0 && millis() > info_message_timer) {
+		info_message_timer = 0;
+		uint8_t info_message[OBUS_PAYLD_INFO_MAXLEN];
+		int len = info_generator(info_message);
+		obus_can::send_i_infomessage(this_module, info_message, len);
+	}
+
 	return interesting_message;
 }
 
