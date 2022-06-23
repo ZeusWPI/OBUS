@@ -3,6 +3,7 @@ from datetime import datetime
 import struct
 import enum
 from typing import NamedTuple
+import sys
 
 
 @enum.unique

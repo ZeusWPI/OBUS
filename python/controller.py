@@ -86,10 +86,10 @@ def parse_can_line(ser, debug_shared) -> Message:
         size = int(line[2])
         if size == 255:
             message = line[3:3+8]
-            obj = Message(message, sender, datetime.now())
+            obj = Message(message, sender, datetime.now(), is_error=True)
         else:
             message = line[3:3+size]
-            obj = Message(message, sender, datetime.now(), is_error=True)
+            obj = Message(message, sender, datetime.now())
         debug_shared.messages.append(obj)
         debug_shared.last_message_index += 1
         return obj
