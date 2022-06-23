@@ -11,7 +11,7 @@
 #define PIN_FIRE_BUTTON 5
 #define PIN_CLEAVER_BUTTON 6
 #define PIN_PAN_BUTTON 9
-#define PIN_EGG_BUTTON 10
+#define PIN_EGG_BUTTON A0
 
 ezButton all_buttons[] = {
   ezButton(PIN_ADD_BUTTON),
@@ -98,71 +98,80 @@ const char *const ingredients[] PROGMEM = {
 #define NUM_INGREDIENTS 59
 
 struct recipe {
-  const int8_t* ingredients;
-  const int8_t numIngredients;
-  const int8_t technique;
-  const int8_t type;
+  int8_t* ingredients;
+  int8_t numIngredients;
+  int8_t technique;
+  int8_t type;
 };
 
-const int8_t mushroom_terrine[] PROGMEM = {20, 22, 25, 26};
-const int8_t scallop_poele[] PROGMEM = {5, 48};
-const int8_t ratatouille[] PROGMEM = {13, 15, 16, 18, 31};
-const int8_t lobster_mousse[] PROGMEM = {5, 6, 33};
-const int8_t caprese_salad[] PROGMEM = {53, 15, 44, 32};
-const int8_t consomme[] PROGMEM = {28, 19, 14};
-const int8_t pumpkin_veloute[] PROGMEM = {12, 24};
-const int8_t carrot_potage[] PROGMEM = {17, 14, 50, 47};
-const int8_t crab_bisque[] PROGMEM = {4, 15, 17, 19, 48};
-const int8_t cold_tomato_soup[] PROGMEM = {58, 15, 33};
-const int8_t sole_meuniere[] PROGMEM = {7, 46};
-const int8_t eel_matelote[] PROGMEM = {8, 31, 34};
-const int8_t bouillabaisse[] PROGMEM = {10, 6, 11, 18, 35};
-const int8_t sea_bass_en_papillote[] PROGMEM = {9, 32, 30, 48};
-const int8_t seafood_tartare[] PROGMEM = {54, 6, 9, 48};
-const int8_t sea_bass_poele[] PROGMEM = {56, 9, 13, 22, 34};
-const int8_t sweetbread_poele[] PROGMEM = {0, 38, 21};
-const int8_t beef_saute[] PROGMEM = {49, 16, 13, 1};
-const int8_t beef_bourguignon[] PROGMEM = {29, 31, 30, 18, 1};
-const int8_t stuffed_quail[] PROGMEM = {23, 50, 21, 27, 34, 2};
-const int8_t filet_mignon_poele[] PROGMEM = {52, 47, 24, 29, 28, 3};
-const int8_t chocolate_mousse[] PROGMEM = {45, 38, 47};
-const int8_t fresh_fruit_compote[] PROGMEM = {41, 43, 36};
-const int8_t crepes_suzette[] PROGMEM = {39, 51, 47};
-const int8_t berries_au_fromage[] PROGMEM = {44, 38, 37, 40, 42};
-const int8_t warm_banana_souffle[] PROGMEM = {55, 47, 51};
-const int8_t fruit_gelee[] PROGMEM = {57, 41, 37};
-const int8_t tarte_aux_fruits[] PROGMEM = {52, 53, 54, 55, 56, 57, 58};
+const int8_t mushroom_terrine_ingredients[] PROGMEM = {20, 22, 25, 26};
+const int8_t scallop_poele_ingredients[] PROGMEM = {5, 48};
+const int8_t ratatouille_ingredients[] PROGMEM = {13, 15, 16, 18, 31};
+const int8_t lobster_mousse_ingredients[] PROGMEM = {5, 6, 33};
+const int8_t caprese_salad_ingredients[] PROGMEM = {53, 15, 44, 32};
+const int8_t consomme_ingredients[] PROGMEM = {28, 19, 14};
+const int8_t pumpkin_veloute_ingredients[] PROGMEM = {12, 24};
+const int8_t carrot_potage_ingredients[] PROGMEM = {17, 14, 50, 47};
+const int8_t crab_bisque_ingredients[] PROGMEM = {4, 15, 17, 19, 48};
+const int8_t cold_tomato_soup_ingredients[] PROGMEM = {58, 15, 33};
+const int8_t sole_meuniere_ingredients[] PROGMEM = {7, 46};
+const int8_t eel_matelote_ingredients[] PROGMEM = {8, 31, 34};
+const int8_t bouillabaisse_ingredients[] PROGMEM = {10, 6, 11, 18, 35};
+const int8_t sea_bass_en_papillote_ingredients[] PROGMEM = {9, 32, 30, 48};
+const int8_t seafood_tartare_ingredients[] PROGMEM = {54, 6, 9, 48};
+const int8_t sea_bass_poele_ingredients[] PROGMEM = {56, 9, 13, 22, 34};
+const int8_t sweetbread_poele_ingredients[] PROGMEM = {0, 38, 21};
+const int8_t beef_saute_ingredients[] PROGMEM = {49, 16, 13, 1};
+const int8_t beef_bourguignon_ingredients[] PROGMEM = {29, 31, 30, 18, 1};
+const int8_t stuffed_quail_ingredients[] PROGMEM = {23, 50, 21, 27, 34, 2};
+const int8_t filet_mignon_poele_ingredients[] PROGMEM = {52, 47, 24, 29, 28, 3};
+const int8_t chocolate_mousse_ingredients[] PROGMEM = {45, 38, 47};
+const int8_t fresh_fruit_compote_ingredients[] PROGMEM = {41, 43, 36};
+const int8_t crepes_suzette_ingredients[] PROGMEM = {39, 51, 47};
+const int8_t berries_au_fromage_ingredients[] PROGMEM = {44, 38, 37, 40, 42};
+const int8_t warm_banana_souffle_ingredients[] PROGMEM = {55, 47, 51};
+const int8_t fruit_gelee_ingredients[] PROGMEM = {57, 41, 37};
+const int8_t tarte_aux_fruits_ingredients[] PROGMEM = {52, 53, 54, 55, 56, 57, 58};
 
-const recipe recipes[] = {
-  { mushroom_terrine, 4, 5, 0},
-  { scallop_poele, 2, 2, 0},
-  { ratatouille, 5, 4, 0},
-  { lobster_mousse, 3, 5, 0},
-  { caprese_salad, 4, 3, 0},
-  { consomme, 3, 4, 1},
-  { pumpkin_veloute, 2, 5, 1},
-  { carrot_potage, 4, 3, 1},
-  { crab_bisque, 5, 2, 1},
-  { cold_tomato_soup, 3, 3, 1},
-  { sole_meuniere, 2, 4, 2},
-  { eel_matelote, 3, 2, 2},
-  { bouillabaisse, 5, 3, 2},
-  { sea_bass_en_papillote, 4, 3, 2},
-  { seafood_tartare, 4, 3, 2},
-  { sea_bass_poele, 5, 2, 2},
-  { sweetbread_poele, 3, 2, 3},
-  { beef_saute, 4, 3, 3},
-  { beef_bourguignon, 5, 3, 3},
-  { stuffed_quail, 6, 4, 3},
-  { filet_mignon_poele, 6, 2, 3},
-  { chocolate_mousse, 3, 5, 4},
-  { fresh_fruit_compote, 3, 3, 4},
-  { crepes_suzette, 3, 2, 4},
-  { berries_au_fromage, 5, 5, 4},
-  { warm_banana_souffle, 3, 5, 4},
-  { fruit_gelee, 3, 4, 4},
-  { tarte_aux_fruits, 7, 5, 4},
+const recipe recipes[] PROGMEM = {
+  { mushroom_terrine_ingredients, 4, 5, 0},
+  { scallop_poele_ingredients, 2, 2, 0},
+  { ratatouille_ingredients, 5, 4, 0},
+  { lobster_mousse_ingredients, 3, 5, 0},
+  { caprese_salad_ingredients, 4, 3, 0},
+  { consomme_ingredients, 3, 4, 1},
+  { pumpkin_veloute_ingredients, 2, 5, 1},
+  { carrot_potage_ingredients, 4, 3, 1},
+  { crab_bisque_ingredients, 5, 2, 1},
+  { cold_tomato_soup_ingredients, 3, 3, 1},
+  { sole_meuniere_ingredients, 2, 4, 2},
+  { eel_matelote_ingredients, 3, 2, 2},
+  { bouillabaisse_ingredients, 5, 3, 2},
+  { sea_bass_en_papillote_ingredients, 4, 3, 2},
+  { seafood_tartare_ingredients, 4, 3, 2},
+  { sea_bass_poele_ingredients, 5, 2, 2},
+  { sweetbread_poele_ingredients, 3, 2, 3},
+  { beef_saute_ingredients, 4, 3, 3},
+  { beef_bourguignon_ingredients, 5, 3, 3},
+  { stuffed_quail_ingredients, 6, 4, 3},
+  { filet_mignon_poele_ingredients, 6, 2, 3},
+  { chocolate_mousse_ingredients, 3, 5, 4},
+  { fresh_fruit_compote_ingredients, 3, 3, 4},
+  { crepes_suzette_ingredients, 3, 2, 4},
+  { berries_au_fromage_ingredients, 5, 5, 4},
+  { warm_banana_souffle_ingredients, 3, 5, 4},
+  { fruit_gelee_ingredients, 3, 4, 4},
+  { tarte_aux_fruits_ingredients, 7, 5, 4},
 };
+
+const uint8_t digits[] = {
+  7, 1, 4, 3,
+  5, 6, 0, 1,
+  4, 5, 8, 9,
+  0, 9, 2, 7,
+  3, 6, 8, 2
+};
+
 
 #define NUM_RECIPES 28
 #define SHOWN_INGREDIENTS 10
@@ -170,8 +179,10 @@ const recipe recipes[] = {
 char buffer[17];
 int8_t available_ingredients[SHOWN_INGREDIENTS];
 int8_t selected_ingredients[SHOWN_INGREDIENTS];
+int8_t buf[7];
 int8_t ingredientIndex;
 int8_t selectedRecipe;
+recipe selectedRecipeVal;
 uint32_t last_time_left;
 uint32_t millis_at_last_update;
 
@@ -210,11 +221,15 @@ void loop() {
 
   for (int8_t i = 2; i < 6; i++) {
     if (all_buttons[i].getCount() > 0) {
+      Serial.println(i);
+      Serial.flush();
       uint8_t digit = lastTimeDigit();
-      Serial.print(selectedRecipe);
-      Serial.print(digit);
-      Serial.print(selectedIngredientsMatch());
-      if (recipes[selectedRecipe].technique == i && selectedIngredientsMatch() && digitCorrect(digit)) {
+      Serial.println(selectedRecipe);
+      Serial.println(digit);
+      Serial.println(selectedIngredientsMatch());
+      Serial.println(i);
+      Serial.flush();
+      if (selectedRecipeVal.technique == i && selectedIngredientsMatch() && digitCorrect(digit)) {
         obus_module::solve();
       } else {
         obus_module::strike();
@@ -229,10 +244,13 @@ void loop() {
 
 void callback_game_start(uint8_t puzzle_modules) {
   selectedRecipe = random(0, NUM_RECIPES);
-  int8_t* recipe_ingredients = (int8_t*) pgm_read_word(&(recipes[selectedRecipe].ingredients));
+  memcpy_P(&selectedRecipeVal, recipes + selectedRecipe, sizeof(recipe));
+  Serial.println(selectedRecipe);
+  Serial.println(digits[selectedRecipeVal.type * 4 + selectedRecipeVal.technique - 2]);
   int8_t numAvailable = 0;
-  for (int8_t i = 0; i < recipes[selectedRecipe].numIngredients; i++) {
-    available_ingredients[numAvailable++] = recipe_ingredients[i];
+  for (int8_t i = 0; i < selectedRecipeVal.numIngredients; i++) {
+    available_ingredients[numAvailable++] = pgm_read_byte(selectedRecipeVal.ingredients + i);
+    Serial.println(available_ingredients[numAvailable - 1]);
   }
 
   while (numAvailable < SHOWN_INGREDIENTS) {
@@ -298,10 +316,10 @@ int8_t addRandomToAvailable(int8_t numAvailable) {
 int8_t matchingRecipes(int8_t ingredientCount) {
   int8_t count = 0;
   for (int8_t i = 0; i < NUM_RECIPES; i++) {
-    recipe current = recipes[i];
     int8_t j = 0;
-    int8_t* recipe_ingredients = (int8_t *) pgm_read_word(&(current.ingredients));
-    while (j < current.numIngredients && contains(available_ingredients, ingredientCount, recipe_ingredients[j])) {
+    recipe current;
+    memcpy_P(&current, recipes + i, sizeof(recipe));
+    while (j < current.numIngredients && contains(available_ingredients, ingredientCount, pgm_read_byte(current.ingredients + j))) {
       j++;
     }
     if (j == current.numIngredients) {
@@ -322,27 +340,21 @@ void shuffle(int8_t * arr, int8_t size) {
 
 int8_t selectedIngredientsMatch() {
   int8_t count = 0;
-  recipe r = recipes[selectedRecipe];
-  int8_t* recipe_ingredients = (int8_t *) pgm_read_word(&(r.ingredients));
+  Serial.println("Started matching ingredients");
+  Serial.flush();
+  memcpy_P(buf, selectedRecipeVal.ingredients, selectedRecipeVal.numIngredients);
   for (int8_t i = 0; i < SHOWN_INGREDIENTS; i++) {
-    if (selected_ingredients[i] != contains(recipe_ingredients, r.numIngredients, available_ingredients[i])) {
+    if (selected_ingredients[i] != contains(buf, selectedRecipeVal.numIngredients, available_ingredients[i])) {
       return false;
     }
   }
+  Serial.println("Matched ingredients");
+  Serial.flush();
   return true;
 }
 
-const uint8_t digits[] = {
-  7, 1, 4, 3,
-  5, 6, 0, 1,
-  4, 5, 8, 9,
-  0, 9, 2, 7,
-  3, 6, 8, 2
-};
-
 int8_t digitCorrect(uint8_t digit) {
-  recipe r = recipes[selectedRecipe];
-  return digit == digits[r.type * 4 + r.technique - 2];
+  return digit == digits[selectedRecipeVal.type * 4 + selectedRecipeVal.technique - 2];
 }
 
 uint8_t lastTimeDigit() {
