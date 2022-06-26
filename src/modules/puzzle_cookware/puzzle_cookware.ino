@@ -13,6 +13,8 @@
 #define PIN_PAN_BUTTON 9
 #define PIN_EGG_BUTTON A0
 
+// Hardware
+
 ezButton all_buttons[] = {
   ezButton(PIN_ADD_BUTTON),
   ezButton(PIN_NEXT_BUTTON),
@@ -23,6 +25,8 @@ ezButton all_buttons[] = {
 };
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// Game data
 
 const char veal[] PROGMEM = "Veal";
 const char beef[] PROGMEM = "Beef";
@@ -99,7 +103,7 @@ const char *const ingredients[] PROGMEM = {
 
 struct recipe {
   int8_t* ingredients;
-  int8_t numIngredients;
+  int8_t num_ingredients;
   int8_t technique;
   int8_t type;
 };
@@ -172,17 +176,21 @@ const uint8_t digits[] = {
   3, 6, 8, 2
 };
 
-
 #define NUM_RECIPES 28
 #define SHOWN_INGREDIENTS 10
 
-char buffer[17];
+// Global buffers
+
+char text_buffer[17];
+int8_t ingredients_buffer[7];
+
+// Global variables
+
 int8_t available_ingredients[SHOWN_INGREDIENTS];
 int8_t selected_ingredients[SHOWN_INGREDIENTS];
-int8_t buf[7];
-int8_t ingredientIndex;
-int8_t selectedRecipe;
-recipe selectedRecipeVal;
+int8_t ingredient_index;
+int8_t selected_recipe_index;
+recipe selected_recipe_val;
 uint32_t last_time_left;
 uint32_t millis_at_last_update;
 
@@ -210,19 +218,19 @@ void loop() {
   }
 
   if (all_buttons[0].getCount() > 0) {
-    selected_ingredients[ingredientIndex] = !selected_ingredients[ingredientIndex];
-    showCurrentIngredient();
+    selected_ingredients[ingredient_index] = !selected_ingredients[ingredient_index];
+    show_current_ingredient();
   }
 
   if (all_buttons[1].getCount() > 0) {
-    ingredientIndex = (ingredientIndex + 1) % SHOWN_INGREDIENTS;
-    showCurrentIngredient();
+    ingredient_index = (ingredient_index + 1) % SHOWN_INGREDIENTS;
+    show_current_ingredient();
   }
 
   for (int8_t i = 2; i < 6; i++) {
     if (all_buttons[i].getCount() > 0) {
-      uint8_t digit = lastTimeDigit();
-      if (selectedRecipeVal.technique == i && selectedIngredientsMatch() && digitCorrect(digit)) {
+      uint8_t digit = last_time_digit();
+      if (selected_recipe_val.technique == i && selected_ingredients_match() && digit_correct(digit)) {
         obus_module::solve();
       } else {
         obus_module::strike();
@@ -236,25 +244,25 @@ void loop() {
 }
 
 void callback_game_start(uint8_t puzzle_modules) {
-  selectedRecipe = random(0, NUM_RECIPES);
-  memcpy_P(&selectedRecipeVal, recipes + selectedRecipe, sizeof(recipe));
-  int8_t numAvailable = 0;
-  for (int8_t i = 0; i < selectedRecipeVal.numIngredients; i++) {
-    available_ingredients[numAvailable++] = pgm_read_byte(selectedRecipeVal.ingredients + i);
+  selected_recipe_index = random(0, NUM_RECIPES);
+  memcpy_P(&selected_recipe_val, recipes + selected_recipe_index, sizeof(recipe));
+  int8_t num_available = 0;
+  for (int8_t i = 0; i < selected_recipe_val.num_ingredients; i++) {
+    available_ingredients[num_available++] = pgm_read_byte(selected_recipe_val.ingredients + i);
   }
 
-  while (numAvailable < SHOWN_INGREDIENTS) {
-    numAvailable = addRandomToAvailable(numAvailable);
+  while (num_available < SHOWN_INGREDIENTS) {
+    num_available = add_random_to_available(num_available);
   }
 
   for (int8_t i = 0; i < SHOWN_INGREDIENTS; i++) {
     selected_ingredients[i] = false;
   }
 
-  shuffle(available_ingredients, numAvailable);
+  shuffle(available_ingredients, num_available);
 
-  ingredientIndex = 0;
-  showCurrentIngredient();
+  ingredient_index = 0;
+  show_current_ingredient();
 }
 
 void callback_game_stop() {
@@ -277,42 +285,42 @@ void callback_state(uint32_t time_left, uint8_t strikes, uint8_t max_strikes, ui
 
 void callback_info(uint8_t info_id, uint8_t infomessage[7]) {}
 
-void showCurrentIngredient() {
-  strcpy_P(buffer, (char *)pgm_read_word(&(ingredients[available_ingredients[ingredientIndex]])));
+void show_current_ingredient() {
+  strcpy_P(text_buffer, (char *)pgm_read_word(&(ingredients[available_ingredients[ingredient_index]])));
   lcd.home();
   lcd.clear();
-  lcd.print(buffer);
-  if (selected_ingredients[ingredientIndex]) {
+  lcd.print(text_buffer);
+  if (selected_ingredients[ingredient_index]) {
     lcd.setCursor(0, 1);
     lcd.print("Added");
   }
 }
 
-int8_t addRandomToAvailable(int8_t numAvailable) {
-  int8_t newIngredient = random(0, NUM_INGREDIENTS);
-  for (int8_t i = 0; i < numAvailable; i++) {
-    if (available_ingredients[i] == newIngredient) {
-      return numAvailable;
+int8_t add_random_to_available(int8_t num_available) {
+  int8_t new_ingredient = random(0, NUM_INGREDIENTS);
+  for (int8_t i = 0; i < num_available; i++) {
+    if (available_ingredients[i] == new_ingredient) {
+      return num_available;
     }
   }
-  available_ingredients[numAvailable] = newIngredient;
-  if (matchingRecipes(numAvailable + 1) == 1) {
-    return numAvailable + 1;
+  available_ingredients[num_available] = new_ingredient;
+  if (matching_recipes(num_available + 1) == 1) {
+    return num_available + 1;
   } else {
-    return numAvailable;
+    return num_available;
   }
 }
 
-int8_t matchingRecipes(int8_t ingredientCount) {
+int8_t matching_recipes(int8_t ingredient_count) {
   int8_t count = 0;
   for (int8_t i = 0; i < NUM_RECIPES; i++) {
     int8_t j = 0;
     recipe current;
     memcpy_P(&current, recipes + i, sizeof(recipe));
-    while (j < current.numIngredients && contains(available_ingredients, ingredientCount, pgm_read_byte(current.ingredients + j))) {
+    while (j < current.num_ingredients && contains(available_ingredients, ingredient_count, pgm_read_byte(current.ingredients + j))) {
       j++;
     }
-    if (j == current.numIngredients) {
+    if (j == current.num_ingredients) {
       count++;
     }
   }
@@ -328,22 +336,22 @@ void shuffle(int8_t * arr, int8_t size) {
   }
 }
 
-int8_t selectedIngredientsMatch() {
+int8_t selected_ingredients_match() {
   int8_t count = 0;
-  memcpy_P(buf, selectedRecipeVal.ingredients, selectedRecipeVal.numIngredients);
+  memcpy_P(ingredients_buffer, selected_recipe_val.ingredients, selected_recipe_val.num_ingredients);
   for (int8_t i = 0; i < SHOWN_INGREDIENTS; i++) {
-    if (selected_ingredients[i] != contains(buf, selectedRecipeVal.numIngredients, available_ingredients[i])) {
+    if (selected_ingredients[i] != contains(ingredients_buffer, selected_recipe_val.num_ingredients, available_ingredients[i])) {
       return false;
     }
   }
   return true;
 }
 
-int8_t digitCorrect(uint8_t digit) {
-  return digit == digits[selectedRecipeVal.type * 4 + selectedRecipeVal.technique - 2];
+int8_t digit_correct(uint8_t digit) {
+  return digit == digits[selected_recipe_val.type * 4 + selected_recipe_val.technique - 2];
 }
 
-uint8_t lastTimeDigit() {
+uint8_t last_time_digit() {
   return (uint8_t) (((last_time_left - (millis() - millis_at_last_update)) / 1000) % 10);
 }
 
