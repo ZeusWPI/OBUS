@@ -1,10 +1,10 @@
 // (c) 2022, chvp
 // See the LICENSE file for conditions for copying
 
-#include <obus_module.h>
-#include <ezButton.h>
 #include <LiquidCrystal_I2C.h>
 #include <avr/pgmspace.h>
+#include <ezButton.h>
+#include <obus_module.h>
 
 #define PIN_ADD_BUTTON 2
 #define PIN_NEXT_BUTTON 3
@@ -16,13 +16,9 @@
 // Hardware
 
 ezButton all_buttons[] = {
-  ezButton(PIN_ADD_BUTTON),
-  ezButton(PIN_NEXT_BUTTON),
-  ezButton(PIN_FIRE_BUTTON),
-  ezButton(PIN_CLEAVER_BUTTON),
-  ezButton(PIN_PAN_BUTTON),
-  ezButton(PIN_EGG_BUTTON)
-};
+    ezButton(PIN_ADD_BUTTON),  ezButton(PIN_NEXT_BUTTON),
+    ezButton(PIN_FIRE_BUTTON), ezButton(PIN_CLEAVER_BUTTON),
+    ezButton(PIN_PAN_BUTTON),  ezButton(PIN_EGG_BUTTON)};
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
@@ -89,20 +85,70 @@ const char melon[] PROGMEM = "Melon";
 const char watermelon[] PROGMEM = "Watermelon";
 
 const char *const ingredients[] PROGMEM = {
-  /* 0 */ veal, /* 1 */ beef, /* 2 */ quail, /* 3 */ filet_mignon,
-  /* 4 */ crab, /* 5 */ scallop, /* 6 */ lobster, /* 7 */ sole, /* 8 */ eel, /* 9 */ sea_bass, /* 10 */ mussel, /* 11 */ cod,
-  /* 12 */ pumpkin, /* 13 */ zucchini, /* 14 */ onion, /* 15 */ tomato, /* 16 */ eggplant, /* 17 */ carrot, /* 18 */ garlic, /* 19 */ celery,
-  /* 20 */ morel, /* 21 */ porcini, /* 22 */ chantarelle, /* 23 */ portobello, /* 24 */ black_truffle, /* 25 */ oyster_mushroom, /* 26 */ black_trumpet, /* 27 */ miller_mushroom,
-  /* 28 */ cloves, /* 29 */ rosemary, /* 30 */ thyme, /* 31 */ bay_leaf, /* 32 */ basil, /* 33 */ dill, /* 34 */ parsley, /* 35 */ saffron,
-  /* 36 */ apricot, /* 37 */ gooseberry, /* 38 */ lemon, /* 39 */ orange, /* 40 */ raspberry, /* 41 */ pear, /* 42 */ blackberry, /* 43 */ apple,
-  /* 44 */ cheese, /* 45 */ chocolate, /* 46 */ caviar, /* 47 */ butter, /* 48 */ olive_oil, /* 49 */ cornichon, /* 50 */ rice, /* 51 */ honey,
-  /* 52 */ sour_cherry, /* 53 */ strawberry, /* 54 */ blood_orange, /* 55 */ banana, /* 56 */ grapes, /* 57 */ melon, /* 58 */ watermelon
-};
+    /* 0 */ veal,
+    /* 1 */ beef,
+    /* 2 */ quail,
+    /* 3 */ filet_mignon,
+    /* 4 */ crab,
+    /* 5 */ scallop,
+    /* 6 */ lobster,
+    /* 7 */ sole,
+    /* 8 */ eel,
+    /* 9 */ sea_bass,
+    /* 10 */ mussel,
+    /* 11 */ cod,
+    /* 12 */ pumpkin,
+    /* 13 */ zucchini,
+    /* 14 */ onion,
+    /* 15 */ tomato,
+    /* 16 */ eggplant,
+    /* 17 */ carrot,
+    /* 18 */ garlic,
+    /* 19 */ celery,
+    /* 20 */ morel,
+    /* 21 */ porcini,
+    /* 22 */ chantarelle,
+    /* 23 */ portobello,
+    /* 24 */ black_truffle,
+    /* 25 */ oyster_mushroom,
+    /* 26 */ black_trumpet,
+    /* 27 */ miller_mushroom,
+    /* 28 */ cloves,
+    /* 29 */ rosemary,
+    /* 30 */ thyme,
+    /* 31 */ bay_leaf,
+    /* 32 */ basil,
+    /* 33 */ dill,
+    /* 34 */ parsley,
+    /* 35 */ saffron,
+    /* 36 */ apricot,
+    /* 37 */ gooseberry,
+    /* 38 */ lemon,
+    /* 39 */ orange,
+    /* 40 */ raspberry,
+    /* 41 */ pear,
+    /* 42 */ blackberry,
+    /* 43 */ apple,
+    /* 44 */ cheese,
+    /* 45 */ chocolate,
+    /* 46 */ caviar,
+    /* 47 */ butter,
+    /* 48 */ olive_oil,
+    /* 49 */ cornichon,
+    /* 50 */ rice,
+    /* 51 */ honey,
+    /* 52 */ sour_cherry,
+    /* 53 */ strawberry,
+    /* 54 */ blood_orange,
+    /* 55 */ banana,
+    /* 56 */ grapes,
+    /* 57 */ melon,
+    /* 58 */ watermelon};
 
 #define NUM_INGREDIENTS 59
 
 struct recipe {
-  int8_t* ingredients;
+  int8_t *ingredients;
   int8_t num_ingredients;
   int8_t technique;
   int8_t type;
@@ -138,34 +184,34 @@ const int8_t fruit_gelee_ingredients[] PROGMEM = {57, 41, 37};
 const int8_t tarte_aux_fruits_ingredients[] PROGMEM = {52, 53, 54, 55, 56, 57, 58};
 
 const recipe recipes[] PROGMEM = {
-  { mushroom_terrine_ingredients, 4, 5, 0},
-  { scallop_poele_ingredients, 2, 2, 0},
-  { ratatouille_ingredients, 5, 4, 0},
-  { lobster_mousse_ingredients, 3, 5, 0},
-  { caprese_salad_ingredients, 4, 3, 0},
-  { consomme_ingredients, 3, 4, 1},
-  { pumpkin_veloute_ingredients, 2, 5, 1},
-  { carrot_potage_ingredients, 4, 3, 1},
-  { crab_bisque_ingredients, 5, 2, 1},
-  { cold_tomato_soup_ingredients, 3, 3, 1},
-  { sole_meuniere_ingredients, 2, 4, 2},
-  { eel_matelote_ingredients, 3, 2, 2},
-  { bouillabaisse_ingredients, 5, 3, 2},
-  { sea_bass_en_papillote_ingredients, 4, 3, 2},
-  { seafood_tartare_ingredients, 4, 3, 2},
-  { sea_bass_poele_ingredients, 5, 2, 2},
-  { sweetbread_poele_ingredients, 3, 2, 3},
-  { beef_saute_ingredients, 4, 3, 3},
-  { beef_bourguignon_ingredients, 5, 3, 3},
-  { stuffed_quail_ingredients, 6, 4, 3},
-  { filet_mignon_poele_ingredients, 6, 2, 3},
-  { chocolate_mousse_ingredients, 3, 5, 4},
-  { fresh_fruit_compote_ingredients, 3, 3, 4},
-  { crepes_suzette_ingredients, 3, 2, 4},
-  { berries_au_fromage_ingredients, 5, 5, 4},
-  { warm_banana_souffle_ingredients, 3, 5, 4},
-  { fruit_gelee_ingredients, 3, 4, 4},
-  { tarte_aux_fruits_ingredients, 7, 5, 4},
+    {mushroom_terrine_ingredients, 4, 5, 0},
+    {scallop_poele_ingredients, 2, 2, 0},
+    {ratatouille_ingredients, 5, 4, 0},
+    {lobster_mousse_ingredients, 3, 5, 0},
+    {caprese_salad_ingredients, 4, 3, 0},
+    {consomme_ingredients, 3, 4, 1},
+    {pumpkin_veloute_ingredients, 2, 5, 1},
+    {carrot_potage_ingredients, 4, 3, 1},
+    {crab_bisque_ingredients, 5, 2, 1},
+    {cold_tomato_soup_ingredients, 3, 3, 1},
+    {sole_meuniere_ingredients, 2, 4, 2},
+    {eel_matelote_ingredients, 3, 2, 2},
+    {bouillabaisse_ingredients, 5, 3, 2},
+    {sea_bass_en_papillote_ingredients, 4, 3, 2},
+    {seafood_tartare_ingredients, 4, 3, 2},
+    {sea_bass_poele_ingredients, 5, 2, 2},
+    {sweetbread_poele_ingredients, 3, 2, 3},
+    {beef_saute_ingredients, 4, 3, 3},
+    {beef_bourguignon_ingredients, 5, 3, 3},
+    {stuffed_quail_ingredients, 6, 4, 3},
+    {filet_mignon_poele_ingredients, 6, 2, 3},
+    {chocolate_mousse_ingredients, 3, 5, 4},
+    {fresh_fruit_compote_ingredients, 3, 3, 4},
+    {crepes_suzette_ingredients, 3, 2, 4},
+    {berries_au_fromage_ingredients, 5, 5, 4},
+    {warm_banana_souffle_ingredients, 3, 5, 4},
+    {fruit_gelee_ingredients, 3, 4, 4},
+    {tarte_aux_fruits_ingredients, 7, 5, 4},
 };
 
 const uint8_t digits[] = {
@@ -327,7 +373,7 @@ int8_t matching_recipes(int8_t ingredient_count) {
   return count;
 }
 
-void shuffle(int8_t * arr, int8_t size) {
+void shuffle(int8_t *arr, int8_t size) {
   for (int8_t i = size - 1; i > 1; i--) {
     int8_t j = random(0, i);
     int8_t temp = arr[i];
@@ -352,10 +398,10 @@ int8_t digit_correct(uint8_t digit) {
 }
 
 uint8_t last_time_digit() {
-  return (uint8_t) (((last_time_left - (millis() - millis_at_last_update)) / 1000) % 10);
+  return (uint8_t)(((last_time_left - (millis() - millis_at_last_update)) / 1000) % 10);
 }
 
-int8_t contains(int8_t * arr, int8_t len, int8_t elem) {
+int8_t contains(int8_t *arr, int8_t len, int8_t elem) {
   for (int8_t i = 0; i < len; i++) {
     if (arr[i] == elem) {
       return true;
