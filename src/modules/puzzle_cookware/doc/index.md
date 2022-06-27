@@ -34,67 +34,76 @@ cijfer dat je vindt in de onderstaande tabel.
 | Vlees       | 2                              | 7                              | 0                               | 9                                  |
 | Dessert     | 8                              | 2                              | 3                               | 6                                  |
 
+
+\newpage{}
+
 ## Mogelijke ingrediënten
 
- * Veal
- * Beef
- * Quail
- * Filet Mignon
- * Crab
- * Scallop
- * Lobster
- * Sole
- * Eel
- * Sea Bass
- * Mussel
- * Cod
- * Pumpkin
- * Zucchini
- * Onion
- * Tomato
- * Eggplant
- * Carrot
- * Garlic
- * Celery
- * Morel
- * Porcini
- * Chantarelle
- * Portobello
- * Black Truffle
- * Oyster Mushroom
- * Black Trumpet
- * Miller Mushroom
- * Cloves
- * Rosemary
- * Thyme
- * Bay Leaf
- * Basil
- * Dill
- * Parsley
- * Saffron
- * Apricot
- * Gooseberry
- * Lemon
- * Orange
- * Raspberry
- * Pear
- * Blackberry
- * Apple
- * Cheese
- * Chocolate
- * Caviar
- * Butter
- * Olive Oil
- * Cornichon
- * Rice
- * Honey
- * Sour Cherry
- * Strawberry
- * Blood Orange
- * Banana
- * Grapes
- * Melon
- * Watermelon
+\begin{multicols}{3}
+\begin{itemize}
+
+  \item Veal
+  \item Beef
+  \item Quail
+  \item Filet Mignon
+  \item Crab
+  \item Scallop
+  \item Lobster
+  \item Sole
+  \item Eel
+  \item Sea Bass
+  \item Mussel
+  \item Cod
+  \item Pumpkin
+  \item Zucchini
+  \item Onion
+  \item Tomato
+  \item Eggplant
+  \item Carrot
+  \item Garlic
+  \item Celery
+  \item Morel
+  \item Porcini
+  \item Chantarelle
+  \item Portobello
+  \item Black Truffle
+  \item Oyster Mushroom
+  \item Black Trumpet
+  \item Miller Mushroom
+  \item Cloves
+  \item Rosemary
+  \item Thyme
+  \item Bay Leaf
+  \item Basil
+  \item Dill
+  \item Parsley
+  \item Saffron
+  \item Apricot
+  \item Gooseberry
+  \item Lemon
+  \item Orange
+  \item Raspberry
+  \item Pear
+  \item Blackberry
+  \item Apple
+  \item Cheese
+  \item Chocolate
+  \item Caviar
+  \item Butter
+  \item Olive Oil
+  \item Cornichon
+  \item Rice
+  \item Honey
+  \item Sour Cherry
+  \item Strawberry
+  \item Blood Orange
+  \item Banana
+  \item Grapes
+  \item Melon
+  \item Watermelon
+\end{itemize}
+\end{multicols}
+
 
 ## Gerechten
 
