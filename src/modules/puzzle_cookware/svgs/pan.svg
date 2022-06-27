@@ -12,11 +12,11 @@
    inkscape:export-filename="pan.png"
    inkscape:export-xdpi="384"
    inkscape:export-ydpi="384"
+   xml:space="preserve"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
+   xmlns:svg="http://www.w3.org/2000/svg"><sodipodi:namedview
      id="namedview7"
      pagecolor="#ffffff"
      bordercolor="#000000"
@@ -27,41 +27,26 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      showgrid="false"
-     inkscape:zoom="16"
-     inkscape:cx="25.8125"
-     inkscape:cy="21.8125"
+     inkscape:zoom="22.627417"
+     inkscape:cx="-8.6178639"
+     inkscape:cy="13.700194"
      inkscape:window-width="1916"
      inkscape:window-height="1065"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
-  <defs
-     id="defs2" />
-  <g
+     inkscape:current-layer="layer1" /><defs
+     id="defs2" /><g
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
-     id="layer1">
-    <rect
+     id="layer1"><rect
        style="fill:#000000;fill-opacity:1;stroke-width:0.484181"
        id="rect130"
        width="24"
        height="24"
        x="0"
-       y="0" />
-    <rect
-       style="fill:#ffffff;fill-opacity:1;stroke-width:0.611618"
-       id="rect2321"
-       width="9.5290298"
-       height="4.1270518"
-       x="2.566467"
-       y="10.86511" />
-    <rect
-       style="fill:#ffffff;fill-opacity:1;stroke-width:0.611618"
-       id="rect3311"
-       width="9.8537083"
-       height="2.0481689"
-       x="12.059996"
-       y="10.865273" />
-  </g>
-</svg>
+       y="0" /><path
+       d="m 2.9704708,11.341343 c -0.036531,-0.15929 -0.07161,-0.30981 -0.1066799,-0.44864 -0.060132,-0.187753 0.079057,-0.379971 0.2761994,-0.381418 H 13.141611 c 0.01751,-0.0014 0.0351,-0.0014 0.05261,0 0.154728,0.03165 0.256328,0.180489 0.229435,0.336115 -0.02776,0.146137 -0.05115,0.292274 -0.07453,0.450102 v 0.04092 h 2.203748 c 0.13653,-0.27287 0.415335,-0.445356 0.720455,-0.445718 h 3.726495 c 0.984093,0.084 0.984093,1.523507 0,1.607508 h -3.726495 c -0.304927,-0.0011 -0.583404,-0.173325 -0.720455,-0.445718 h -2.288507 -0.04677 c -0.206054,0.998116 -0.602085,1.988925 -1.76972,1.988925 H 4.9462393 c -1.3590746,0 -1.7156491,-1.560744 -1.975773,-2.702074 z"
+       id="path867"
+       sodipodi:nodetypes="ccccccccccccccccssc"
+       style="fill:#ffffff;stroke-width:0.146137" /></g></svg>
