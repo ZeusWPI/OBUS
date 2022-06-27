@@ -243,7 +243,7 @@ uint32_t millis_at_last_update;
 void setup() {
   Serial.begin(115200);
   for (int8_t i = 0; i < 6; i++) {
-    all_buttons[i].setDebounceTime(100);
+    all_buttons[i].setDebounceTime(50);
   }
   lcd.init();
   lcd.backlight();
