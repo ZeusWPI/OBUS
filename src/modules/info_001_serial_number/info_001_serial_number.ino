@@ -30,9 +30,9 @@ bool render_now = true;
 void setup() {
 	Serial.begin(115200);
 	lcd.init(); // initialize the lcd
-  	lcd.backlight();
+	lcd.backlight();
 	lcd.setCursor(0, 0);
-  	lcd.print("init");
+	lcd.print("init");
 	obus_module::setup(OBUS_TYPE_INFO, 1);
 }
 
@@ -67,8 +67,8 @@ int info_generator(uint8_t* buffer) {
 			uint8_t generated = random(26 + 10);
 			if (generated < 26)
 				serial_number[i] = 'A' + generated;
-	    else
-			  serial_number[i] = '0' + (generated - 26);
+			else
+				serial_number[i] = '0' + (generated - 26);
 		}
 	}
 	memcpy(buffer, serial_number, SERIAL_NUMBER_SIZE);
