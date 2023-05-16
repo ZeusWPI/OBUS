@@ -1,0 +1,24 @@
+# Protocol example
+
+- Controller: INFO START (contains a random seed, indicating that info modules can send their info)
+- (in the next 5 seconds, spread over the first 4 seconds):
+	- INFO 1: infomessage
+	- INFO 2: infomessage
+	- INFO 3: infomessage
+- Controller: HELLO
+- (The following phase happens all at once, this should be changed so only 1 module registers at a time, we should smear this across time)
+	- PUZZLE 1: HELLO
+	- PUZZLE 2: HELLO
+	- NEEDY  1: HELLO
+	- Controller: acknowledge puzzle 1
+	- Controller: acknowledge puzzle 2
+	- Controller: acknowledge needy 1
+- Controller: GAME START
+- Controller: STATE
+- Controller: STATE
+- Controller: STATE
+- ...
+- (after some time) PUZZLE 1: SOLVE
+- ...
+- (after some time) PUZZLE 2: SOLVE
+- Controller: SOLVED

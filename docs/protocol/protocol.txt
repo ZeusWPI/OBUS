@@ -87,7 +87,7 @@ Types for info:
 
 Types for modules:
 
-    - 0 register
+    - 0 register (also known as "module hello")
       [ X B B B  B B B B ]
           --------------
              reserved
