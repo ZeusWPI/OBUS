@@ -181,7 +181,7 @@ function updateGameState() {
 			const startButton = document.querySelector("#buttonStart");
 			const restartButton = document.querySelector("#buttonRestart");
 			const stopButton = document.querySelector("#buttonStop");
-			startButton.disabled = state.gamestate !== "DISCOVER";
+			startButton.disabled = state.gamestate !== "READY";
 			restartButton.disabled = state.gamestate !== "GAMEOVER";
 			stopButton.disabled = state.gamestate !== "GAME";
 
@@ -256,7 +256,7 @@ function setTimeleft(timeLeft) {
  * Update the segment display with the latest game data.
  */
 function updateSegmentDisplay() {
-	if (state.gamestate === "INACTIVE" || state.gamestate === "INFO" || state.gamestate === "DISCOVER") {
+	if (state.gamestate === "INACTIVE" || state.gamestate === "INFO" || state.gamestate === "DISCOVER" || state.gamestate === "READY") {
 		setTimeleft(state.gameDuration);
 	}
 	// Do not update the timer when the game is not running.

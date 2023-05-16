@@ -81,7 +81,7 @@ bool init() {
 	mcp2515.reset();
 	mcp2515.setBitrate(CAN_50KBPS);
 
-	// filter mask is 0x300 because we only want modules with type 0 (controller & puzzle modules)
+	// filter mask is 0x300 because we only want modules with type 0 (controller & info modules)
 	mcp2515.setFilterMask(MCP2515::MASK0, false, 0x300);
 	mcp2515.setFilter(MCP2515::RXF0, false, 0);
 	mcp2515.setFilter(MCP2515::RXF1, false, 0);

@@ -22,7 +22,7 @@ priority bit (so that each type can send priority messages if need be, 0 = high 
 
     type:
     - 0 module-ID 0: controller, >0: info
-    - 1 puzzel
+    - 1 puzzle
     - 2 needy
     - 3 reserved for future use
 

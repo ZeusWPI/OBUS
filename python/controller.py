@@ -15,6 +15,7 @@ from obus import Message, ModuleAddress
 
 
 INFO_ROUND_DURATION = timedelta(seconds=5)
+DISCOVER_ROUND_DURATION = timedelta(seconds=5)
 GAMESTATE_UPDATE_INTERVAL = timedelta(seconds=0.5)
 
 
@@ -23,8 +24,9 @@ class Gamestate(enum.Enum):
     INACTIVE = 0
     INFO = 1
     DISCOVER = 2
-    GAME = 3
-    GAMEOVER = 4
+    READY = 3
+    GAME = 4
+    GAMEOVER = 5
 
 
 
@@ -125,14 +127,11 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
                 parse_can_line(ser, debug_shared) # throw away, TODO keep this and display it
                 if datetime.now() - serial_to_web.info_round_start > INFO_ROUND_DURATION:
                     serial_to_web.gamestate = Gamestate.DISCOVER
+                    serial_to_web.discover_round_start = datetime.now()
                     send_message(ser, Message.create_controller_hello(),debug_shared)
             elif serial_to_web.gamestate == Gamestate.DISCOVER:
-                if web_to_serial.start_game:
-                    web_to_serial.start_game = False
-                    serial_to_web.game_start = datetime.now()
-                    serial_to_web.last_state_update = datetime.now()
-                    serial_to_web.gamestate = Gamestate.GAME
-                    send_message(ser, Message.create_controller_gamestart(web_to_serial.game_duration, 0, web_to_serial.max_allowed_strikes, len(serial_to_web.registered_modules)),debug_shared)
+                if datetime.now() - serial_to_web.discover_round_start > DISCOVER_ROUND_DURATION:
+                    serial_to_web.gamestate = Gamestate.READY
                 msg = parse_can_line(ser, debug_shared)
                 if msg is None:
                     continue
@@ -140,11 +139,17 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
                 if puzzle_address is None:
                     continue
                 if puzzle_address in web_to_serial.blocked_modules:
-                    # this is blocked puzzle module, don't ack it
+                    # this is a blocked puzzle module, don't ack it
                     continue
                 serial_to_web.registered_modules[puzzle_address] = PuzzleState()
                 send_message(ser, Message.create_controller_ack(msg.module_address()),debug_shared)
-
+            elif serial_to_web.gamestate == Gamestate.READY:
+                if web_to_serial.start_game:
+                    web_to_serial.start_game = False
+                    serial_to_web.game_start = datetime.now()
+                    serial_to_web.last_state_update = datetime.now()
+                    serial_to_web.gamestate = Gamestate.GAME
+                    send_message(ser, Message.create_controller_gamestart(web_to_serial.game_duration, 0, web_to_serial.max_allowed_strikes, len(serial_to_web.registered_modules)),debug_shared)
             elif serial_to_web.gamestate == Gamestate.GAME:
                 # React to puzzle strike / solve
                 msg = parse_can_line(ser, debug_shared)
@@ -221,7 +226,7 @@ def status():
 
 @app.route('/start')
 def start():
-    if serial_to_web.gamestate == Gamestate.DISCOVER:
+    if serial_to_web.gamestate == Gamestate.READY:
         web_to_serial.start_game = True
         return 'OK'
     return 'Wrong gamestage'

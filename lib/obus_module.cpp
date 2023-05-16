@@ -33,6 +33,10 @@ unsigned long blink_next_time = 0;
 uint32_t led_reset_time;
 
 
+// Used in the puzzle module loop to spread 'register hello' messages
+// Used in the info module loop to spread 'info' messages
+uint32_t message_spread_timer = 0;
+
 void _setLed(struct color color) {
 	led_color = color;
 	blink_delay = 0;
@@ -158,7 +162,17 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 					break;
 				case OBUS_MSGTYPE_C_HELLO:
 					_resetState();
-					obus_can::send_m_hello(this_module);
+					// wait a bit before sending this message
+					// so we don't send all the register messages at the same time
+					// assuming 50kbps and 4 seconds of hello round (there are 5, but we want to keep a margin)
+					// and a message is 112 bits long (maximum length of total frame), we can send
+					// about 14000 messages. There are only 3 * 255 possible info module ID's
+					// we want to spread them as good as possible in the 4 seconds of transmit time
+					// However, just linearly spreading the IDs to the transmit time is suboptimal:
+					// the higher IDs will probably never be used
+					// We first spread the messages in 16 slots based on the module type and 3 least significant bits,
+					// then spread the messages in those slots based on the other 5 bits
+					message_spread_timer = millis() + 250 * (((this_module.type & 0b10) << 2) | this_module.id & 0b111) + 8 * (this_module.id >> 3);
 					break;
 				case OBUS_MSGTYPE_C_SOLVED:
 				case OBUS_MSGTYPE_C_TIMEOUT:
@@ -196,7 +210,10 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 			callback_info(message->from.id, infobuffer);
 		}
 	}
-
+	if (message_spread_timer != 0 && millis() > message_spread_timer) {
+		message_spread_timer = 0;
+		obus_can::send_m_hello(this_module);
+	}
 	_ledLoop();
 
 	return received_message;
@@ -206,8 +223,6 @@ bool loopNeedy(obus_can::message* message, void (*callback_game_start)(uint8_t p
 	// For now this is the same function
 	return loopPuzzle(message, callback_game_start, callback_game_stop, callback_info, callback_state);
 }
-
-uint32_t info_message_timer = 0;
 
 bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 	bool interesting_message = false;
@@ -228,7 +243,7 @@ bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 						// We first spread the messages in 8 slots based on the 3 least significant bits,
 						// then spread the messages in those slots based on the other 5 bits
 						// !! Important assumption: the info_generator() module function should return very quickly
-						info_message_timer = millis() + 500 * (this_module.id & 0b111) + 16 * (this_module.id >> 3);
+						message_spread_timer = millis() + 500 * (this_module.id & 0b111) + 16 * (this_module.id >> 3);
 					}
 					break;
 				case OBUS_MSGTYPE_C_STATE:
@@ -240,8 +255,8 @@ bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 		}
 	}
 
-	if (info_message_timer != 0 && millis() > info_message_timer) {
-		info_message_timer = 0;
+	if (message_spread_timer != 0 && millis() > message_spread_timer) {
+		message_spread_timer = 0;
 		uint8_t info_message[OBUS_PAYLD_INFO_MAXLEN];
 		int len = info_generator(info_message);
 		obus_can::send_i_infomessage(this_module, info_message, len);
