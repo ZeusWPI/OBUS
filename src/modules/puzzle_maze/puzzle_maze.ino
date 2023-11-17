@@ -192,7 +192,9 @@ void buttonLoop() {
   if (!connected(current_x, current_y, new_x, new_y)) {
     obus_module::strike();
   } else {
-    lc.setLed(0, current_x, current_y, false);
+		if (current_x != new_x || current_y != new_y) {
+			lc.setLed(0, current_x, current_y, false);
+		}
     current_x = new_x;
     current_y = new_y;
   }
