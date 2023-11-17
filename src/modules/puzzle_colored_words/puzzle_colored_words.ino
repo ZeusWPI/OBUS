@@ -62,8 +62,11 @@ bool press_yes = false;
 
 void generate_problem() {
 	for (int i = 0; i < PUZZLE_SIZE; i++) {
-		puzzle_colors[i] = random(AMOUNT_COLORS);
-		puzzle_words[i] = random(AMOUNT_COLORS);
+		do {
+			puzzle_colors[i] = random(AMOUNT_COLORS);
+			puzzle_words[i] = random(AMOUNT_COLORS);
+			// Assign random color and word; re-roll if the color and word are same as the one before
+		} while (i > 0 && (puzzle_colors[i] == puzzle_colors[i-1] && puzzle_words[i] == puzzle_words[i-1]));
 	}
 
 	switch (puzzle_colors[0]) {
