@@ -252,7 +252,7 @@ void setup() {
   lcd.setCursor(0, 1);
   lcd.print("game...");
 
-  obus_module::setup(OBUS_TYPE_PUZZLE, 6);
+  obus_module::setup(OBUS_TYPE_PUZZLE, 4);
 }
 
 obus_can::message message;
