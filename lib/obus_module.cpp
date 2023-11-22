@@ -31,7 +31,7 @@ bool blink_led_lit = false;
 int blink_delay = 0;
 unsigned long blink_next_time = 0;
 uint32_t led_reset_time;
-
+uint32_t seed;
 
 // Used in the puzzle module loop to spread 'register hello' messages
 // Used in the info module loop to spread 'info' messages
@@ -98,6 +98,7 @@ void _resetState() {
 	active = false;
 	next_loop_call_deadline = 0;
 	acked_after_last_hello = false;
+	seed = 1;
 
 	if (this_module.type == OBUS_TYPE_PUZZLE || this_module.type == OBUS_TYPE_NEEDY) {
 		pinMode(PIN_LED_RED, OUTPUT);
@@ -151,7 +152,6 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 	if (obus_can::receive(message)) {
 		received_message = true;
 		if (is_from_controller(message->from)) {
-			uint32_t seed;
 			switch (message->msg_type) {
 				case OBUS_MSGTYPE_C_GAMESTART:
 					if (acked_after_last_hello) {
@@ -189,6 +189,7 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 					}
 					break;
 				case OBUS_MSGTYPE_C_STATE:
+					randomSeed(seed);
 					callback_state(message->gamestatus.time_left, message->gamestatus.strikes, message->gamestatus.max_strikes, message->gamestatus.puzzle_modules_left);
 					break;
 				case OBUS_MSGTYPE_C_INFOSTART:
@@ -199,7 +200,6 @@ bool loopPuzzle(obus_can::message* message, void (*callback_game_start)(uint8_t 
 					if (seed == 0) {
 						seed--;
 					}
-					randomSeed(seed);
 					break;
 				default:
 					break;
@@ -230,8 +230,10 @@ bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 		if (is_from_controller(message->from)) {
 			switch (message->msg_type) {
 				case OBUS_MSGTYPE_C_INFOSTART:
-					{
-						randomSeed(message->infostart.seed);
+					{	
+						seed = message->infostart.seed;
+						if (seed == 0)
+							seed--;
 						// wait a bit before sending this message
 						// so we don't send all the infomessages at the same time
 						// assuming 50kbps and 4 seconds of info round (there are 5, but we want to keep a margin)
@@ -256,6 +258,7 @@ bool loopInfo(obus_can::message* message, int (*info_generator)(uint8_t*)) {
 	}
 
 	if (message_spread_timer != 0 && millis() > message_spread_timer) {
+		randomSeed(seed);
 		message_spread_timer = 0;
 		uint8_t info_message[OBUS_PAYLD_INFO_MAXLEN];
 		int len = info_generator(info_message);
