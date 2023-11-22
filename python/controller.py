@@ -14,6 +14,10 @@ import random
 from obus import Message, ModuleAddress
 
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 INFO_ROUND_DURATION = timedelta(seconds=5)
 DISCOVER_ROUND_DURATION = timedelta(seconds=5)
 GAMESTATE_UPDATE_INTERVAL = timedelta(seconds=0.5)
@@ -39,8 +43,8 @@ class PuzzleState:
 
 @dataclass
 class SharedWebToSerial:
-    game_duration: timedelta = timedelta(seconds=60)
-    max_allowed_strikes: int = 3
+    game_duration: timedelta = timedelta(seconds=60*10)
+    max_allowed_strikes: int = 5
     seed: int = 1
     blocked_modules: list[ModuleAddress] = field(default_factory=list)
     start_game: bool = False
@@ -221,7 +225,6 @@ def status():
         ]
     status_dict['max_allowed_strikes'] = web_to_serial.max_allowed_strikes
     status_dict['game_duration'] = web_to_serial.game_duration.total_seconds()
-    print(status_dict)
     return jsonify(status_dict)
 
 @app.route('/start')
