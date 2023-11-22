@@ -65,12 +65,10 @@ class SharedSerialToWeb:
 
 @dataclass
 class DebugShared:
-    messages: deque
+    messages: list
     last_message_index: int
 
-# Keep this the same as max_messages on the client!
-max_message_cache = 200
-debug_shared = DebugShared(deque(maxlen=max_message_cache), -1)
+debug_shared = DebugShared([], -1)
 
 app = Flask(__name__)
 
@@ -97,14 +95,12 @@ def parse_can_line(ser, debug_shared) -> Message:
             message = line[3:3+size]
             obj = Message(message, sender, datetime.now())
         debug_shared.messages.append(obj)
-        debug_shared.last_message_index += 1
         return obj
     return None
 
 
 def send_message(ser, msg, debug_shared) -> None:
     debug_shared.messages.append(msg)
-    debug_shared.last_message_index += 1
     # we send the payload padded with null-bytes, but these don't actually get sent
     packed = struct.pack('>HB8s', msg.module_address().as_binary(), len(msg.payload), msg.payload)
     ser.write(packed + b'\n')
@@ -122,6 +118,7 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
         ser.reset_input_buffer()
         time.sleep(5)
         while True:
+            time.sleep(1/1000)
             if serial_to_web.gamestate == Gamestate.INACTIVE:
                 send_message(ser, Message.create_controller_infostart(web_to_serial.seed),debug_shared)
                 serial_to_web.gamestate = Gamestate.INFO
@@ -254,12 +251,9 @@ def restart():
 @app.route('/<last_received>/api.json')
 def api(last_received):
     last_received = int(last_received)
-    messages = list(m.serialize() for m in debug_shared.messages)
-
-    if last_received >= debug_shared.last_message_index - len(debug_shared.messages):
-        messages = messages[len(debug_shared.messages) - (debug_shared.last_message_index - last_received):]
-
-    return jsonify({"server_id": server_id, "newest_msg": debug_shared.last_message_index, "messages": messages})
+    start = min(len(debug_shared.messages), last_received)
+    messages = list(m.serialize() for m in debug_shared.messages[start:])
+    return jsonify({"server_id": server_id, "newest_msg": len(debug_shared.messages), "messages": messages})
 
 
 @app.route('/')
@@ -277,4 +271,4 @@ if __name__ == '__main__':
     if sys.argv[1] != 'mock':
         thread = Thread(target=serial_controller, args=(sys.argv[1], web_to_serial, serial_to_web, debug_shared))
         thread.start()
-    app.run(debug=False, host='0.0.0.0', port=8080)
+    app.run(debug=True, host='0.0.0.0', port=8080)

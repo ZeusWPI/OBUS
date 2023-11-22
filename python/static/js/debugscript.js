@@ -1,6 +1,3 @@
-// Keep this the same as on the server!
-let max_messages = 200;
-
 let paused = true;
 let updaterID = null;
 
@@ -83,12 +80,6 @@ function updateMessages() {
 						raw_id.classList.add("raw");
 						raw_id.classList.add("raw_id");
 					}
-				}
-
-				// delete children if there are too many :O
-				// -1 so we don't delete the header :)
-				while (messageTable.children.length - 1 > max_messages) {
-					messageTable.removeChild(messageTable.lastChild);
 				}
 				newest_message_index = data.newest_msg;
 
