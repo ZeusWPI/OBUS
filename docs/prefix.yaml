@@ -7,5 +7,6 @@ geometry: "left=2cm,right=2cm,top=2cm,bottom=3cm"
 fontsize: 14pt
 ---
 
+\newcommand{\warning}{\fontencoding{U}\fontfamily{futs}\selectfont\char 49\relax\normalfont}
 \graphicspath{ {./images/} }
 \newpage{}

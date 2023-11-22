@@ -7,6 +7,7 @@
 - De kleur van het eerste woord in de reeks bepaalt
 welke van de onderstaande regels je dient te volgen.
 - Pas enkel de bovenste geldige regel toe uit het blok dat van toepassing is.
+- \warning{} **De rode knop is 'Ja', de groene knop is 'Nee'.** \warning{}
 
 **De kleur van het eerste woord in de reeks is rood**
 
