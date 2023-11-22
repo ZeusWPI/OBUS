@@ -12,6 +12,8 @@ namespace obus_module {
 
 void setup(uint8_t type, uint8_t id);
 
+void blink_error(String message);
+
 void empty_callback_info(uint8_t info_id, uint8_t infomessage[7]);
 void empty_callback_state(uint32_t time_left, uint8_t strikes, uint8_t max_strikes, uint8_t puzzle_modules_left);
 
