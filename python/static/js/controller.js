@@ -46,6 +46,11 @@ function playSound(sound) {
 	sound.play();
 }
 
+function stopSound(sound) {
+	sound.pause();
+	sound.currentTime = 0;
+}
+
 /**
  * Update the modules.
  * @param {Array} List of puzzles
@@ -154,6 +159,7 @@ function updateGameState() {
 				}
 			} else if (state.gamestate == "GAMEOVER") {
 				if (!state.endOfGameAnimationPlayed) {
+					stopSound(sounds.alarm);
 					switch (data.cause) {
 						case 'STRIKEOUT':
 						case 'TIMEOUT':
@@ -267,10 +273,17 @@ function updateSegmentDisplay() {
 	}
 }
 
+function loadSounds() {
+	for (let sound in sounds.values) {
+		sound.load();
+	}
+}
+
 /**
  * When the window is loaded.
  */
 window.addEventListener("load", () => {
+	loadSounds();
 	initializeGameState();
 	initializeSegmentDisplay();
 });
