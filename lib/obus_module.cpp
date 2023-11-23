@@ -287,6 +287,7 @@ void solve() {
 	_setLed(COLOR_GREEN);
 }
 
+/* Check if this module is in play (game is started, module is acked, module not solved yet)*/
 bool is_active() {
 	return active;
 }
