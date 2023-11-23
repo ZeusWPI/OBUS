@@ -251,7 +251,7 @@ void setup() {
   lcd.print("Waiting for next");
   lcd.setCursor(0, 1);
   lcd.print("game...");
-
+	Serial.println("I got booted");
   obus_module::setup(OBUS_TYPE_PUZZLE, 4);
 }
 
@@ -262,27 +262,28 @@ void loop() {
   for (int8_t i = 0; i < 6; i++) {
     all_buttons[i].loop();
   }
+	if (obus_module::is_active()) {
+		if (all_buttons[0].getCount() > 0) {
+			selected_ingredients[ingredient_index] = !selected_ingredients[ingredient_index];
+			show_current_ingredient();
+		}
 
-  if (all_buttons[0].getCount() > 0) {
-    selected_ingredients[ingredient_index] = !selected_ingredients[ingredient_index];
-    show_current_ingredient();
-  }
+		if (all_buttons[1].getCount() > 0) {
+			ingredient_index = (ingredient_index + 1) % SHOWN_INGREDIENTS;
+			show_current_ingredient();
+		}
 
-  if (all_buttons[1].getCount() > 0) {
-    ingredient_index = (ingredient_index + 1) % SHOWN_INGREDIENTS;
-    show_current_ingredient();
-  }
-
-  for (int8_t i = 2; i < 6; i++) {
-    if (all_buttons[i].getCount() > 0) {
-      uint8_t digit = last_time_digit();
-      if (selected_recipe_val.technique == i && selected_ingredients_match() && digit_correct(digit)) {
-        obus_module::solve();
-      } else {
-        obus_module::strike();
-      }
-    }
-  }
+		for (int8_t i = 2; i < 6; i++) {
+			if (all_buttons[i].getCount() > 0) {
+				uint8_t digit = last_time_digit();
+				if (selected_recipe_val.technique == i && selected_ingredients_match() && digit_correct(digit)) {
+					obus_module::solve();
+				} else {
+					obus_module::strike();
+				}
+			}
+		}
+	}
 
   for (int8_t i = 0; i < 6; i++) {
     all_buttons[i].resetCount();
