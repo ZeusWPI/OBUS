@@ -119,8 +119,12 @@ bool receive(struct message *msg) {
 	memset(&receive_frame.data, 0, CAN_MAX_DLEN);
 
 	MCP2515::ERROR status = mcp2515.readMessage(&receive_frame);
-	if (status != MCP2515::ERROR_OK) {
+	if (status == MCP2515::ERROR_NOMSG) {
 		return false;
+	}
+
+	if (status != MCP2515::ERROR_OK) {
+		Serial.println(F("W readMessage returned error"));
 	}
 
 	// Always at least OBUS message type required
