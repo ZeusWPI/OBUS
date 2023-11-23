@@ -114,6 +114,13 @@ def calculate_strikes(serial_to_web) -> int:
 def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
     with serial.Serial(serialport, 115200, timeout=0.05) as ser:
         serial_to_web.gamestate = Gamestate.INACTIVE
+
+        ser.reset_input_buffer()
+        # Restart Arduino
+        ser.setDTR(False)
+        time.sleep(0.022)
+        ser.setDTR(True)
+
         # TODO send message here to get all modules to stop talking and reset
         ser.reset_input_buffer()
         time.sleep(5)
