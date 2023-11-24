@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>OBUS controller settings</title>
+	</head>
+
+	<body>
+		<form action="/settings/set" method="POST">
+			<div>
+			  <label for="time">Time, in seconds</label>
+			  <input name="time" required type="number" id="time" value="{{time_seconds}}" />
+			</div>
+			<div>
+				<label for="strikes">Amount of strikes</label>
+				<input name="strikes" required type="number" id="strikes" value="{{strikes}}" />
+			</div>
+			<div>
+				<label for="seed">Fixed seed (set to 0 to randomize)</label>
+				<input name="seed" required type="number" id="seed" value="{{seed}}" />
+			</div>
+			<div>
+			  <button>Set</button>
+			</div>
+		</form>
+	</body>
+</html>
