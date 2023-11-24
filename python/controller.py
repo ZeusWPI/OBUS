@@ -1,5 +1,5 @@
 from threading import Thread
-from flask import Flask, jsonify, send_file
+from flask import Flask, jsonify, send_file, redirect, request, render_template
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import serial
@@ -10,8 +10,21 @@ import enum
 import struct
 import time
 import random
+import typing
 
 from obus import Message, ModuleAddress
+
+
+# This is the OBUS controller
+# This program consists of two threads:
+#  - a Flask webserver, serving static files and an API that's used by the OBUS web interface and the debugger
+#  - a thread that's responsible for communicating over the serial connection to the OBUS USB/CAN adapter
+# These threads communicate using two global variables:
+#  - web_to_serial (instance of the SharedWebToSerial class); only the Flask thread is allowed to write fields here; the serial thread can read them
+#  - serial_to_web (instance of the SharedSerialToWeb class); only the serial thread is allowed to write fields here; the Flask thread can read them
+# In addition to the controller interface running on / (so http://localhost:8080/), 
+#  there is also a debugger showing all CAN messages on /debugger (so http://localhost:8080/debugger)
+# The settings are changeable on /settings (http://localhost:8080/settings), this should only be done after a game is done
 
 
 import logging
@@ -43,9 +56,9 @@ class PuzzleState:
 
 @dataclass
 class SharedWebToSerial:
-    game_duration: timedelta = timedelta(seconds=60*10)
+    game_duration: timedelta = timedelta(seconds=30)
     max_allowed_strikes: int = 5
-    seed: int = 1
+    fixed_seed: typing.Optional[int] = None
     blocked_modules: list[ModuleAddress] = field(default_factory=list)
     start_game: bool = False
     restart_game: bool = False
@@ -62,6 +75,7 @@ class SharedSerialToWeb:
     last_state_update: datetime = None
     registered_modules: dict[ModuleAddress, PuzzleState] = field(default_factory=dict)
     game_stop_cause: str = None
+    chosen_seed: int = 0
 
 @dataclass
 class DebugShared:
@@ -127,7 +141,11 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
         while True:
             time.sleep(1/1000)
             if serial_to_web.gamestate == Gamestate.INACTIVE:
-                send_message(ser, Message.create_controller_infostart(web_to_serial.seed),debug_shared)
+                # don't include 0 as possible seed value
+                seed = web_to_serial.fixed_seed or random.randrange(1, 2**32)
+                assert seed != 0
+                serial_to_web.chosen_seed = seed
+                send_message(ser, Message.create_controller_infostart(seed), debug_shared)
                 serial_to_web.gamestate = Gamestate.INFO
                 serial_to_web.info_round_start = datetime.now()
                 serial_to_web.registered_modules = {}
@@ -212,7 +230,8 @@ def serial_controller(serialport, web_to_serial, serial_to_web, debug_shared):
 def status():
     status_dict = {
         'gamestate': serial_to_web.gamestate.name,
-        'server_id': server_id
+        'server_id': server_id,
+        'chosen_seed': serial_to_web.chosen_seed
     }
     if serial_to_web.gamestate == Gamestate.GAME:
         # Send the time left to avoid time syncronisation issues between server and client
@@ -221,7 +240,7 @@ def status():
     elif serial_to_web.gamestate == Gamestate.GAMEOVER:
         status_dict['timeleft'] = max(0, (web_to_serial.game_duration - (serial_to_web.game_stop - serial_to_web.game_start)).total_seconds())
         status_dict['cause'] = serial_to_web.game_stop_cause
-    if serial_to_web.gamestate in (Gamestate.DISCOVER, Gamestate.GAME, Gamestate.GAMEOVER):
+    if serial_to_web.gamestate in (Gamestate.DISCOVER, Gamestate.READY, Gamestate.GAME, Gamestate.GAMEOVER):
         status_dict['puzzles'] = [
             {'address': address.as_binary(), 'solved': state.solved if address.is_puzzle() else None, 'strikes': state.strike_amount}
             for address, state
@@ -249,9 +268,6 @@ def stop():
 def restart():
     if serial_to_web.gamestate == Gamestate.GAMEOVER:
         web_to_serial.restart_game = True
-        # don't include 0 as possible seed value
-        # TODO add input field to set/display
-        web_to_serial.seed = random.randrange(1, 2**32)
         return 'OK'
     return 'Wrong gamestage'
 
@@ -264,12 +280,27 @@ def api(last_received):
 
 
 @app.route('/')
-def index():
+def index_static():
     return send_file('static/controller.html')
 
 @app.route('/debugger')
-def debugger():
+def debugger_static():
     return send_file('static/debugger.html')
+
+@app.route('/settings')
+def settings_static():
+    return render_template('settings.html',
+                           time_seconds=int(web_to_serial.game_duration.total_seconds()),
+                           seed=web_to_serial.fixed_seed or 0,
+                           strikes=web_to_serial.max_allowed_strikes)
+
+@app.route('/settings/set', methods=["POST"])
+def settings():
+    web_to_serial.game_duration = timedelta(seconds=int(request.form.get('time')))
+    web_to_serial.max_allowed_strikes = int(request.form.get('strikes'))
+    # Set fixed_seed to None if it was 0 in the form
+    web_to_serial.fixed_seed = int(request.form.get('seed')) or None
+    return redirect('/settings')
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:

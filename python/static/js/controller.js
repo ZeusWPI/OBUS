@@ -6,6 +6,7 @@ const sounds = {
 	alarm: new Audio("/static/sounds/alarm.mp3"),
 	explosion: new Audio("/static/sounds/explosion.mp3"),
 	victory: new Audio("/static/sounds/victory.mp3"),
+	puzzle_solved: new Audio("/static/sounds/puzzle-solved.mp3")
 };
 
 /**
@@ -34,7 +35,10 @@ const state = {
 	maxAllowedStrikes: 0,
 
 	// Time on the timer at the beginning of a game
-	gameDuration: 0
+	gameDuration: 0,
+
+	// Amount of puzzles the player has solved
+	puzzlesSolved: 0,
 };
 
 /**
@@ -131,8 +135,10 @@ function updateGameState() {
 			// Reset the strike amount if the game is not running anymore.
 			if (state.gamestate === "INFO") {
 				state.strikes = 0;
+				state.puzzlesSolved = 0;
 				state.alarmPlayed = false;
 				state.endOfGameAnimationPlayed = false;
+				document.getElementById("seed-display").innerText = data.chosen_seed;
 			}
 
 			if (state.gamestate === "GAME") {
@@ -152,6 +158,15 @@ function updateGameState() {
 					state.strikes = newStrikes;
 				}
 
+				const newPuzzlesSolved = data.puzzles
+					.map((p) => p.solved ? 1 : 0)
+					.reduce((a, b) => a + b, 0);
+
+				// Play a "ding" sound when the player solved a puzzle
+				if (state.puzzlesSolved < newPuzzlesSolved) {
+					playSound(sounds.puzzle_solved);
+					state.puzzlesSolved = newPuzzlesSolved;
+				}
 				// Play a "alarm" sound when the time is at 20 seconds.
 				if (data.timeleft <= 20 && data.timeleft > 19 && !state.alarmPlayed) {
 					playSound(sounds.alarm);
