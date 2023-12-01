@@ -309,4 +309,5 @@ if __name__ == '__main__':
     if sys.argv[1] != 'mock':
         thread = Thread(target=serial_controller, args=(sys.argv[1], web_to_serial, serial_to_web, debug_shared))
         thread.start()
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    # debug is set to False to prevent live reloading, which would create a new serial_controller thread while also keeping the old thread alive
+    app.run(debug=False, host='0.0.0.0', port=8080)
